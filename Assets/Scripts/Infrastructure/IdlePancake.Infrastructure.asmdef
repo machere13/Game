@@ -1,0 +1,17 @@
+{
+  "name": "IdlePancake.Infrastructure",
+  "rootNamespace": "IdlePancake.Infrastructure",
+  "references": [
+    "IdlePancake.Core",
+    "IdlePancake.Features"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
