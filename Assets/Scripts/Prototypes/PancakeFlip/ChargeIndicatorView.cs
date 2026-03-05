@@ -7,28 +7,57 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] Image fillImage;
         [SerializeField] float blinkPeriod = 0.5f;
+        [SerializeField] Color baseColor = new Color(1f, 0.9f, 0.3f);
 
         float _charge = -1f;
+        float _baseScaleX = 1f;
+
+        void Start()
+        {
+            if (fillImage == null)
+            {
+                fillImage = GetComponent<Image>();
+                if (fillImage == null)
+                    fillImage = GetComponentInChildren<Image>();
+            }
+
+            if (fillImage != null)
+            {
+                var rt = fillImage.rectTransform;
+                _baseScaleX = Mathf.Abs(rt.localScale.x);
+                if (_baseScaleX <= 0f) _baseScaleX = 1f;
+
+                fillImage.color = baseColor;
+            }
+
+            SetCharge(0f);
+        }
 
         void Update()
         {
             if (fillImage == null) return;
+
             if (_charge >= 0.999f)
             {
                 float blink = (Mathf.Sin(Time.time * (2f * Mathf.PI / blinkPeriod)) + 1f) * 0.5f;
-                fillImage.color = Color.Lerp(new Color(1f, 1f, 0.6f), new Color(1f, 1f, 1f), 0.3f + 0.4f * blink);
+                fillImage.color = Color.Lerp(baseColor, Color.white, 0.3f + 0.4f * blink);
             }
             else
             {
-                fillImage.color = Color.white;
+                fillImage.color = baseColor;
             }
         }
 
         public void SetCharge(float charge01)
         {
             _charge = Mathf.Clamp01(charge01);
-            if (fillImage != null)
-                fillImage.fillAmount = _charge;
+
+            if (fillImage == null) return;
+
+            var rt = fillImage.rectTransform;
+            var s = rt.localScale;
+            float x = Mathf.Lerp(0.0001f, _baseScaleX, _charge);
+            rt.localScale = new Vector3(x, s.y, s.z);
         }
     }
 }
