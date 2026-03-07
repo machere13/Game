@@ -17,7 +17,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void Start()
         {
             if (chargeIndicator == null)
-                chargeIndicator = FindObjectOfType<ChargeIndicatorView>();
+                chargeIndicator = Object.FindFirstObjectByType<ChargeIndicatorView>();
             if (pancake != null && pan != null)
                 pancake.SetPanCenter(pan.PanCenter);
         }

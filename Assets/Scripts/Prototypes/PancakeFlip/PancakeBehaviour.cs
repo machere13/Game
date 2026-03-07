@@ -71,10 +71,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 float dx = panCenter.position.x - transform.position.x;
                 _rb.linearVelocity = new Vector2(dx * config.landingAssistStrength, _rb.linearVelocity.y);
             }
-
-            float vy = _rb.linearVelocity.y;
-            float t = Mathf.Clamp(vy / 12f, -0.2f, 0.2f);
-            transform.localScale = new Vector3(_baseScale.x * (1f - t * 0.5f), _baseScale.y * (1f + t), _baseScale.z);
         }
 
         void OnCollisionEnter2D(Collision2D other)
@@ -92,7 +88,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _rb.linearVelocity = Vector2.zero;
             _rb.angularVelocity = 0f;
             transform.rotation = Quaternion.identity;
-            transform.localScale = _baseScale;
+            Vector3 scale = _baseScale;
+            if (scale.y < scale.x * 0.7f)
+            {
+                scale.y = scale.x;
+                _baseScale = scale;
+            }
+            transform.localScale = scale;
             if (panCenter != null)
             {
                 _restPosition = panCenter.position;

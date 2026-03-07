@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: PancakeFlipConfig
   m_EditorClassIdentifier: 
   maxHoldTime: 3
-  minForce: 5
-  maxForce: 25
-  minSpin: 180
-  maxSpin: 720
+  minForce: 3
+  maxForce: 12
+  minSpin: 360
+  maxSpin: 1440
+  spinMultiplier: 10
   gravityScale: 1
   airTimeScale: 1
   landingAssistStrength: 0.5
