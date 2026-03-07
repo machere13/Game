@@ -11,9 +11,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         float _charge = -1f;
         float _baseScaleX = 1f;
+        CanvasGroup _canvasGroup;
 
         void Start()
         {
+            _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null)
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
             var myImage = GetComponent<Image>();
             if (myImage != null) myImage.raycastTarget = false;
 
@@ -39,6 +44,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void Update()
         {
+            if (_canvasGroup != null)
+                _canvasGroup.alpha = _charge > 0.001f ? 1f : 0f;
+
             if (fillImage == null) return;
 
             if (_charge >= 0.999f)
@@ -56,12 +64,30 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             _charge = Mathf.Clamp01(charge01);
 
+            if (_charge > 0.001f && !gameObject.activeSelf)
+                gameObject.SetActive(true);
+            if (_canvasGroup == null) _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            _canvasGroup.alpha = _charge > 0.001f ? 1f : 0f;
+
             if (fillImage == null) return;
 
             var rt = fillImage.rectTransform;
             var s = rt.localScale;
             float x = Mathf.Lerp(0.0001f, _baseScaleX, _charge);
             rt.localScale = new Vector3(x, s.y, s.z);
+        }
+
+        public void SetVisible(bool visible)
+        {
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = visible ? 1f : 0f;
+                _canvasGroup.blocksRaycasts = false;
+                _canvasGroup.interactable = visible;
+            }
+            else
+                gameObject.SetActive(visible);
         }
     }
 }
