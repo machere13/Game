@@ -17,6 +17,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [Header("Spin")]
         public float minSpin = 360f;
         public float maxSpin = 1440f;
+        [Min(0.1f)]
+        public float spinMultiplier = 1f;
 
         [Header("Air / Gravity")]
         public float gravityScale = 2f;
@@ -38,7 +40,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public float SpinFromCharge(float charge01)
         {
-            return Mathf.Lerp(minSpin, maxSpin, Mathf.Clamp01(charge01));
+            return Mathf.Lerp(minSpin, maxSpin, Mathf.Clamp01(charge01)) * spinMultiplier;
         }
     }
 }

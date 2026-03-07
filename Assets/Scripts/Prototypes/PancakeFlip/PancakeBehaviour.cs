@@ -26,6 +26,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             _rb = GetComponent<Rigidbody2D>();
             _rb.gravityScale = 0f;
+            _rb.constraints = RigidbodyConstraints2D.None;
             _baseScale = transform.localScale;
             if (panCenter != null)
                 _restPosition = panCenter.position;
@@ -61,7 +62,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (_state != State.InFlight) return;
 
-                float deltaDeg = Mathf.Abs(_rb.angularVelocity * Mathf.Rad2Deg * Time.fixedDeltaTime);
+            float deltaDeg = Mathf.Abs(_rb.angularVelocity * Mathf.Rad2Deg * Time.fixedDeltaTime);
             _totalRotationDegrees += deltaDeg;
             _fullRotations = Mathf.FloorToInt(_totalRotationDegrees / 360f);
 
@@ -71,7 +72,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 _rb.linearVelocity = new Vector2(dx * config.landingAssistStrength, _rb.linearVelocity.y);
             }
 
-            // Лёгкая эластичность: тянемся вверх, сплющиваем вниз
             float vy = _rb.linearVelocity.y;
             float t = Mathf.Clamp(vy / 12f, -0.2f, 0.2f);
             transform.localScale = new Vector3(_baseScale.x * (1f - t * 0.5f), _baseScale.y * (1f + t), _baseScale.z);
