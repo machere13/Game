@@ -14,6 +14,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void Start()
         {
+            var myImage = GetComponent<Image>();
+            if (myImage != null) myImage.raycastTarget = false;
+
             if (fillImage == null)
             {
                 fillImage = GetComponent<Image>();
@@ -23,6 +26,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (fillImage != null)
             {
+                fillImage.raycastTarget = false;
                 var rt = fillImage.rectTransform;
                 _baseScaleX = Mathf.Abs(rt.localScale.x);
                 if (_baseScaleX <= 0f) _baseScaleX = 1f;

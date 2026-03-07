@@ -17,6 +17,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         float _totalRotationDegrees;
         int _fullRotations;
         Vector2 _restPosition;
+        Vector3 _baseScale;
 
         public State CurrentState => _state;
         public int FullRotations => _fullRotations;
@@ -25,6 +26,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             _rb = GetComponent<Rigidbody2D>();
             _rb.gravityScale = 0f;
+            _baseScale = transform.localScale;
             if (panCenter != null)
                 _restPosition = panCenter.position;
             else
@@ -68,6 +70,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 float dx = panCenter.position.x - transform.position.x;
                 _rb.linearVelocity = new Vector2(dx * config.landingAssistStrength, _rb.linearVelocity.y);
             }
+
+            // Лёгкая эластичность: тянемся вверх, сплющиваем вниз
+            float vy = _rb.linearVelocity.y;
+            float t = Mathf.Clamp(vy / 12f, -0.2f, 0.2f);
+            transform.localScale = new Vector3(_baseScale.x * (1f - t * 0.5f), _baseScale.y * (1f + t), _baseScale.z);
         }
 
         void OnCollisionEnter2D(Collision2D other)
@@ -84,15 +91,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _rb.gravityScale = 0f;
             _rb.linearVelocity = Vector2.zero;
             _rb.angularVelocity = 0f;
+            transform.rotation = Quaternion.identity;
+            transform.localScale = _baseScale;
             if (panCenter != null)
+            {
                 _restPosition = panCenter.position;
+                transform.position = _restPosition;
+            }
             OnLanded?.Invoke(_fullRotations);
         }
 
         void Update()
         {
             if (_state == State.OnPan && panCenter != null)
+            {
                 transform.position = Vector2.Lerp(transform.position, _restPosition, landingSnapSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.identity, landingSnapSpeed * Time.deltaTime);
+            }
         }
 
         public event System.Action<int> OnLanded;

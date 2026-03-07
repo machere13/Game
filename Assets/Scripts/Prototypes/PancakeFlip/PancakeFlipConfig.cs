@@ -11,16 +11,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public float maxHoldTime = 3f;
 
         [Header("Throw Force")]
-        public float minForce = 5f;
-        public float maxForce = 25f;
+        public float minForce = 3f;
+        public float maxForce = 12f;
 
         [Header("Spin")]
-        public float minSpin = 180f;
-        public float maxSpin = 720f;
+        public float minSpin = 360f;
+        public float maxSpin = 1440f;
 
         [Header("Air / Gravity")]
-        [Tooltip("Scale for gravity; higher = faster fall")]
-        public float gravityScale = 1f;
+        public float gravityScale = 2f;
         [Tooltip("Optional: scale total air time")]
         public float airTimeScale = 1f;
 
