@@ -122,7 +122,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var pancakeGo = new GameObject("Pancake");
             pancakeGo.transform.position = new Vector3(0f, -2.5f, 0f);
-            pancakeGo.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
+            pancakeGo.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
             var pancakeSr = pancakeGo.AddComponent<SpriteRenderer>();
             pancakeSr.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
             pancakeSr.color = new Color(1f, 0.9f, 0.6f);
@@ -240,7 +240,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                         if (sr != null)
                         {
                             if (pancakeSprite != null) sr.sprite = pancakeSprite;
-                            t.localScale = new Vector3(0.9f, 0.9f, 1f);
+                            t.localScale = new Vector3(0.6f, 0.6f, 1f);
                             sr.sortingOrder = 1;
                             EditorUtility.SetDirty(t);
                             pancakeAssigned = true;

@@ -53,18 +53,30 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _state = State.InFlight;
             _totalRotationDegrees = 0f;
             _fullRotations = 0;
-            _lastAngleDeg = transform.eulerAngles.z;
+            _lastAngleDeg = _rb.rotation;
 
             _rb.gravityScale = config != null ? config.gravityScale : 1f;
             _rb.linearVelocity = new Vector2(0f, verticalForce);
-            _rb.angularVelocity = -(spinDegPerSec * Mathf.Deg2Rad);
+            _rb.angularVelocity = -spinDegPerSec;
         }
 
         void FixedUpdate()
         {
+            if (_state == State.OnPan && panCenter != null)
+            {
+                _restPosition = panCenter.position;
+                _rb.position = _restPosition;
+                _rb.linearVelocity = Vector2.zero;
+                _rb.angularVelocity = 0f;
+                _rb.gravityScale = 0f;
+                _rb.rotation = 0f;
+                transform.rotation = Quaternion.identity;
+                return;
+            }
+
             if (_state != State.InFlight) return;
 
-            float currentAngle = transform.eulerAngles.z;
+            float currentAngle = _rb.rotation;
             float delta = Mathf.DeltaAngle(_lastAngleDeg, currentAngle);
             _lastAngleDeg = currentAngle;
             _totalRotationDegrees += Mathf.Abs(delta);
@@ -91,29 +103,21 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _rb.gravityScale = 0f;
             _rb.linearVelocity = Vector2.zero;
             _rb.angularVelocity = 0f;
-            transform.rotation = Quaternion.identity;
-            Vector3 scale = _baseScale;
-            if (scale.y < scale.x * 0.7f)
-            {
-                scale.y = scale.x;
-                _baseScale = scale;
-            }
-            transform.localScale = scale;
+
             if (panCenter != null)
             {
                 _restPosition = panCenter.position;
-                transform.position = _restPosition;
+                _rb.position = _restPosition;
             }
+
+            _rb.rotation = 0f;
+            transform.rotation = Quaternion.identity;
+
             OnLanded?.Invoke(_fullRotations);
         }
 
         void Update()
         {
-            if (_state == State.OnPan && panCenter != null)
-            {
-                transform.position = Vector2.Lerp(transform.position, _restPosition, landingSnapSpeed * Time.deltaTime);
-                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.identity, landingSnapSpeed * Time.deltaTime);
-            }
         }
 
         public event System.Action<int> OnLanded;
