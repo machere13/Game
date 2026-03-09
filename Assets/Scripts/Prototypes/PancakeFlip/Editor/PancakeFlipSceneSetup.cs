@@ -111,8 +111,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetSerialized(scoreView, "rotationsPopupText", popupTextComp);
 
             var panGo = new GameObject("Pan");
-            panGo.transform.position = new Vector3(0f, -3f, 0f);
-            panGo.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
+            panGo.transform.position = new Vector3(1.4f, -3f, 0f);
+            panGo.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
             var panSr = panGo.AddComponent<SpriteRenderer>();
             panSr.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
             panSr.color = new Color(0.4f, 0.25f, 0.1f);
@@ -228,7 +228,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                         if (sr != null)
                         {
                             if (panSprite != null) sr.sprite = panSprite;
-                            t.localScale = new Vector3(0.4f, 0.4f, 1f);
+                            t.localScale = new Vector3(0.6f, 0.6f, 1f);
                             sr.sortingOrder = 0;
                             EditorUtility.SetDirty(t);
                             panAssigned = true;

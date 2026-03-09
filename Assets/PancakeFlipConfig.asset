@@ -15,9 +15,9 @@ MonoBehaviour:
   maxHoldTime: 3
   minForce: 3
   maxForce: 12
-  minSpin: 360
-  maxSpin: 1440
-  spinMultiplier: 10
+  minSpin: 90
+  maxSpin: 360
+  spinMultiplier: 1
   gravityScale: 1
   airTimeScale: 1
   landingAssistStrength: 0.5
