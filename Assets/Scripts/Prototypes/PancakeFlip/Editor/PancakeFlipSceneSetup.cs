@@ -71,6 +71,45 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             inputZoneGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.01f);
             var inputZoneComp = inputZoneGo.AddComponent<PancakeFlipInputZone>();
 
+            var scoreTextGo = new GameObject("ScoreText");
+            scoreTextGo.transform.SetParent(canvasGo.transform, false);
+            var scoreRect = scoreTextGo.AddComponent<RectTransform>();
+            scoreRect.anchorMin = new Vector2(0.5f, 0f);
+            scoreRect.anchorMax = new Vector2(0.5f, 0f);
+            scoreRect.pivot = new Vector2(0.5f, 0f);
+            scoreRect.anchoredPosition = new Vector2(0f, 80f);
+            scoreRect.sizeDelta = new Vector2(400f, 80f);
+            var defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var scoreTextComp = scoreTextGo.AddComponent<Text>();
+            scoreTextComp.text = "Очки: 0";
+            scoreTextComp.fontSize = 48;
+            scoreTextComp.alignment = TextAnchor.MiddleCenter;
+            scoreTextComp.color = Color.black;
+            if (defaultFont != null) scoreTextComp.font = defaultFont;
+
+            var rotationsPopupGo = new GameObject("RotationsPopup");
+            rotationsPopupGo.transform.SetParent(canvasGo.transform, false);
+            var popupRect = rotationsPopupGo.AddComponent<RectTransform>();
+            popupRect.anchorMin = new Vector2(0.5f, 0.5f);
+            popupRect.anchorMax = new Vector2(0.5f, 0.5f);
+            popupRect.pivot = new Vector2(0.5f, 0.5f);
+            popupRect.anchoredPosition = Vector2.zero;
+            popupRect.sizeDelta = new Vector2(500f, 120f);
+            var popupTextComp = rotationsPopupGo.AddComponent<Text>();
+            popupTextComp.text = "";
+            popupTextComp.fontSize = 56;
+            popupTextComp.alignment = TextAnchor.MiddleCenter;
+            popupTextComp.color = new Color(0.2f, 0.15f, 0.05f);
+            popupTextComp.fontStyle = FontStyle.Bold;
+            if (defaultFont != null) popupTextComp.font = defaultFont;
+
+            var scoreUIGo = new GameObject("ScoreUI");
+            scoreUIGo.transform.SetParent(canvasGo.transform, false);
+            scoreUIGo.AddComponent<RectTransform>();
+            var scoreView = scoreUIGo.AddComponent<PancakeFlipScoreView>();
+            SetSerialized(scoreView, "scoreText", scoreTextComp);
+            SetSerialized(scoreView, "rotationsPopupText", popupTextComp);
+
             var panGo = new GameObject("Pan");
             panGo.transform.position = new Vector3(0f, -3f, 0f);
             panGo.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
@@ -101,15 +140,71 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetSerialized(controller, "chargeIndicator", chargeView);
             SetSerialized(controller, "inputZone", inputRect);
             SetSerialized(inputZoneComp, "controller", controller);
+            SetSerialized(scoreView, "pancake", pancakeBh);
 
             pancakeBh.SetPanCenter(pan.PanCenter);
 
-            EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            if (!Application.isPlaying)
+                EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
             Debug.Log("PancakeFlip scene created. Create and assign PancakeFlipConfig (Create > IdlePancake > Prototypes > PancakeFlip Config) to PancakeFlipController and PancakeBehaviour.");
         }
 
         const string PanGuid = "e9107d6466d245d4d8b36637e369cbb4";
         const string PancakeGuid = "0534ba38780a54e4db8729cf9af9e4af";
+
+        [MenuItem("PancakeFlip/Add Score and Rotations UI")]
+        public static void AddScoreUI()
+        {
+            if (Application.isPlaying) { Debug.LogWarning("PancakeFlip: останови Play и вызови меню снова."); return; }
+            var canvas = Object.FindObjectOfType<Canvas>();
+            if (canvas == null) { Debug.LogWarning("PancakeFlip: в сцене нет Canvas."); return; }
+            var pancake = Object.FindObjectOfType<PancakeBehaviour>();
+            if (pancake == null) { Debug.LogWarning("PancakeFlip: в сцене нет Pancake (PancakeBehaviour)."); return; }
+
+            var defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var scoreTextGo = new GameObject("ScoreText");
+            scoreTextGo.transform.SetParent(canvas.transform, false);
+            var scoreRect = scoreTextGo.AddComponent<RectTransform>();
+            scoreRect.anchorMin = new Vector2(0.5f, 0f);
+            scoreRect.anchorMax = new Vector2(0.5f, 0f);
+            scoreRect.pivot = new Vector2(0.5f, 0f);
+            scoreRect.anchoredPosition = new Vector2(0f, 80f);
+            scoreRect.sizeDelta = new Vector2(400f, 80f);
+            var scoreTextComp = scoreTextGo.AddComponent<Text>();
+            scoreTextComp.text = "Очки: 0";
+            scoreTextComp.fontSize = 48;
+            scoreTextComp.alignment = TextAnchor.MiddleCenter;
+            scoreTextComp.color = Color.black;
+            if (defaultFont != null) scoreTextComp.font = defaultFont;
+
+            var rotationsPopupGo = new GameObject("RotationsPopup");
+            rotationsPopupGo.transform.SetParent(canvas.transform, false);
+            var popupRect = rotationsPopupGo.AddComponent<RectTransform>();
+            popupRect.anchorMin = new Vector2(0.5f, 0.5f);
+            popupRect.anchorMax = new Vector2(0.5f, 0.5f);
+            popupRect.pivot = new Vector2(0.5f, 0.5f);
+            popupRect.anchoredPosition = Vector2.zero;
+            popupRect.sizeDelta = new Vector2(500f, 120f);
+            var popupTextComp = rotationsPopupGo.AddComponent<Text>();
+            popupTextComp.text = "";
+            popupTextComp.fontSize = 56;
+            popupTextComp.alignment = TextAnchor.MiddleCenter;
+            popupTextComp.color = new Color(0.2f, 0.15f, 0.05f);
+            popupTextComp.fontStyle = FontStyle.Bold;
+            if (defaultFont != null) popupTextComp.font = defaultFont;
+
+            var scoreUIGo = new GameObject("ScoreUI");
+            scoreUIGo.transform.SetParent(canvas.transform, false);
+            scoreUIGo.AddComponent<RectTransform>();
+            var scoreView = scoreUIGo.AddComponent<PancakeFlipScoreView>();
+            SetSerialized(scoreView, "scoreText", scoreTextComp);
+            SetSerialized(scoreView, "rotationsPopupText", popupTextComp);
+            SetSerialized(scoreView, "pancake", pancake);
+
+            if (!Application.isPlaying)
+                EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            Debug.Log("PancakeFlip: добавлены ScoreText (внизу), RotationsPopup (центр), ScoreUI.");
+        }
 
         [MenuItem("PancakeFlip/Assign Pan and Pancake Sprites")]
         public static void AssignSprites()

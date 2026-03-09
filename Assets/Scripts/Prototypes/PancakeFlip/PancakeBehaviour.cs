@@ -16,6 +16,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         State _state = State.OnPan;
         float _totalRotationDegrees;
         int _fullRotations;
+        float _lastAngleDeg;
         Vector2 _restPosition;
         Vector3 _baseScale;
 
@@ -52,6 +53,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _state = State.InFlight;
             _totalRotationDegrees = 0f;
             _fullRotations = 0;
+            _lastAngleDeg = transform.eulerAngles.z;
 
             _rb.gravityScale = config != null ? config.gravityScale : 1f;
             _rb.linearVelocity = new Vector2(0f, verticalForce);
@@ -62,8 +64,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (_state != State.InFlight) return;
 
-            float deltaDeg = Mathf.Abs(_rb.angularVelocity * Mathf.Rad2Deg * Time.fixedDeltaTime);
-            _totalRotationDegrees += deltaDeg;
+            float currentAngle = transform.eulerAngles.z;
+            float delta = Mathf.DeltaAngle(_lastAngleDeg, currentAngle);
+            _lastAngleDeg = currentAngle;
+            _totalRotationDegrees += Mathf.Abs(delta);
             _fullRotations = Mathf.FloorToInt(_totalRotationDegrees / 360f);
 
             if (config != null && config.landingAssistStrength > 0.001f && panCenter != null)
