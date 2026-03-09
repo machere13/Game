@@ -80,7 +80,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             float delta = Mathf.DeltaAngle(_lastAngleDeg, currentAngle);
             _lastAngleDeg = currentAngle;
             _totalRotationDegrees += Mathf.Abs(delta);
-            _fullRotations = Mathf.FloorToInt(_totalRotationDegrees / 360f);
+            _fullRotations = Mathf.RoundToInt(_totalRotationDegrees / 360f);
 
             if (config != null && config.landingAssistStrength > 0.001f && panCenter != null)
             {
