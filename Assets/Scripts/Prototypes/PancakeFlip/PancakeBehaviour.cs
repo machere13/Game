@@ -13,6 +13,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Transform panCenter;
 
         Rigidbody2D _rb;
+        Collider2D _col;
+        Collider2D _panCol;
         State _state = State.OnPan;
         Side _currentSide = Side.A;
 
@@ -22,6 +24,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         float _cookA;
         float _cookB;
+
+        Vector2 _restPosition;
 
         public State CurrentState => _state;
         public Side CurrentSide => _currentSide;
@@ -49,8 +53,21 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
+            _col = GetComponent<Collider2D>();
             _rb.gravityScale = 0f;
             _rb.constraints = RigidbodyConstraints2D.None;
+        }
+
+        void Start()
+        {
+            _restPosition = _rb.position;
+
+            if (panCenter != null)
+            {
+                _panCol = panCenter.GetComponent<Collider2D>();
+                if (_panCol != null && _col != null)
+                    Physics2D.IgnoreCollision(_col, _panCol, true);
+            }
         }
 
         public void SetPanCenter(Transform center)
@@ -66,6 +83,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _totalRotationDegrees = 0f;
             _fullRotations = 0;
             _lastAngleDeg = _rb.rotation;
+
+            if (_panCol != null && _col != null)
+                Physics2D.IgnoreCollision(_col, _panCol, false);
 
             _rb.gravityScale = config != null ? config.gravityScale : 1f;
             _rb.linearVelocity = new Vector2(0f, verticalForce);
@@ -94,6 +114,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 CookCurrentSide();
 
+                _rb.position = _restPosition;
                 _rb.linearVelocity = Vector2.zero;
                 _rb.angularVelocity = 0f;
                 _rb.gravityScale = 0f;
@@ -123,6 +144,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void OnCollisionEnter2D(Collision2D other)
         {
             if (_state != State.InFlight) return;
+            if (_rb.linearVelocity.y > 0f) return;
             if (!other.gameObject.TryGetComponent<PanBehaviour>(out _)) return;
             Land();
         }
@@ -136,7 +158,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _rb.linearVelocity = Vector2.zero;
             _rb.angularVelocity = 0f;
             _rb.rotation = 0f;
+            _rb.position = _restPosition;
             transform.rotation = Quaternion.identity;
+
+            if (_panCol != null && _col != null)
+                Physics2D.IgnoreCollision(_col, _panCol, true);
 
             OnLanded?.Invoke(new LandingResult
             {

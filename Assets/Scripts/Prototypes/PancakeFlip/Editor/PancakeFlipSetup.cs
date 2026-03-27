@@ -17,7 +17,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         {
             if (Application.isPlaying) { Debug.LogWarning("Останови Play."); return; }
 
-            // 1 — Scene
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var cam = Camera.main;
             if (cam != null) { cam.orthographic = true; cam.orthographicSize = 5f; cam.backgroundColor = new Color(0.2f, 0.2f, 0.25f); }
@@ -30,7 +29,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
             }
 
-            // 2 — Sprites
             ForceAllSprites();
             var bgSpr = LoadSprite("Background");
             var panSpr = LoadSprite("Pan");
@@ -41,7 +39,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var orderItemSpr = LoadSprite("OrderItem");
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
-            // 3 — Data
             EnsureFolder("Assets/Data");
             EnsureFolder(DataDir);
             var flipConfig = GetOrCreate<PancakeFlipConfig>(DataDir, "PancakeFlipConfig");
@@ -61,7 +58,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            // 4 — World: Background
             if (bgSpr != null)
             {
                 var bg = new GameObject("Background");
@@ -72,7 +68,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 bg.transform.position = new Vector3(0, 0, 10);
             }
 
-            // 5 — World: Stove
             float stoveScale = 0.55f, burnerY = -1.5f;
             if (stoveClosedS != null)
             {
@@ -93,10 +88,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 if (stoveOpenS != null) SetField(stoveGo.GetComponent<StoveView>(), "openSprite", stoveOpenS);
             }
 
-            // 6 — World: Pan
+            const float worldScale = 0.25f;
+            const float panLiftWorld = 0.12f;
+
             var panGo = new GameObject("Pan");
-            panGo.transform.position = new Vector3(0, burnerY, 0);
-            panGo.transform.localScale = Vector3.one * 0.5f;
+            panGo.transform.position = new Vector3(0, burnerY + panLiftWorld, 0);
+            panGo.transform.localScale = Vector3.one * worldScale;
             var panSrC = panGo.AddComponent<SpriteRenderer>();
             panSrC.sprite = panSpr != null ? panSpr : AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
             panSrC.color = panSpr != null ? Color.white : new Color(0.4f, 0.25f, 0.1f);
@@ -104,10 +101,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             panGo.AddComponent<BoxCollider2D>();
             var panBh = panGo.AddComponent<PanBehaviour>();
 
-            // 7 — World: Pancake
+            const float pancakeY = -1.2f;
+
             var pcGo = new GameObject("Pancake");
-            pcGo.transform.position = new Vector3(0, burnerY + 0.5f, 0);
-            pcGo.transform.localScale = Vector3.one * 0.5f;
+            pcGo.transform.position = new Vector3(0, pancakeY, 0);
+            pcGo.transform.localScale = Vector3.one * worldScale;
             var pcSr = pcGo.AddComponent<SpriteRenderer>();
             pcSr.sprite = pancakeSpr != null ? pancakeSpr : AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
             pcSr.color = pancakeSpr != null ? Color.white : new Color(1, 0.9f, 0.6f);
@@ -118,7 +116,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             pcBh.SetPanCenter(panBh.PanCenter);
             SetField(pcBh, "config", flipConfig);
 
-            // 8 — Canvas
             var canvasGo = new GameObject("Canvas");
             var canvas = canvasGo.AddComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             var scaler = canvasGo.AddComponent<CanvasScaler>();
@@ -172,7 +169,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(olv, "cardPrefab", cardPrefab);
             SetField(olv, "container", cardsContainer.transform);
 
-            // 11 — Charge indicator
             var chargeGo = MkPanel(canvas.transform, "ChargeIndicator", V2(0.25f, 0.88f), V2(0.75f, 0.94f), new Color(0.15f, 0.15f, 0.15f, 0.7f));
             var fillGo2 = new GameObject("Fill", typeof(RectTransform), typeof(Image));
             fillGo2.transform.SetParent(chargeGo.transform, false); Fill(fillGo2);
@@ -180,21 +176,18 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             fillI.type = Image.Type.Filled; fillI.fillMethod = Image.FillMethod.Horizontal; fillI.fillAmount = 0;
             var cv = chargeGo.AddComponent<ChargeIndicatorView>(); SetField(cv, "fillImage", fillI);
 
-            // 12 — Rotations popup
             var popup = MkLabel(canvas.transform, "RotationsPopup", "", font, 52, new Color(1, 0.95f, 0.7f), 0);
             var popupR = popup.GetComponent<RectTransform>();
             popupR.anchorMin = V2(0.5f, 0.5f); popupR.anchorMax = V2(0.5f, 0.5f);
             popupR.sizeDelta = new Vector2(400, 100);
             popup.GetComponent<Text>().fontStyle = FontStyle.Bold;
 
-            // 13 — Score view
             var scoreUI = new GameObject("ScoreUI", typeof(RectTransform));
             scoreUI.transform.SetParent(canvas.transform, false);
             var sv = scoreUI.AddComponent<PancakeFlipScoreView>();
             SetField(sv, "pancake", pcBh); SetField(sv, "config", flipConfig);
             SetField(sv, "rotationsPopupText", popup.GetComponent<Text>());
 
-            // 14 — Cooking indicators
             var cookRoot = MkPanel(canvas.transform, "CookingIndicators", V2(0.88f, 0.35f), V2(0.97f, 0.7f), new Color(0, 0, 0, 0));
             MkCookBar(cookRoot, "A", V2(0, 0.55f), V2(1, 1), font, out Image barA, out Text lblA);
             MkCookBar(cookRoot, "B", V2(0, 0), V2(1, 0.45f), font, out Image barB, out Text lblB);
@@ -203,7 +196,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(civ, "barA", barA); SetField(civ, "labelA", lblA);
             SetField(civ, "barB", barB); SetField(civ, "labelB", lblB);
 
-            // 15 — Ingredients screen (overlay, starts hidden)
             var ingScr = MkPanel(canvas.transform, "IngredientsScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.1f, 0.12f, 0.1f, 0.95f));
             var iVlg = ingScr.AddComponent<VerticalLayoutGroup>(); iVlg.padding = new RectOffset(20, 20, 20, 20); iVlg.spacing = 10; iVlg.childForceExpandHeight = false;
             MkLabel(ingScr.transform, "Title", "Ингредиенты", font, 38, Color.white, 0).AddComponent<LayoutElement>().preferredHeight = 50;
@@ -218,11 +210,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(isv, "ingredientListContainer", iList.transform);
             SetField(isv, "closeButton", iCloseBtn.GetComponent<Button>());
 
-            // Wire stove → ingredients
             var stoveV = Object.FindObjectOfType<StoveView>();
             if (stoveV != null) { SetField(stoveV, "ingredientsScreen", isv); SetField(isv, "stove", stoveV); }
 
-            // 16 — Upgrade screen (overlay, starts hidden)
             var upgScr = MkPanel(canvas.transform, "UpgradeScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.12f, 0.1f, 0.08f, 0.95f));
             var uVlg = upgScr.AddComponent<VerticalLayoutGroup>(); uVlg.padding = new RectOffset(20, 20, 20, 20); uVlg.spacing = 10; uVlg.childForceExpandHeight = false;
             MkLabel(upgScr.transform, "Title", "Апгрейды сковороды", font, 38, Color.white, 0).AddComponent<LayoutElement>().preferredHeight = 50;
@@ -237,13 +227,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(usv, "upgradeListContainer", uList.transform);
             SetField(usv, "closeButton", uCloseBtn.GetComponent<Button>());
 
-            // 17 — Controller
             var ctrlGo = new GameObject("PancakeFlipController");
             var ctrl = ctrlGo.AddComponent<PancakeFlipController>();
             SetField(ctrl, "pancake", pcBh); SetField(ctrl, "pan", panBh);
             SetField(ctrl, "chargeIndicator", cv); SetField(ctrl, "config", flipConfig);
 
-            // 18 — GameSession
             var sessGo = new GameObject("GameSession");
             var sess = sessGo.AddComponent<GameSession>();
             SetField(sess, "flipConfig", flipConfig); SetField(sess, "levelTable", levelTable);
@@ -256,7 +244,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             Debug.Log("PancakeFlip: всё создано одной кнопкой.");
         }
 
-        // ═══════════ Data helpers ═══════════
         static IngredientConfig CreateIngredient(string n, int cost, int lvl, bool inf)
         {
             var o = GetOrCreate<IngredientConfig>(DataDir, n);
@@ -284,7 +271,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             AssetDatabase.CreateAsset(o, p); return o;
         }
 
-        // ═══════════ Sprite helpers ═══════════
         static void ForceAllSprites()
         {
             foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake" })
@@ -309,7 +295,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             return null;
         }
 
-        // ═══════════ UI helpers ═══════════
         static Vector2 V2(float x, float y) => new(x, y);
         static GameObject MkPanel(Transform p, string n, Vector2 amin, Vector2 amax, Color c)
         {
@@ -390,7 +375,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             lbl = lg.GetComponent<Text>();
         }
 
-        // ═══════════ Serialization ═══════════
         static void SetField(Object obj, string prop, Object val)
         {
             var so = new SerializedObject(obj); var p = so.FindProperty(prop);
