@@ -6,11 +6,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
     public sealed class PancakeFlipScoreView : MonoBehaviour
     {
         [SerializeField] PancakeBehaviour pancake;
+        [SerializeField] PancakeFlipConfig config;
         [SerializeField] Text scoreText;
         [SerializeField] Text rotationsPopupText;
         [SerializeField] float popupDuration = 1.8f;
 
-        int _score;
         float _popupHideTime = -1f;
 
         void Start()
@@ -19,7 +19,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 pancake.OnLanded += OnPancakeLanded;
             if (rotationsPopupText != null)
                 rotationsPopupText.gameObject.SetActive(false);
-            RefreshScoreText();
         }
 
         void OnDestroy()
@@ -30,18 +29,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void Update()
         {
+            RefreshScoreText();
+
             if (rotationsPopupText != null && rotationsPopupText.gameObject.activeSelf && Time.time >= _popupHideTime)
                 rotationsPopupText.gameObject.SetActive(false);
         }
 
-        void OnPancakeLanded(int fullRotations)
+        void OnPancakeLanded(PancakeBehaviour.LandingResult result)
         {
-            _score += 1 + fullRotations;
-            RefreshScoreText();
+            int xpPerRot = (config != null) ? config.xpPerRotation : 10;
+            int earned = Mathf.Max(1, result.rotations) * xpPerRot;
 
             if (rotationsPopupText != null)
             {
-                rotationsPopupText.text = RotationsLabel(fullRotations);
+                string label = result.rotations > 0
+                    ? $"+{earned} XP  ({result.rotations}x)"
+                    : $"+{earned} XP";
+                rotationsPopupText.text = label;
                 rotationsPopupText.gameObject.SetActive(true);
                 _popupHideTime = Time.time + popupDuration;
             }
@@ -49,13 +53,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void RefreshScoreText()
         {
-            if (scoreText != null)
-                scoreText.text = "Очки: " + _score;
-        }
-
-        static string RotationsLabel(int n)
-        {
-            return n.ToString();
+            if (scoreText == null) return;
+            var s = GameSession.Instance;
+            if (s != null)
+                scoreText.text = $"XP: {s.Wallet.TotalXp}";
         }
     }
 }

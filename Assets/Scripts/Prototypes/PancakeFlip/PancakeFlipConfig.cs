@@ -30,8 +30,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [Range(0f, 1f)]
         public float landingAssistStrength = 0.5f;
 
-        [Header("Scoring (optional)")]
-        public int popupPointsPerRotation = 10;
+        [Header("Cooking")]
+        [Tooltip("Seconds to fully cook one side (0→1)")]
+        public float cookTimePerSide = 8f;
+        [Tooltip("Doneness range considered 'perfect' (e.g. 0.4–0.7)")]
+        [Range(0f, 1f)] public float perfectMin = 0.4f;
+        [Range(0f, 1f)] public float perfectMax = 0.7f;
+        [Tooltip("Above this = overcooked")]
+        [Range(0f, 1f)] public float overcookedThreshold = 0.85f;
+
+        [Header("Scoring")]
+        public int xpPerRotation = 10;
 
         public float ForceFromCharge(float charge01)
         {

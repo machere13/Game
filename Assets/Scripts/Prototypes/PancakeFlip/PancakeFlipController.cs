@@ -18,8 +18,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (chargeIndicator == null)
                 chargeIndicator = Object.FindFirstObjectByType<ChargeIndicatorView>();
-            if (pancake != null && pan != null)
-                pancake.SetPanCenter(pan.PanCenter);
         }
 
         void Update()
@@ -34,9 +32,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 return;
             }
 
-            bool mouse = Input.GetMouseButton(0);
+            bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            bool mouse = Input.GetMouseButton(0) && !overUI;
             bool space = Input.GetKey(KeyCode.Space);
-            bool newInput = GetSpaceOrMouseFromNewInputSystem();
+            bool newInput = !overUI && GetSpaceOrMouseFromNewInputSystem();
             bool pointerDown = mouse || space || newInput;
             bool pointerJustDown = pointerDown && !_wasKeyOrMouseDown;
             bool pointerJustUp = !pointerDown && _wasKeyOrMouseDown;
@@ -62,10 +61,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (_isCharging)
             {
-                _chargeTime = Mathf.Min(_chargeTime + Time.deltaTime, config.maxHoldTime);
-                float charge = Mathf.Min(1f, _chargeTime / config.maxHoldTime);
+                _chargeTime += Time.deltaTime;
+                float charge = Mathf.Clamp01(_chargeTime / config.maxHoldTime);
                 if (chargeIndicator != null)
                     chargeIndicator.SetCharge(charge);
+
+                if (_chargeTime >= config.maxHoldTime && pan != null)
+                {
+                    pancake.Throw(config.ForceFromCharge(1f), config.SpinFromCharge(1f));
+                    pan.PlayNod();
+                    _isCharging = false;
+                    _chargeTime = 0f;
+                    if (chargeIndicator != null) chargeIndicator.SetCharge(0f);
+                }
             }
         }
 

@@ -81,7 +81,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             scoreRect.sizeDelta = new Vector2(400f, 80f);
             var defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             var scoreTextComp = scoreTextGo.AddComponent<Text>();
-            scoreTextComp.text = "Очки: 0";
+            scoreTextComp.text = "XP: 0";
             scoreTextComp.fontSize = 48;
             scoreTextComp.alignment = TextAnchor.MiddleCenter;
             scoreTextComp.color = Color.black;
@@ -121,7 +121,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var pan = panGo.AddComponent<PanBehaviour>();
 
             var pancakeGo = new GameObject("Pancake");
-            pancakeGo.transform.position = new Vector3(0f, -2.5f, 0f);
+            pancakeGo.transform.position = new Vector3(1.4f, -2.5f, 0f);
             pancakeGo.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
             var pancakeSr = pancakeGo.AddComponent<SpriteRenderer>();
             pancakeSr.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
@@ -144,9 +144,21 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             pancakeBh.SetPanCenter(pan.PanCenter);
 
+            var cfgGuids = AssetDatabase.FindAssets("t:PancakeFlipConfig");
+            if (cfgGuids.Length > 0)
+            {
+                var cfg = AssetDatabase.LoadAssetAtPath<PancakeFlipConfig>(AssetDatabase.GUIDToAssetPath(cfgGuids[0]));
+                if (cfg != null)
+                {
+                    SetSerialized(controller, "config", cfg);
+                    SetSerialized(pancakeBh, "config", cfg);
+                    SetSerialized(scoreView, "config", cfg);
+                }
+            }
+
             if (!Application.isPlaying)
                 EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
-            Debug.Log("PancakeFlip scene created. Create and assign PancakeFlipConfig (Create > IdlePancake > Prototypes > PancakeFlip Config) to PancakeFlipController and PancakeBehaviour.");
+            Debug.Log("PancakeFlip scene created. Если PancakeFlipConfig ещё не создан: Create > IdlePancake > Prototypes > PancakeFlip Config.");
         }
 
         const string PanGuid = "e9107d6466d245d4d8b36637e369cbb4";
@@ -171,7 +183,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             scoreRect.anchoredPosition = new Vector2(0f, 80f);
             scoreRect.sizeDelta = new Vector2(400f, 80f);
             var scoreTextComp = scoreTextGo.AddComponent<Text>();
-            scoreTextComp.text = "Очки: 0";
+            scoreTextComp.text = "XP: 0";
             scoreTextComp.fontSize = 48;
             scoreTextComp.alignment = TextAnchor.MiddleCenter;
             scoreTextComp.color = Color.black;
@@ -315,6 +327,94 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     if (o is Sprite s2) return s2;
             }
             return null;
+        }
+
+        [MenuItem("PancakeFlip/Add Cooking Indicators UI")]
+        public static void AddCookingIndicators()
+        {
+            if (Application.isPlaying) { Debug.LogWarning("PancakeFlip: останови Play и вызови меню снова."); return; }
+            var canvas = Object.FindObjectOfType<Canvas>();
+            if (canvas == null) { Debug.LogWarning("PancakeFlip: в сцене нет Canvas."); return; }
+            var pancake = Object.FindObjectOfType<PancakeBehaviour>();
+            if (pancake == null) { Debug.LogWarning("PancakeFlip: в сцене нет PancakeBehaviour."); return; }
+
+            var defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+            var rootGo = new GameObject("CookingIndicators");
+            rootGo.transform.SetParent(canvas.transform, false);
+            var rootRect = rootGo.AddComponent<RectTransform>();
+            rootRect.anchorMin = new Vector2(1f, 0.3f);
+            rootRect.anchorMax = new Vector2(1f, 0.7f);
+            rootRect.pivot = new Vector2(1f, 0.5f);
+            rootRect.anchoredPosition = new Vector2(-20f, 0f);
+            rootRect.sizeDelta = new Vector2(80f, 400f);
+
+            CreateCookBar(rootGo.transform, "SideA_Bar", "SideA_Label", new Vector2(0f, 0.55f), new Vector2(1f, 1f), "A", defaultFont,
+                out Image barA, out Text labelA);
+            CreateCookBar(rootGo.transform, "SideB_Bar", "SideB_Label", new Vector2(0f, 0f), new Vector2(1f, 0.45f), "B", defaultFont,
+                out Image barB, out Text labelB);
+
+            var view = rootGo.AddComponent<CookingIndicatorView>();
+            SetSerialized(view, "pancake", pancake);
+            SetSerialized(view, "barA", barA);
+            SetSerialized(view, "labelA", labelA);
+            SetSerialized(view, "barB", barB);
+            SetSerialized(view, "labelB", labelB);
+
+            var configs = AssetDatabase.FindAssets("t:PancakeFlipConfig");
+            if (configs.Length > 0)
+            {
+                var cfgPath = AssetDatabase.GUIDToAssetPath(configs[0]);
+                var cfg = AssetDatabase.LoadAssetAtPath<PancakeFlipConfig>(cfgPath);
+                if (cfg != null) SetSerialized(view, "config", cfg);
+            }
+
+            if (!Application.isPlaying)
+                EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            Debug.Log("PancakeFlip: добавлены индикаторы прожарки (CookingIndicators) справа.");
+        }
+
+        static void CreateCookBar(Transform parent, string barName, string labelName,
+            Vector2 anchorMin, Vector2 anchorMax, string sideLabel, Font font,
+            out Image bar, out Text label)
+        {
+            var bgGo = new GameObject(barName + "_BG");
+            bgGo.transform.SetParent(parent, false);
+            var bgRect = bgGo.AddComponent<RectTransform>();
+            bgRect.anchorMin = anchorMin;
+            bgRect.anchorMax = anchorMax;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
+            var bgImg = bgGo.AddComponent<Image>();
+            bgImg.color = new Color(0.15f, 0.15f, 0.15f, 0.6f);
+
+            var fillGo = new GameObject(barName);
+            fillGo.transform.SetParent(bgGo.transform, false);
+            var fillRect = fillGo.AddComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            bar = fillGo.AddComponent<Image>();
+            bar.type = Image.Type.Filled;
+            bar.fillMethod = Image.FillMethod.Vertical;
+            bar.fillOrigin = 0;
+            bar.fillAmount = 0f;
+            bar.color = new Color(1f, 0.95f, 0.8f);
+
+            var lblGo = new GameObject(labelName);
+            lblGo.transform.SetParent(bgGo.transform, false);
+            var lblRect = lblGo.AddComponent<RectTransform>();
+            lblRect.anchorMin = Vector2.zero;
+            lblRect.anchorMax = new Vector2(1f, 0.25f);
+            lblRect.offsetMin = Vector2.zero;
+            lblRect.offsetMax = Vector2.zero;
+            label = lblGo.AddComponent<Text>();
+            label.text = sideLabel;
+            label.fontSize = 22;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.color = Color.white;
+            if (font != null) label.font = font;
         }
 
         static void SetSerialized(Object obj, string propertyName, Object value)
