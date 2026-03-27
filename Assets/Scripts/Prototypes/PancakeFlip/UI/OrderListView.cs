@@ -7,24 +7,39 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] OrderCardView cardPrefab;
         [SerializeField] Transform container;
         [SerializeField] int maxCards = 4;
+        [SerializeField] float gap = 0.003f;
 
         readonly System.Collections.Generic.List<OrderCardView> _cards = new();
 
         void Start()
         {
+            float slotH = 1f / maxCards;
+
             for (int i = 0; i < maxCards; i++)
             {
                 var card = Instantiate(cardPrefab, container);
+                var rt = card.GetComponent<RectTransform>();
+
+                float yMax = 1f - slotH * i + (i == 0 ? 0 : -gap * 0.5f);
+                float yMin = 1f - slotH * (i + 1) + (i == maxCards - 1 ? 0 : gap * 0.5f);
+
+                rt.anchorMin = new Vector2(0, yMin);
+                rt.anchorMax = new Vector2(1, yMax);
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+                rt.pivot = new Vector2(0.5f, 0.5f);
+
                 card.gameObject.SetActive(false);
                 _cards.Add(card);
             }
+
             Refresh();
 
             var s = GameSession.Instance;
             if (s != null)
             {
                 s.Orders.OnChanged += Refresh;
-                s.OnOrderSelected += _ => UpdateSelection();
+                s.OnOrderSelected += OnOrderSelected;
             }
         }
 
@@ -34,9 +49,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (s != null)
             {
                 s.Orders.OnChanged -= Refresh;
-                s.OnOrderSelected -= _ => UpdateSelection();
+                s.OnOrderSelected -= OnOrderSelected;
             }
         }
+
+        void OnOrderSelected(Order _) => UpdateSelection();
 
         void Refresh()
         {

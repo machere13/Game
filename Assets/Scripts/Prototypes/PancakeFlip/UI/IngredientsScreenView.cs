@@ -8,12 +8,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Transform ingredientListContainer;
         [SerializeField] GameObject ingredientRowPrefab;
         [SerializeField] Button closeButton;
+        [SerializeField] StoveView stove;
 
         void Start()
         {
             if (closeButton != null)
-                closeButton.onClick.AddListener(() => gameObject.SetActive(false));
+                closeButton.onClick.AddListener(OnClose);
             gameObject.SetActive(false);
+        }
+
+        void OnClose()
+        {
+            gameObject.SetActive(false);
+            if (stove != null) stove.Close();
         }
 
         public void Open()

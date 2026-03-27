@@ -5,18 +5,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class OrderCardView : MonoBehaviour
     {
-        [SerializeField] Image recipeIcon;
-        [SerializeField] Image customerIcon;
         [SerializeField] Text rewardText;
         [SerializeField] Button selectButton;
-        [SerializeField] Button dismissButton;
         [SerializeField] Image selectionHighlight;
 
         Order _order;
+        bool _isSelected;
+        float _lastClickTime;
+        const float DoubleClickThreshold = 0.4f;
 
         public void Bind(Order order)
         {
             _order = order;
+            _isSelected = false;
             if (order == null)
             {
                 gameObject.SetActive(false);
@@ -24,40 +25,55 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
             gameObject.SetActive(true);
 
-            if (recipeIcon != null && order.Recipe != null && order.Recipe.icon != null)
-                recipeIcon.sprite = order.Recipe.icon;
-
             if (rewardText != null)
-                rewardText.text = $"{order.RewardCoins}c  {order.RewardXp}xp";
+            {
+                string name = order.Recipe != null ? order.Recipe.displayName : "Блин";
+                rewardText.text = $"{name}\n{order.RewardCoins}c  {order.RewardXp}xp";
+            }
 
             if (selectButton != null)
             {
                 selectButton.onClick.RemoveAllListeners();
-                selectButton.onClick.AddListener(OnSelect);
-            }
-            if (dismissButton != null)
-            {
-                dismissButton.onClick.RemoveAllListeners();
-                dismissButton.onClick.AddListener(OnDismiss);
+                selectButton.onClick.AddListener(OnClick);
             }
         }
 
         public void SetSelected(bool selected)
         {
+            _isSelected = selected;
             if (selectionHighlight != null)
                 selectionHighlight.enabled = selected;
         }
 
-        void OnSelect()
+        void OnClick()
         {
-            if (_order != null)
-                GameSession.Instance?.SelectOrder(_order);
+            if (_order == null) return;
+            var s = GameSession.Instance;
+            if (s == null) return;
+
+            float now = Time.unscaledTime;
+
+            if (_isSelected && (now - _lastClickTime) < DoubleClickThreshold)
+            {
+                TryServe();
+                _lastClickTime = 0f;
+                return;
+            }
+
+            s.SelectOrder(_order);
+            _lastClickTime = now;
         }
 
-        void OnDismiss()
+        void TryServe()
         {
-            if (_order != null)
-                GameSession.Instance?.DismissOrder(_order);
+            var s = GameSession.Instance;
+            if (s == null || _order == null) return;
+
+            var msc = Object.FindFirstObjectByType<MainScreenController>();
+            if (msc != null)
+                msc.Serve();
+            else
+                s.TryServe();
         }
     }
 }
