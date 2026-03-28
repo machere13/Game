@@ -298,6 +298,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var olv = orderPanel.AddComponent<OrderListView>();
             SetField(olv, "cardPrefab", cardPrefab);
             SetField(olv, "container", cardsContainer.transform);
+            SetFloatField(olv, "slotHeight", 0.285f);
+            SetFloatField(olv, "gap", 0.004f);
 
             var chargeGo = MkPanel(uiRoot, "ChargeIndicator", V2(0.25f, 0.84f), V2(0.75f, 0.9f), new Color(0.15f, 0.15f, 0.15f, 0.7f));
             var fillGo2 = new GameObject("Fill", typeof(RectTransform), typeof(Image));
@@ -318,9 +320,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sv, "pancake", pcBh); SetField(sv, "config", flipConfig);
             SetField(sv, "rotationsPopupText", popup.GetComponent<Text>());
 
-            var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.76f, 0.34f), V2(0.998f, 0.81f), new Color(0, 0, 0, 0));
-            MkCookPancakePreview(cookRoot, "A", V2(0, 0.515f), V2(1, 0.792f), pancakeSideUiSpr, font, out Image imgA);
-            MkCookPancakePreview(cookRoot, "B", V2(0, 0.21f), V2(1, 0.485f), pancakeSideUiSpr, font, out Image imgB);
+            var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.74f, 0.34f), V2(0.97f, 0.81f), new Color(0, 0, 0, 0));
+            MkCookPancakePreview(cookRoot, "A", V2(0, 0.53f), V2(1, 0.778f), pancakeSideUiSpr, font, out Image imgA);
+            MkCookPancakePreview(cookRoot, "B", V2(0, 0.232f), V2(1, 0.498f), pancakeSideUiSpr, font, out Image imgB);
             var civ = cookRoot.AddComponent<CookingIndicatorView>();
             SetField(civ, "pancake", pcBh); SetField(civ, "config", flipConfig);
             SetField(civ, "pancakeA", imgA); SetField(civ, "pancakeB", imgB);
@@ -503,25 +505,25 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var rbImg = rewardBg.GetComponent<Image>();
             if (rewardSpr != null) { rbImg.sprite = rewardSpr; rbImg.color = Color.white; rbImg.preserveAspect = true; }
             else rbImg.color = new Color(0.9f, 0.85f, 0.6f);
-            Anch(rewardBg, 0.48f, 0.48f, 1.12f, 1.12f);
+            Anch(rewardBg, 0.4f, 0.4f, 1.24f, 1.24f);
 
             var coinTxtGo = new GameObject("CoinTxt", typeof(RectTransform));
-            coinTxtGo.transform.SetParent(rewardBg.transform, false); Anch(coinTxtGo, 0.04f, 0.56f, 0.54f, 0.88f);
-            var coinT = coinTxtGo.AddComponent<Text>(); coinT.fontSize = 38; coinT.color = new Color(0.2f, 0.15f, 0.1f);
+            coinTxtGo.transform.SetParent(rewardBg.transform, false); Anch(coinTxtGo, 0.06f, 0.62f, 0.52f, 0.78f);
+            var coinT = coinTxtGo.AddComponent<Text>(); coinT.fontSize = 30; coinT.color = new Color(0.2f, 0.15f, 0.1f);
             coinT.alignment = TextAnchor.MiddleRight; coinT.fontStyle = FontStyle.Bold; if (f) coinT.font = f;
 
             var coinIco = new GameObject("CoinIcon", typeof(RectTransform), typeof(Image));
-            coinIco.transform.SetParent(rewardBg.transform, false); Anch(coinIco, 0.56f, 0.58f, 0.88f, 0.86f);
+            coinIco.transform.SetParent(rewardBg.transform, false); Anch(coinIco, 0.52f, 0.63f, 0.66f, 0.77f);
             var coinIcoImg = coinIco.GetComponent<Image>(); coinIcoImg.preserveAspect = true;
             if (coinSpr != null) { coinIcoImg.sprite = coinSpr; coinIcoImg.color = Color.white; }
 
             var xpTxtGo = new GameObject("XpTxt", typeof(RectTransform));
-            xpTxtGo.transform.SetParent(rewardBg.transform, false); Anch(xpTxtGo, 0.04f, 0.32f, 0.54f, 0.54f);
-            var xpT = xpTxtGo.AddComponent<Text>(); xpT.fontSize = 38; xpT.color = new Color(0.2f, 0.15f, 0.1f);
+            xpTxtGo.transform.SetParent(rewardBg.transform, false); Anch(xpTxtGo, 0.06f, 0.44f, 0.52f, 0.60f);
+            var xpT = xpTxtGo.AddComponent<Text>(); xpT.fontSize = 30; xpT.color = new Color(0.2f, 0.15f, 0.1f);
             xpT.alignment = TextAnchor.MiddleRight; xpT.fontStyle = FontStyle.Bold; if (f) xpT.font = f;
 
             var xpIco = new GameObject("XpIcon", typeof(RectTransform), typeof(Image));
-            xpIco.transform.SetParent(rewardBg.transform, false); Anch(xpIco, 0.56f, 0.34f, 0.88f, 0.52f);
+            xpIco.transform.SetParent(rewardBg.transform, false); Anch(xpIco, 0.52f, 0.45f, 0.66f, 0.59f);
             var xpIcoImg = xpIco.GetComponent<Image>(); xpIcoImg.preserveAspect = true;
             if (xpSpr != null) { xpIcoImg.sprite = xpSpr; xpIcoImg.color = Color.white; }
 
@@ -547,7 +549,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             personGo.transform.SetParent(root.transform, false);
             var piImg = personGo.GetComponent<Image>(); piImg.preserveAspect = true;
             piImg.color = Color.white;
-            Anch(personGo, 0.48f, 0.04f, 0.96f, 0.44f);
+            Anch(personGo, 0.44f, 0.1f, 0.88f, 0.46f);
 
             var cv2 = root.AddComponent<OrderCardView>();
             SetField(cv2, "recipeImage", riImg);
@@ -589,7 +591,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var imgGo = new GameObject("PancakePreview", typeof(RectTransform), typeof(Image));
             imgGo.transform.SetParent(row.transform, false);
             var rt = imgGo.GetComponent<RectTransform>();
-            rt.anchorMin = rt.anchorMax = new Vector2(0.62f, 0.5f);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.68f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = new Vector2(CookPancakePreviewSize, CookPancakePreviewSize);
             rt.anchoredPosition = Vector2.zero;
@@ -606,6 +608,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         {
             var so = new SerializedObject(obj); var p = so.FindProperty(prop);
             if (p != null) { p.objectReferenceValue = val; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+        static void SetFloatField(Object obj, string prop, float val)
+        {
+            var so = new SerializedObject(obj);
+            var p = so.FindProperty(prop);
+            if (p != null && p.propertyType == SerializedPropertyType.Float) { p.floatValue = val; so.ApplyModifiedPropertiesWithoutUndo(); }
         }
         static void SetFieldArr(Object obj, string prop, Object[] vals)
         {
