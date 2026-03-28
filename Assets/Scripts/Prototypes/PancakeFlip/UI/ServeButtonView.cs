@@ -42,8 +42,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (s == null) return;
             if (!s.TryServe())
             {
-                if (statusText != null)
+                if (statusText == null) return;
+                var p = Object.FindFirstObjectByType<PancakeBehaviour>();
+                float min = s.FlipConfig != null ? s.FlipConfig.perfectMin : 0.4f;
+                if (p != null && (p.CookA < min || p.CookB < min))
                     statusText.text = "Блин не готов!";
+                else if (s.ActiveOrder != null && s.ActiveOrder.Recipe != null && !s.Inventory.HasIngredients(s.ActiveOrder.Recipe))
+                    statusText.text = "Нет ингредиентов — «Магазин» или плита";
+                else
+                    statusText.text = "Не удалось сдать";
             }
         }
 
@@ -53,8 +60,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (s == null) return;
             if (!s.TryServeBase())
             {
-                if (statusText != null)
+                if (statusText == null) return;
+                var p = Object.FindFirstObjectByType<PancakeBehaviour>();
+                float min = s.FlipConfig != null ? s.FlipConfig.perfectMin : 0.4f;
+                if (p != null && (p.CookA < min || p.CookB < min))
                     statusText.text = "Блин не готов!";
+                else if (s.BaseRecipe != null && !s.Inventory.HasIngredients(s.BaseRecipe))
+                    statusText.text = "Нет ингредиентов (нужен базовый набор)";
+                else
+                    statusText.text = "Не удалось сдать";
             }
         }
     }

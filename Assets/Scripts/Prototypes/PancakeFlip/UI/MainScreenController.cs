@@ -5,21 +5,44 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class MainScreenController : MonoBehaviour
     {
-        [SerializeField] IngredientsScreenView ingredientsScreen;
+        [SerializeField] RecipeBookScreenView recipeBookScreen;
         [SerializeField] PanUpgradeScreenView upgradeScreen;
         [SerializeField] Text statusText;
         [SerializeField] CustomerAnimator customerAnimator;
 
-        public void OpenIngredients()
+        void Awake()
         {
-            if (ingredientsScreen != null)
-                ingredientsScreen.Open();
+            if (recipeBookScreen == null)
+            {
+                var canvas = Object.FindFirstObjectByType<Canvas>();
+                if (canvas != null)
+                    recipeBookScreen = RecipeBookScreenView.EnsureUnderCanvas(canvas);
+            }
+        }
+
+        public void OpenRecipeBook()
+        {
+            if (recipeBookScreen != null)
+                recipeBookScreen.Open();
         }
 
         public void OpenUpgrades()
         {
             if (upgradeScreen != null)
                 upgradeScreen.Open();
+        }
+
+        /// <summary>Тот же экран, что и клик по плите — но из UI, без OnMouseDown по спрайту.</summary>
+        public void OpenIngredientsShop()
+        {
+            var stove = Object.FindFirstObjectByType<StoveView>();
+            if (stove != null)
+                stove.Open();
+            else
+            {
+                var shop = Object.FindFirstObjectByType<IngredientsScreenView>();
+                shop?.Open();
+            }
         }
 
         public void Serve()
@@ -50,13 +73,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
 
             int personIdx = s.ActiveOrder.PersonIndex;
+            bool hadIngredients = s.ActiveOrder.Recipe == null || s.Inventory.HasIngredients(s.ActiveOrder.Recipe);
             if (!s.TryServe())
             {
                 ShowStatus("Не удалось сдать блин");
             }
             else
             {
-                ShowStatus("Заказ сдан!");
+                ShowStatus(hadIngredients ? "Заказ сдан!" : "Сдано без ингредиентов (−50%)");
                 if (customerAnimator != null)
                     customerAnimator.PlayServe(personIdx);
             }

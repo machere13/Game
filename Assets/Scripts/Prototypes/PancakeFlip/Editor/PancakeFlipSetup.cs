@@ -62,6 +62,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var chocoStrawberrySpr = LoadSprite("ChocolateStrawberryPancake");
             var xpIconSpr = LoadSprite("XPIcon");
             var pancakeSideUiSpr = LoadSprite("PancakeSide");
+            var doughEmptySpr = LoadSprite("Empty");
+            var doughFullSpr = LoadSprite("Full");
+            var receiptBtnSpr = LoadSprite("ReceiptButton");
+            var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             EnsureFolder("Assets/Data");
@@ -69,7 +73,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var flipConfig = GetOrCreate<PancakeFlipConfig>(DataDir, "PancakeFlipConfig");
             var levelTable = GetOrCreate<LevelTableConfig>(DataDir, "LevelTable");
 
-            var dough = CreateIngredient("Тесто", 0, 0, true);
+            var dough = CreateIngredient("Тесто", 0, 0, false);
             var salami = CreateIngredient("Салями", 5, 1, false);
             var cheese = CreateIngredient("Сыр", 5, 1, false);
             var banana = CreateIngredient("Банан", 4, 2, false);
@@ -321,41 +325,92 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sv, "rotationsPopupText", popup.GetComponent<Text>());
 
             var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.74f, 0.34f), V2(0.97f, 0.81f), new Color(0, 0, 0, 0));
+            cookRoot.GetComponent<Image>().raycastTarget = false;
             MkCookPancakePreview(cookRoot, "A", V2(0, 0.53f), V2(1, 0.778f), pancakeSideUiSpr, font, out Image imgA);
             MkCookPancakePreview(cookRoot, "B", V2(0, 0.232f), V2(1, 0.498f), pancakeSideUiSpr, font, out Image imgB);
             var civ = cookRoot.AddComponent<CookingIndicatorView>();
             SetField(civ, "pancake", pcBh); SetField(civ, "config", flipConfig);
             SetField(civ, "pancakeA", imgA); SetField(civ, "pancakeB", imgB);
 
-            var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.1f, 0.12f, 0.1f, 0.95f));
-            var iVlg = ingScr.AddComponent<VerticalLayoutGroup>(); iVlg.padding = new RectOffset(20, 20, 20, 20); iVlg.spacing = 10; iVlg.childForceExpandHeight = false;
-            MkLabel(ingScr.transform, "Title", "Ингредиенты", font, 38, Color.white, 0).AddComponent<LayoutElement>().preferredHeight = 50;
-            var iList = new GameObject("List", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
-            iList.transform.SetParent(ingScr.transform, false);
-            iList.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            iList.GetComponent<VerticalLayoutGroup>().spacing = 8;
-            iList.AddComponent<LayoutElement>().flexibleHeight = 1;
-            var iCloseBtn = MkButton(ingScr.transform, "CloseBtn", "Закрыть", font, new Color(0.6f, 0.2f, 0.2f));
-            iCloseBtn.AddComponent<LayoutElement>().preferredHeight = 55;
+            var recipeBookScr = MkPanel(uiRoot, "RecipeBookScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            recipeBookScr.GetComponent<Image>().raycastTarget = true;
+            AddModalCanvasLayer(recipeBookScr);
+            var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
+            MkPanel(recipeBookScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
+            var rbTitle = MkLabel(recipeBookScr.transform, "Title", "Рецепты", font, 22, Color.white, 0);
+            var rbTitleRt = rbTitle.GetComponent<RectTransform>();
+            rbTitleRt.anchorMin = V2(0.04f, 0.86f); rbTitleRt.anchorMax = V2(0.96f, 0.98f);
+            rbTitleRt.offsetMin = rbTitleRt.offsetMax = Vector2.zero;
+            rbTitle.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+            MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform rbListContent);
+            var rbTextGo = new GameObject("Body", typeof(RectTransform), typeof(Text), typeof(ContentSizeFitter), typeof(LayoutElement));
+            rbTextGo.transform.SetParent(rbListContent, false);
+            var rbLe = rbTextGo.GetComponent<LayoutElement>();
+            rbLe.flexibleWidth = 1f;
+            rbLe.minHeight = 80f;
+            var rbTxt = rbTextGo.GetComponent<Text>();
+            rbTxt.font = font;
+            rbTxt.fontSize = 22;
+            rbTxt.color = new Color(0.15f, 0.12f, 0.1f);
+            rbTxt.alignment = TextAnchor.UpperLeft;
+            rbTxt.horizontalOverflow = HorizontalWrapMode.Wrap;
+            rbTxt.verticalOverflow = VerticalWrapMode.Overflow;
+            var rbTxtRt = rbTextGo.GetComponent<RectTransform>();
+            rbTxtRt.anchorMin = new Vector2(0f, 1f);
+            rbTxtRt.anchorMax = new Vector2(1f, 1f);
+            rbTxtRt.pivot = new Vector2(0.5f, 1f);
+            rbTxtRt.sizeDelta = Vector2.zero;
+            rbTxtRt.anchoredPosition = Vector2.zero;
+            var rbCsf = rbTextGo.GetComponent<ContentSizeFitter>();
+            rbCsf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            rbCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var rbCloseBtn = MkButton(recipeBookScr.transform, "CloseBtn", "Закрыть", font, new Color(0.52f, 0.3f, 0.24f, 1f));
+            var rbCloseRt = rbCloseBtn.GetComponent<RectTransform>();
+            rbCloseRt.anchorMin = V2(0.28f, 0.02f); rbCloseRt.anchorMax = V2(0.72f, 0.1f);
+            rbCloseRt.offsetMin = rbCloseRt.offsetMax = Vector2.zero;
+            var rbsv = recipeBookScr.AddComponent<RecipeBookScreenView>();
+            SetField(rbsv, "bodyText", rbTxt);
+            SetField(rbsv, "closeButton", rbCloseBtn.GetComponent<Button>());
+
+            var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            ingScr.GetComponent<Image>().raycastTarget = true;
+            AddModalCanvasLayer(ingScr);
+            var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
+            MkPanel(ingScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
+            var ingTitle = MkLabel(ingScr.transform, "Title", "Ингредиенты", font, 22, Color.white, 0);
+            var ingTitleRt = ingTitle.GetComponent<RectTransform>();
+            ingTitleRt.anchorMin = V2(0.04f, 0.86f); ingTitleRt.anchorMax = V2(0.96f, 0.98f);
+            ingTitleRt.offsetMin = ingTitleRt.offsetMax = Vector2.zero;
+            ingTitle.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform iListContent);
+            var iCloseBtn = MkButton(ingScr.transform, "CloseBtn", "Закрыть", font, new Color(0.52f, 0.3f, 0.24f, 1f));
+            var iCloseRt = iCloseBtn.GetComponent<RectTransform>();
+            iCloseRt.anchorMin = V2(0.28f, 0.02f); iCloseRt.anchorMax = V2(0.72f, 0.1f);
+            iCloseRt.offsetMin = iCloseRt.offsetMax = Vector2.zero;
             var isv = ingScr.AddComponent<IngredientsScreenView>();
-            SetField(isv, "ingredientListContainer", iList.transform);
+            SetField(isv, "ingredientListContainer", iListContent);
             SetField(isv, "closeButton", iCloseBtn.GetComponent<Button>());
 
             var stoveV = Object.FindObjectOfType<StoveView>();
             if (stoveV != null) { SetField(stoveV, "ingredientsScreen", isv); SetField(isv, "stove", stoveV); }
 
-            var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.12f, 0.1f, 0.08f, 0.95f));
-            var uVlg = upgScr.AddComponent<VerticalLayoutGroup>(); uVlg.padding = new RectOffset(20, 20, 20, 20); uVlg.spacing = 10; uVlg.childForceExpandHeight = false;
-            MkLabel(upgScr.transform, "Title", "Апгрейды сковороды", font, 38, Color.white, 0).AddComponent<LayoutElement>().preferredHeight = 50;
-            var uList = new GameObject("List", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
-            uList.transform.SetParent(upgScr.transform, false);
-            uList.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            uList.GetComponent<VerticalLayoutGroup>().spacing = 8;
-            uList.AddComponent<LayoutElement>().flexibleHeight = 1;
-            var uCloseBtn = MkButton(upgScr.transform, "CloseBtn", "Закрыть", font, new Color(0.6f, 0.2f, 0.2f));
-            uCloseBtn.AddComponent<LayoutElement>().preferredHeight = 55;
+            var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.98f, 0.95f, 0.9f, 0.99f));
+            upgScr.GetComponent<Image>().raycastTarget = true;
+            AddModalCanvasLayer(upgScr);
+            var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
+            MkPanel(upgScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.45f, 0.32f, 0.22f, 1f));
+            var upgTitle = MkLabel(upgScr.transform, "Title", "Прокачка сковороды", font, 22, Color.white, 0);
+            var upgTitleRt = upgTitle.GetComponent<RectTransform>();
+            upgTitleRt.anchorMin = V2(0.04f, 0.86f); upgTitleRt.anchorMax = V2(0.96f, 0.98f);
+            upgTitleRt.offsetMin = upgTitleRt.offsetMax = Vector2.zero;
+            upgTitle.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+            MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform uListContent);
+            var uCloseBtn = MkButton(upgScr.transform, "CloseBtn", "Закрыть", font, new Color(0.52f, 0.3f, 0.24f, 1f));
+            var uCloseRt = uCloseBtn.GetComponent<RectTransform>();
+            uCloseRt.anchorMin = V2(0.28f, 0.02f); uCloseRt.anchorMax = V2(0.72f, 0.1f);
+            uCloseRt.offsetMin = uCloseRt.offsetMax = Vector2.zero;
             var usv = upgScr.AddComponent<PanUpgradeScreenView>();
-            SetField(usv, "upgradeListContainer", uList.transform);
+            SetField(usv, "upgradeListContainer", uListContent);
             SetField(usv, "closeButton", uCloseBtn.GetComponent<Button>());
 
             var ctrlGo = new GameObject("PancakeFlipController");
@@ -369,13 +424,55 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "pancake", pcBh); SetField(sess, "baseRecipe", baseRecipe);
             SetFieldArr(sess, "startingRecipes", new Object[] { baseRecipe, cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe });
             SetFieldArr(sess, "allIngredients", new Object[] { dough, salami, cheese, banana, chocolate, mushroom, strawberry });
+            SetField(sess, "doughIngredient", dough);
             SetFieldArr(sess, "allUpgrades", new Object[] { upg1, upg2 });
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
-            SetField(msc, "ingredientsScreen", isv);
+            SetField(msc, "recipeBookScreen", rbsv);
             SetField(msc, "upgradeScreen", usv);
             SetField(msc, "customerAnimator", custAnim);
+
+            var kitchenBottom = new GameObject("KitchenBottom", typeof(RectTransform), typeof(KitchenUiFrontLayer));
+            kitchenBottom.transform.SetParent(uiRoot, false);
+            var kitchenBottomRt = kitchenBottom.GetComponent<RectTransform>();
+            kitchenBottomRt.anchorMin = Vector2.zero;
+            kitchenBottomRt.anchorMax = Vector2.one;
+            kitchenBottomRt.offsetMin = kitchenBottomRt.offsetMax = Vector2.zero;
+
+            var recipesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "RecipesBtn", V2(0.05f, 0.04f), V2(0.17f, 0.18f), receiptBtnSpr);
+            var upgradesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "UpgradesBtn", V2(0.83f, 0.04f), V2(0.95f, 0.18f), panUpgradeBtnSpr);
+
+            var doughBowlRoot = new GameObject("DoughBowl", typeof(RectTransform), typeof(Image), typeof(Button));
+            doughBowlRoot.transform.SetParent(kitchenBottom.transform, false);
+            var doughRt = doughBowlRoot.GetComponent<RectTransform>();
+            doughRt.anchorMin = V2(0.04f, 0.10f); doughRt.anchorMax = V2(0.2f, 0.31f);
+            doughRt.offsetMin = doughRt.offsetMax = Vector2.zero;
+            var doughImg = doughBowlRoot.GetComponent<Image>();
+            doughImg.sprite = doughEmptySpr;
+            doughImg.preserveAspect = true;
+            doughImg.color = Color.white;
+            doughImg.type = Image.Type.Simple;
+            doughImg.raycastTarget = true;
+            var doughBtn = doughBowlRoot.GetComponent<Button>();
+            doughBtn.targetGraphic = doughImg;
+            var dbv = doughBowlRoot.AddComponent<DoughBowlView>();
+            SetField(dbv, "doughIngredient", dough);
+            SetField(dbv, "bowlButton", doughBtn);
+            SetField(dbv, "bowlImage", doughImg);
+            SetField(dbv, "emptySprite", doughEmptySpr);
+            SetField(dbv, "fullSprite", doughFullSpr);
+
+            var kHud = new GameObject("KitchenHUD", typeof(RectTransform));
+            kHud.transform.SetParent(uiRoot, false);
+            var kHudRt = kHud.GetComponent<RectTransform>();
+            kHudRt.anchorMin = kHudRt.anchorMax = Vector2.zero;
+            kHudRt.sizeDelta = Vector2.zero;
+            var kBar = kHud.AddComponent<KitchenBarController>();
+            SetField(kBar, "mainScreen", msc);
+            SetField(kBar, "recipesButton", recipesBtnGo.GetComponent<Button>());
+            SetField(kBar, "upgradesButton", upgradesBtnGo.GetComponent<Button>());
+            kitchenBottom.transform.SetAsLastSibling();
 
             EnsureFolder("Assets/Scenes");
             var active = EditorSceneManager.GetActiveScene();
@@ -439,7 +536,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
         static void ForceAllSprites()
         {
-            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "PancakeSide", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4", "Person1Icon", "Person2Icon", "Person3Icon", "RewardInfo", "CommonPancake", "CheeseHamPancake", "ChocolateStrawberryPancake", "XPIcon" })
+            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "PancakeSide", "Empty", "Full", "ReceiptButton", "PanUpgradeButton", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4", "Person1Icon", "Person2Icon", "Person3Icon", "RewardInfo", "CommonPancake", "CheeseHamPancake", "ChocolateStrawberryPancake", "XPIcon" })
             {
                 string p = $"{ArtDir}/{n}.png";
                 if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, p.Replace("Assets/", "")))) continue;
@@ -470,6 +567,15 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             r.offsetMin = r.offsetMax = Vector2.zero;
             g.GetComponent<Image>().color = c; return g;
         }
+
+        /// <summary>Модалки выше слоя кухни (<see cref="KitchenUiFrontLayer.SortOrder"/>).</summary>
+        static void AddModalCanvasLayer(GameObject go)
+        {
+            var c = go.AddComponent<Canvas>();
+            c.overrideSorting = true;
+            c.sortingOrder = 100;
+            go.AddComponent<GraphicRaycaster>();
+        }
         static GameObject MkLabel(Transform p, string n, string txt, Font f, int sz, Color c, float w)
         {
             var g = new GameObject(n, typeof(RectTransform));
@@ -494,6 +600,70 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var r = g.GetComponent<RectTransform>(); r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one;
             r.offsetMin = r.offsetMax = Vector2.zero;
         }
+
+        static void MkVerticalScrollArea(Transform parent, string name, Vector2 amin, Vector2 amax, out RectTransform contentOut)
+        {
+            var scrollGo = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(ScrollRect));
+            scrollGo.transform.SetParent(parent, false);
+            var sRt = scrollGo.GetComponent<RectTransform>();
+            sRt.anchorMin = amin; sRt.anchorMax = amax; sRt.offsetMin = sRt.offsetMax = Vector2.zero;
+            scrollGo.GetComponent<Image>().color = new Color(0.78f, 0.74f, 0.68f, 0.45f);
+
+            var vp = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            vp.transform.SetParent(scrollGo.transform, false);
+            var vpRt = vp.GetComponent<RectTransform>();
+            vpRt.anchorMin = Vector2.zero; vpRt.anchorMax = Vector2.one;
+            vpRt.offsetMin = new Vector2(8, 6); vpRt.offsetMax = new Vector2(-8, -6);
+            vp.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.02f);
+            vp.GetComponent<Mask>().showMaskGraphic = false;
+
+            var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            content.transform.SetParent(vp.transform, false);
+            var cRt = content.GetComponent<RectTransform>();
+            cRt.anchorMin = new Vector2(0f, 1f);
+            cRt.anchorMax = new Vector2(1f, 1f);
+            cRt.pivot = new Vector2(0.5f, 1f);
+            cRt.anchoredPosition = Vector2.zero;
+            cRt.sizeDelta = new Vector2(0f, 0f);
+            var cv = content.GetComponent<ContentSizeFitter>();
+            cv.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            cv.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var vl = content.GetComponent<VerticalLayoutGroup>();
+            vl.spacing = 10;
+            vl.padding = new RectOffset(4, 4, 4, 8);
+            vl.childAlignment = TextAnchor.UpperCenter;
+            vl.childControlWidth = true;
+            vl.childControlHeight = true;
+            vl.childForceExpandWidth = true;
+
+            var sr = scrollGo.GetComponent<ScrollRect>();
+            sr.viewport = vpRt;
+            sr.content = cRt;
+            sr.horizontal = false;
+            sr.vertical = true;
+            sr.movementType = ScrollRect.MovementType.Clamped;
+            sr.scrollSensitivity = 28f;
+
+            contentOut = cRt;
+        }
+
+        static GameObject MkKitchenSpriteButton(Transform parent, string name, Vector2 amin, Vector2 amax, Sprite spr)
+        {
+            var g = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+            g.transform.SetParent(parent, false);
+            var rt = g.GetComponent<RectTransform>();
+            rt.anchorMin = amin; rt.anchorMax = amax; rt.offsetMin = rt.offsetMax = Vector2.zero;
+            var img = g.GetComponent<Image>();
+            img.sprite = spr;
+            img.preserveAspect = true;
+            img.color = Color.white;
+            img.type = Image.Type.Simple;
+            img.raycastTarget = true;
+            var btn = g.GetComponent<Button>();
+            btn.targetGraphic = img;
+            return g;
+        }
+
         static OrderCardView MkOrderCard(Transform p, Font f, Sprite itemSpr, Sprite rewardSpr,
             Sprite[] personIcons, Sprite coinSpr, Sprite xpSpr)
         {

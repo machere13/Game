@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace IdlePancake.Prototypes.PancakeFlip
 {
@@ -20,6 +21,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void OnMouseDown()
         {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
+
             if (_isOpen)
                 Close();
             else

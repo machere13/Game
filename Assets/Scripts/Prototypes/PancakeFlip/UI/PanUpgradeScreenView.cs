@@ -19,6 +19,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void Open()
         {
             gameObject.SetActive(true);
+            transform.SetAsLastSibling();
             Rebuild();
         }
 
@@ -73,7 +74,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var row = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup));
             row.transform.SetParent(parent, false);
             var rect = row.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(0f, 60f);
+            rect.sizeDelta = new Vector2(0f, 64f);
 
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
@@ -81,7 +82,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             labelGo.transform.SetParent(row.transform, false);
             var label = labelGo.AddComponent<Text>();
             label.fontSize = 26;
-            label.color = Color.white;
+            label.color = new Color(0.18f, 0.15f, 0.12f);
             if (font != null) label.font = font;
             var le = labelGo.AddComponent<LayoutElement>();
             le.flexibleWidth = 1;
@@ -89,7 +90,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var btnGo = new GameObject("Btn", typeof(RectTransform));
             btnGo.transform.SetParent(row.transform, false);
             var btnImg = btnGo.AddComponent<Image>();
-            btnImg.color = new Color(0.6f, 0.5f, 0.2f);
+            btnImg.color = new Color(0.55f, 0.42f, 0.22f, 1f);
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = btnImg;
             var btnLe = btnGo.AddComponent<LayoutElement>();

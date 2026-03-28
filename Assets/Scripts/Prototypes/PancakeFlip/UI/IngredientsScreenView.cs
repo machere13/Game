@@ -26,6 +26,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void Open()
         {
             gameObject.SetActive(true);
+            transform.SetAsLastSibling();
             Rebuild();
         }
 
@@ -43,6 +44,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             foreach (var ing in ingredients)
             {
                 if (ing == null) continue;
+                if (s.DoughIngredient != null && ing == s.DoughIngredient) continue;
                 if (ing.unlockLevel > s.Wallet.Level) continue;
 
                 var go = ingredientRowPrefab != null
@@ -53,35 +55,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (texts.Length >= 1)
                     texts[0].text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
 
-                if (ing.infinite)
+                var buyBtn = go.GetComponentInChildren<Button>();
+                if (buyBtn != null)
                 {
-                    var tapBtn = go.GetComponentInChildren<Button>();
-                    if (tapBtn != null)
+                    var captured = ing;
+                    buyBtn.onClick.AddListener(() =>
                     {
-                        var captured = ing;
-                        tapBtn.onClick.AddListener(() =>
-                        {
-                            s.TapDough(captured);
-                            Rebuild();
-                        });
-                        var btnText = tapBtn.GetComponentInChildren<Text>();
-                        if (btnText != null) btnText.text = "Тап +1";
-                    }
-                }
-                else
-                {
-                    var buyBtn = go.GetComponentInChildren<Button>();
-                    if (buyBtn != null)
-                    {
-                        var captured = ing;
-                        buyBtn.onClick.AddListener(() =>
-                        {
-                            s.BuyIngredient(captured);
-                            Rebuild();
-                        });
-                        var btnText = buyBtn.GetComponentInChildren<Text>();
-                        if (btnText != null) btnText.text = $"Купить ({ing.coinCost}c)";
-                    }
+                        s.BuyIngredient(captured);
+                        Rebuild();
+                    });
+                    var btnText = buyBtn.GetComponentInChildren<Text>();
+                    if (btnText != null) btnText.text = $"Купить ({ing.coinCost}c)";
                 }
             }
         }
@@ -91,15 +75,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var row = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup));
             row.transform.SetParent(parent, false);
             var rect = row.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(0f, 60f);
+            rect.sizeDelta = new Vector2(0f, 64f);
 
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             var labelGo = new GameObject("Label", typeof(RectTransform));
             labelGo.transform.SetParent(row.transform, false);
             var label = labelGo.AddComponent<Text>();
-            label.fontSize = 28;
-            label.color = Color.white;
+            label.fontSize = 26;
+            label.color = new Color(0.18f, 0.15f, 0.12f);
             if (font != null) label.font = font;
             var le = labelGo.AddComponent<LayoutElement>();
             le.flexibleWidth = 1;
@@ -107,7 +91,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var btnGo = new GameObject("Btn", typeof(RectTransform));
             btnGo.transform.SetParent(row.transform, false);
             var btnImg = btnGo.AddComponent<Image>();
-            btnImg.color = new Color(0.3f, 0.7f, 0.3f);
+            btnImg.color = new Color(0.35f, 0.62f, 0.38f, 1f);
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = btnImg;
             var btnLe = btnGo.AddComponent<LayoutElement>();

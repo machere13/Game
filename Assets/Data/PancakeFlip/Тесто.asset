@@ -16,4 +16,4 @@ MonoBehaviour:
   icon: {fileID: 0}
   coinCost: 0
   unlockLevel: 0
-  infinite: 1
+  infinite: 0

@@ -10,6 +10,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] RecipeConfig[] startingRecipes;
         [SerializeField] RecipeConfig baseRecipe;
         [SerializeField] IngredientConfig[] allIngredients;
+        [SerializeField] IngredientConfig doughIngredient;
         [SerializeField] PanUpgradeConfig[] allUpgrades;
 
         [Header("Scene refs")]
@@ -22,7 +23,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public PancakeFlipConfig FlipConfig => flipConfig;
         public RecipeConfig BaseRecipe => baseRecipe;
         public IngredientConfig[] AllIngredients => allIngredients;
+        public IngredientConfig DoughIngredient => doughIngredient;
         public PanUpgradeConfig[] AllUpgrades => allUpgrades;
+        public RecipeConfig[] RecipeCatalog => startingRecipes;
 
         public static GameSession Instance { get; private set; }
 
@@ -73,11 +76,18 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (cookA >= overcook) coinMult *= 0.5f;
             if (cookB >= overcook) coinMult *= 0.5f;
 
+            bool hasIngredients = _activeOrder.Recipe == null || Inventory.HasIngredients(_activeOrder.Recipe);
+            if (!hasIngredients)
+                coinMult *= 0.5f;
+
             int coins = Mathf.RoundToInt(_activeOrder.RewardCoins * coinMult);
-            int xp = _activeOrder.RewardXp;
+            int xp = hasIngredients ? _activeOrder.RewardXp : Mathf.RoundToInt(_activeOrder.RewardXp * 0.5f);
 
             Wallet.AddCoins(Mathf.Max(1, coins));
-            Wallet.AddXp(xp);
+            Wallet.AddXp(Mathf.Max(1, xp));
+
+            if (hasIngredients && _activeOrder.Recipe != null)
+                Inventory.Consume(_activeOrder.Recipe);
 
             Orders.CompleteOrder(_activeOrder);
             _activeOrder = null;
@@ -96,8 +106,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
             float minReady = flipConfig != null ? flipConfig.perfectMin : 0.4f;
             if (cookA < minReady || cookB < minReady) return false;
 
-            Wallet.AddCoins(Mathf.Max(1, baseRecipe.rewardCoins));
-            Wallet.AddXp(baseRecipe.rewardXp);
+            bool hasIngredients = Inventory.HasIngredients(baseRecipe);
+            float mult = hasIngredients ? 1f : 0.5f;
+
+            if (hasIngredients)
+                Inventory.Consume(baseRecipe);
+
+            Wallet.AddCoins(Mathf.Max(1, Mathf.RoundToInt(baseRecipe.rewardCoins * mult)));
+            Wallet.AddXp(Mathf.Max(1, Mathf.RoundToInt(baseRecipe.rewardXp * mult)));
 
             Orders.CompleteOrder(_activeOrder);
             _activeOrder = null;
@@ -131,10 +147,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
         }
 
+        /// <summary>Клик по миске: бесплатно +1 теста, если миска пуста (в инвентаре 0).</summary>
         public void TapDough(IngredientConfig dough)
         {
-            if (dough != null && dough.infinite)
-                Inventory.Add(dough, 1);
+            if (dough == null) return;
+            if (Inventory.GetAmount(dough) > 0) return;
+            Inventory.Add(dough, 1);
         }
 
         void OnPancakeLanded(PancakeBehaviour.LandingResult result)
