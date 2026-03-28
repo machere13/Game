@@ -46,22 +46,56 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var person2 = LoadSprite("Person2");
             var person3 = LoadSprite("Person3");
             var person4 = LoadSprite("Person4");
+            var person1Icon = LoadSprite("Person1Icon");
+            var person2Icon = LoadSprite("Person2Icon");
+            var person3Icon = LoadSprite("Person3Icon");
+            var rewardInfoSpr = LoadSprite("RewardInfo");
+            var commonPancakeSpr = LoadSprite("CommonPancake");
+            var cheeseHamPancakeSpr = LoadSprite("CheeseHamPancake");
+            var chocoStrawberrySpr = LoadSprite("ChocolateStrawberryPancake");
+            var xpIconSpr = LoadSprite("XPIcon");
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             EnsureFolder("Assets/Data");
             EnsureFolder(DataDir);
             var flipConfig = GetOrCreate<PancakeFlipConfig>(DataDir, "PancakeFlipConfig");
             var levelTable = GetOrCreate<LevelTableConfig>(DataDir, "LevelTable");
+
             var dough = CreateIngredient("Тесто", 0, 0, true);
-            var jam = CreateIngredient("Варенье", 5, 2, false);
-            var cheese = CreateIngredient("Сыр", 8, 3, false);
-            var baseRecipe = CreateRecipe("Базовый блин", 0, 3, 5, new[] { new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 } });
-            var jamRecipe = CreateRecipe("Блин с вареньем", 2, 12, 25, new[] {
-                new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
-                new RecipeConfig.IngredientSlot { ingredient = jam, amount = 1 } });
-            var cheeseRecipe = CreateRecipe("Блин с сыром", 3, 18, 35, new[] {
-                new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
-                new RecipeConfig.IngredientSlot { ingredient = cheese, amount = 1 } });
+            var salami = CreateIngredient("Салями", 5, 1, false);
+            var cheese = CreateIngredient("Сыр", 5, 1, false);
+            var banana = CreateIngredient("Банан", 4, 2, false);
+            var chocolate = CreateIngredient("Шоколад", 6, 2, false);
+            var mushroom = CreateIngredient("Гриб", 4, 3, false);
+            var strawberry = CreateIngredient("Клубника", 5, 3, false);
+
+            var baseRecipe = CreateRecipe("Обычный блин", 0, 5, 10,
+                new[] { new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 } },
+                commonPancakeSpr);
+            var cheeseHamRecipe = CreateRecipe("Блин с салями и сыром", 1, 20, 35,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = salami, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = cheese, amount = 1 }
+                }, cheeseHamPancakeSpr);
+            var bananaChocoRecipe = CreateRecipe("Блин с бананом и шоколадом", 2, 18, 30,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = banana, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
+                }, null);
+            var mushroomRecipe = CreateRecipe("Грибной блин", 3, 22, 40,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = mushroom, amount = 2 }
+                }, null);
+            var strawberryChocoRecipe = CreateRecipe("Блин с клубникой и шоколадом", 3, 25, 45,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = strawberry, amount = 2 },
+                    new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
+                }, chocoStrawberrySpr);
+
             var upg1 = CreateUpgrade("Широкая норма", 30, 1, PanUpgradeConfig.EffectType.WiderPerfectZone, 1.2f);
             var upg2 = CreateUpgrade("Медленный пережар", 50, 2, PanUpgradeConfig.EffectType.SlowerOvercook, 1.3f);
             AssetDatabase.SaveAssets();
@@ -226,14 +260,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(tbv, "coinsText", coinT);
             SetField(tbv, "levelText", lvlT);
 
-            var orderPanel = MkPanel(canvas.transform, "OrderPanel", V2(0, 0.32f), V2(0.36f, 0.98f), new Color(0, 0, 0, 0));
+            var orderPanel = MkPanel(canvas.transform, "OrderPanel", V2(0, 0.44f), V2(0.44f, 1f), new Color(0, 0, 0, 0));
 
             if (orderListSpr != null)
             {
                 var rope = new GameObject("Rope", typeof(RectTransform), typeof(Image));
                 rope.transform.SetParent(orderPanel.transform, false);
                 var ropeR = rope.GetComponent<RectTransform>();
-                ropeR.anchorMin = V2(0.08f, 0.15f); ropeR.anchorMax = V2(0.24f, 1.45f);
+                ropeR.anchorMin = V2(-0.08f, 0f); ropeR.anchorMax = V2(0.48f, 1.08f);
                 ropeR.offsetMin = ropeR.offsetMax = Vector2.zero;
                 var ropeI = rope.GetComponent<Image>(); ropeI.sprite = orderListSpr;
                 ropeI.type = Image.Type.Simple; ropeI.preserveAspect = false; ropeI.raycastTarget = false;
@@ -242,10 +276,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var cardsContainer = new GameObject("Cards", typeof(RectTransform));
             cardsContainer.transform.SetParent(orderPanel.transform, false);
             var cardsRect = cardsContainer.GetComponent<RectTransform>();
-            cardsRect.anchorMin = V2(0, 0); cardsRect.anchorMax = V2(0.75f, 1);
+            cardsRect.anchorMin = V2(0.1f, 0); cardsRect.anchorMax = V2(1.02f, 1);
             cardsRect.offsetMin = cardsRect.offsetMax = Vector2.zero;
 
-            var cardPrefab = MkOrderCard(cardsContainer.transform, font, orderItemSpr);
+            var cardPrefab = MkOrderCard(cardsContainer.transform, font, orderItemSpr, rewardInfoSpr,
+                new[] { person1Icon, person2Icon, person3Icon }, walletSpr, xpIconSpr);
             cardPrefab.gameObject.SetActive(false);
             var olv = orderPanel.AddComponent<OrderListView>();
             SetField(olv, "cardPrefab", cardPrefab);
@@ -318,8 +353,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var sess = sessGo.AddComponent<GameSession>();
             SetField(sess, "flipConfig", flipConfig); SetField(sess, "levelTable", levelTable);
             SetField(sess, "pancake", pcBh); SetField(sess, "baseRecipe", baseRecipe);
-            SetFieldArr(sess, "startingRecipes", new Object[] { baseRecipe, jamRecipe, cheeseRecipe });
-            SetFieldArr(sess, "allIngredients", new Object[] { dough, jam, cheese });
+            SetFieldArr(sess, "startingRecipes", new Object[] { baseRecipe, cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe });
+            SetFieldArr(sess, "allIngredients", new Object[] { dough, salami, cheese, banana, chocolate, mushroom, strawberry });
             SetFieldArr(sess, "allUpgrades", new Object[] { upg1, upg2 });
 
             var mscGo = new GameObject("MainScreenController");
@@ -338,10 +373,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             o.displayName = n; o.coinCost = cost; o.unlockLevel = lvl; o.infinite = inf;
             EditorUtility.SetDirty(o); return o;
         }
-        static RecipeConfig CreateRecipe(string n, int lvl, int coins, int xp, RecipeConfig.IngredientSlot[] ing)
+        static RecipeConfig CreateRecipe(string n, int lvl, int coins, int xp, RecipeConfig.IngredientSlot[] ing, Sprite icon = null)
         {
             var o = GetOrCreate<RecipeConfig>(DataDir, n);
             o.displayName = n; o.unlockLevel = lvl; o.rewardCoins = coins; o.rewardXp = xp; o.ingredients = ing;
+            o.icon = icon;
             EditorUtility.SetDirty(o); return o;
         }
         static PanUpgradeConfig CreateUpgrade(string n, int cost, int lvl, PanUpgradeConfig.EffectType t, float v)
@@ -361,7 +397,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
         static void ForceAllSprites()
         {
-            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4" })
+            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4", "Person1Icon", "Person2Icon", "Person3Icon", "RewardInfo", "CommonPancake", "CheeseHamPancake", "ChocolateStrawberryPancake", "XPIcon" })
             {
                 string p = $"{ArtDir}/{n}.png";
                 if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, p.Replace("Assets/", "")))) continue;
@@ -416,30 +452,77 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var r = g.GetComponent<RectTransform>(); r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one;
             r.offsetMin = r.offsetMax = Vector2.zero;
         }
-        static OrderCardView MkOrderCard(Transform p, Font f, Sprite itemSpr)
+        static OrderCardView MkOrderCard(Transform p, Font f, Sprite itemSpr, Sprite rewardSpr,
+            Sprite[] personIcons, Sprite coinSpr, Sprite xpSpr)
         {
-            var card = new GameObject("OrderCard", typeof(RectTransform), typeof(Image));
-            card.transform.SetParent(p, false);
+            var root = new GameObject("OrderCard", typeof(RectTransform));
+            root.transform.SetParent(p, false);
+
+            var rewardBg = new GameObject("RewardBg", typeof(RectTransform), typeof(Image));
+            rewardBg.transform.SetParent(root.transform, false);
+            var rbImg = rewardBg.GetComponent<Image>();
+            if (rewardSpr != null) { rbImg.sprite = rewardSpr; rbImg.color = Color.white; rbImg.preserveAspect = true; }
+            else rbImg.color = new Color(0.9f, 0.85f, 0.6f);
+            Anch(rewardBg, 0.42f, 0.42f, 1.22f, 1.18f);
+
+            var coinTxtGo = new GameObject("CoinTxt", typeof(RectTransform));
+            coinTxtGo.transform.SetParent(rewardBg.transform, false); Anch(coinTxtGo, 0.05f, 0.5f, 0.6f, 0.9f);
+            var coinT = coinTxtGo.AddComponent<Text>(); coinT.fontSize = 64; coinT.color = new Color(0.2f, 0.15f, 0.1f);
+            coinT.alignment = TextAnchor.MiddleRight; coinT.fontStyle = FontStyle.Bold; if (f) coinT.font = f;
+
+            var coinIco = new GameObject("CoinIcon", typeof(RectTransform), typeof(Image));
+            coinIco.transform.SetParent(rewardBg.transform, false); Anch(coinIco, 0.62f, 0.52f, 0.92f, 0.88f);
+            var coinIcoImg = coinIco.GetComponent<Image>(); coinIcoImg.preserveAspect = true;
+            if (coinSpr != null) { coinIcoImg.sprite = coinSpr; coinIcoImg.color = Color.white; }
+
+            var xpTxtGo = new GameObject("XpTxt", typeof(RectTransform));
+            xpTxtGo.transform.SetParent(rewardBg.transform, false); Anch(xpTxtGo, 0.05f, 0.1f, 0.6f, 0.5f);
+            var xpT = xpTxtGo.AddComponent<Text>(); xpT.fontSize = 64; xpT.color = new Color(0.2f, 0.15f, 0.1f);
+            xpT.alignment = TextAnchor.MiddleRight; xpT.fontStyle = FontStyle.Bold; if (f) xpT.font = f;
+
+            var xpIco = new GameObject("XpIcon", typeof(RectTransform), typeof(Image));
+            xpIco.transform.SetParent(rewardBg.transform, false); Anch(xpIco, 0.62f, 0.12f, 0.92f, 0.48f);
+            var xpIcoImg = xpIco.GetComponent<Image>(); xpIcoImg.preserveAspect = true;
+            if (xpSpr != null) { xpIcoImg.sprite = xpSpr; xpIcoImg.color = Color.white; }
+
+            var card = new GameObject("CardBg", typeof(RectTransform), typeof(Image));
+            card.transform.SetParent(root.transform, false); Fill(card);
             var cardImg = card.GetComponent<Image>();
             if (itemSpr != null) { cardImg.sprite = itemSpr; cardImg.color = Color.white; }
             else cardImg.color = new Color(0.95f, 0.9f, 0.8f, 0.95f);
+
+            var recipeImg = new GameObject("RecipeImage", typeof(RectTransform), typeof(Image));
+            recipeImg.transform.SetParent(card.transform, false); Anch(recipeImg, 0.2f, 0.22f, 0.8f, 0.78f);
+            var riImg = recipeImg.GetComponent<Image>(); riImg.preserveAspect = true;
+            riImg.color = Color.white; riImg.enabled = false;
 
             var hl = new GameObject("Highlight", typeof(RectTransform), typeof(Image));
             hl.transform.SetParent(card.transform, false); Fill(hl);
             var hlI = hl.GetComponent<Image>(); hlI.color = new Color(1, 0.85f, 0.3f, 0.35f); hlI.enabled = false;
 
-            var rew = new GameObject("Reward", typeof(RectTransform));
-            rew.transform.SetParent(card.transform, false); Anch(rew, 0.08f, 0.1f, 0.92f, 0.9f);
-            var rt = rew.AddComponent<Text>(); rt.fontSize = 28; rt.color = new Color(0.2f, 0.15f, 0.1f);
-            rt.alignment = TextAnchor.MiddleCenter; rt.fontStyle = FontStyle.Bold; if (f) rt.font = f;
-
             var sel = new GameObject("SelectBtn", typeof(RectTransform), typeof(Image), typeof(Button));
-            sel.transform.SetParent(card.transform, false); Fill(sel); sel.GetComponent<Image>().color = new Color(1, 1, 1, 0.01f);
+            sel.transform.SetParent(root.transform, false); Fill(sel); sel.GetComponent<Image>().color = new Color(1, 1, 1, 0.01f);
 
-            var cv2 = card.AddComponent<OrderCardView>();
-            SetField(cv2, "rewardText", rt);
+            var personGo = new GameObject("PersonIcon", typeof(RectTransform), typeof(Image));
+            personGo.transform.SetParent(root.transform, false);
+            var piImg = personGo.GetComponent<Image>(); piImg.preserveAspect = true;
+            piImg.color = Color.white;
+            Anch(personGo, 0.48f, 0.04f, 0.96f, 0.44f);
+
+            var cv2 = root.AddComponent<OrderCardView>();
+            SetField(cv2, "recipeImage", riImg);
+            SetField(cv2, "rewardBg", rbImg);
+            SetField(cv2, "coinText", coinT);
+            SetField(cv2, "xpText", xpT);
+            SetField(cv2, "personIcon", piImg);
             SetField(cv2, "selectButton", sel.GetComponent<Button>());
             SetField(cv2, "selectionHighlight", hlI);
+            if (personIcons != null && personIcons.Length > 0)
+            {
+                var arr = new Object[personIcons.Length];
+                for (int i = 0; i < personIcons.Length; i++) arr[i] = personIcons[i];
+                SetFieldArr(cv2, "personIconSprites", arr);
+            }
             return cv2;
         }
         static void Anch(GameObject g, float xmin, float ymin, float xmax, float ymax)

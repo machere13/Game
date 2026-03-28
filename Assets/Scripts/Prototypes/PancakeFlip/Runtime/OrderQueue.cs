@@ -8,14 +8,16 @@ namespace IdlePancake.Prototypes.PancakeFlip
         readonly List<Order> _visible = new();
         readonly List<RecipeConfig> _pool = new();
         readonly int _maxVisible;
+        readonly int _personCount;
 
         public IReadOnlyList<Order> Visible => _visible;
 
         public event System.Action OnChanged;
 
-        public OrderQueue(RecipeConfig[] availableRecipes, int maxVisible = 4)
+        public OrderQueue(RecipeConfig[] availableRecipes, int maxVisible = 4, int personCount = 3)
         {
             _maxVisible = maxVisible;
+            _personCount = Mathf.Max(1, personCount);
             if (availableRecipes != null)
                 _pool.AddRange(availableRecipes);
             Refill();
@@ -46,7 +48,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 int idx = Random.Range(0, _pool.Count);
                 var recipe = _pool[idx];
                 _pool.RemoveAt(idx);
-                _visible.Add(new Order(recipe));
+                _visible.Add(new Order(recipe, Random.Range(0, _personCount)));
             }
         }
 

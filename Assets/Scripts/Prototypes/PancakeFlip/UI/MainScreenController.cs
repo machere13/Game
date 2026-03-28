@@ -49,6 +49,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 }
             }
 
+            int personIdx = s.ActiveOrder.PersonIndex;
             if (!s.TryServe())
             {
                 ShowStatus("Не удалось сдать блин");
@@ -57,7 +58,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 ShowStatus("Заказ сдан!");
                 if (customerAnimator != null)
-                    customerAnimator.PlayServe();
+                    customerAnimator.PlayServe(personIdx);
             }
         }
 

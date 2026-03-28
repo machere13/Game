@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 387a75688c056254c9d68640d5a7d887, type: 3}
-  m_Name: "\u0421\u044B\u0440"
+  m_Name: "\u0413\u0440\u0438\u0431"
   m_EditorClassIdentifier: 
-  displayName: "\u0421\u044B\u0440"
+  displayName: "\u0413\u0440\u0438\u0431"
   icon: {fileID: 0}
-  coinCost: 5
-  unlockLevel: 1
+  coinCost: 4
+  unlockLevel: 3
   infinite: 0

@@ -33,13 +33,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
             exitX = leftOffscreen;
         }
 
-        public void PlayServe()
+        public void PlayServe(int personIndex = -1)
         {
             if (_busy) return;
             gameObject.SetActive(true);
 
             if (personSprites != null && personSprites.Length > 0 && sr != null)
-                sr.sprite = personSprites[Random.Range(0, personSprites.Length)];
+            {
+                int idx = (personIndex >= 0 && personIndex < personSprites.Length)
+                    ? personIndex : Random.Range(0, personSprites.Length);
+                sr.sprite = personSprites[idx];
+            }
 
             StartCoroutine(ServeRoutine());
         }

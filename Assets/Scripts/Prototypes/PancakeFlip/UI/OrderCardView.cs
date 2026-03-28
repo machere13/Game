@@ -5,9 +5,16 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class OrderCardView : MonoBehaviour
     {
-        [SerializeField] Text rewardText;
+        [SerializeField] Image recipeImage;
+        [SerializeField] Image rewardBg;
+        [SerializeField] Text coinText;
+        [SerializeField] Text xpText;
+        [SerializeField] Image personIcon;
         [SerializeField] Button selectButton;
         [SerializeField] Image selectionHighlight;
+
+        [Header("Person Icons")]
+        [SerializeField] Sprite[] personIconSprites;
 
         Order _order;
         bool _isSelected;
@@ -25,10 +32,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
             gameObject.SetActive(true);
 
-            if (rewardText != null)
+            if (recipeImage != null && order.Recipe != null && order.Recipe.icon != null)
             {
-                string name = order.Recipe != null ? order.Recipe.displayName : "Блин";
-                rewardText.text = $"{name}\n{order.RewardCoins}c  {order.RewardXp}xp";
+                recipeImage.sprite = order.Recipe.icon;
+                recipeImage.enabled = true;
+            }
+            else if (recipeImage != null)
+                recipeImage.enabled = false;
+
+            if (coinText != null)
+                coinText.text = $"+{order.RewardCoins}";
+            if (xpText != null)
+                xpText.text = $"+{order.RewardXp}";
+
+            if (personIcon != null && personIconSprites != null && order.PersonIndex < personIconSprites.Length)
+            {
+                personIcon.sprite = personIconSprites[order.PersonIndex];
+                personIcon.enabled = true;
             }
 
             if (selectButton != null)
@@ -44,6 +64,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (selectionHighlight != null)
                 selectionHighlight.enabled = selected;
         }
+
+        public Order BoundOrder => _order;
 
         void OnClick()
         {

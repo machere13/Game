@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d06a627a999e3a1458ef7bf06b1494cb, type: 3}
+  m_Name: "\u041E\u0431\u044B\u0447\u043D\u044B\u0439 \u0431\u043B\u0438\u043D"
+  m_EditorClassIdentifier: 
+  displayName: "\u041E\u0431\u044B\u0447\u043D\u044B\u0439 \u0431\u043B\u0438\u043D"
+  icon: {fileID: 21300000, guid: 535e758f2fffbba4f9f8467465a3785e, type: 3}
+  unlockLevel: 0
+  ingredients:
+  - ingredient: {fileID: 11400000, guid: b8bf2c6c33990dc4d9a23281c7aab2a6, type: 2}
+    amount: 1
+  rewardCoins: 5
+  rewardXp: 10

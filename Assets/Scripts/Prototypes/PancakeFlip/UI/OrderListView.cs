@@ -6,22 +6,21 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] OrderCardView cardPrefab;
         [SerializeField] Transform container;
-        [SerializeField] int maxCards = 4;
-        [SerializeField] float gap = 0.003f;
+        [SerializeField] int maxCards = 3;
+        [SerializeField] float slotHeight = 0.36f;
+        [SerializeField] float gap = 0.025f;
 
         readonly System.Collections.Generic.List<OrderCardView> _cards = new();
 
         void Start()
         {
-            float slotH = 1f / maxCards;
-
             for (int i = 0; i < maxCards; i++)
             {
                 var card = Instantiate(cardPrefab, container);
                 var rt = card.GetComponent<RectTransform>();
 
-                float yMax = 1f - slotH * i + (i == 0 ? 0 : -gap * 0.5f);
-                float yMin = 1f - slotH * (i + 1) + (i == maxCards - 1 ? 0 : gap * 0.5f);
+                float yMin = i * slotHeight + (i > 0 ? gap * 0.5f : 0);
+                float yMax = (i + 1) * slotHeight - (i < maxCards - 1 ? gap * 0.5f : 0);
 
                 rt.anchorMin = new Vector2(0, yMin);
                 rt.anchorMax = new Vector2(1, yMax);

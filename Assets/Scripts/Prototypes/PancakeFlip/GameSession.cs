@@ -38,7 +38,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             Wallet = new Wallet(levelTable);
             Inventory = new Inventory();
             Upgrades = new PanUpgradeState();
-            Orders = new OrderQueue(startingRecipes, 4);
+            Orders = new OrderQueue(startingRecipes, 3, 3);
 
             if (pancake != null)
                 pancake.OnLanded += OnPancakeLanded;
