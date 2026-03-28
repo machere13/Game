@@ -7,8 +7,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] OrderCardView cardPrefab;
         [SerializeField] Transform container;
         [SerializeField] int maxCards = 3;
-        [SerializeField] float slotHeight = 0.36f;
-        [SerializeField] float gap = 0.025f;
+        [SerializeField] float slotHeight = 0.32f;
+        [SerializeField] float gap = 0.02f;
 
         readonly System.Collections.Generic.List<OrderCardView> _cards = new();
 

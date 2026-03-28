@@ -11,6 +11,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
     {
         const string ArtDir = "Assets/Art/PancakeFlip";
         const string DataDir = "Assets/Data/PancakeFlip";
+        const string OutputScenePath = "Assets/Scenes/PancakeFlip.unity";
 
         [MenuItem("PancakeFlip/Build Everything")]
         public static void BuildEverything()
@@ -19,7 +20,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var cam = Camera.main;
-            if (cam != null) { cam.orthographic = true; cam.orthographicSize = 5f; cam.backgroundColor = new Color(0.2f, 0.2f, 0.25f); }
+            if (cam != null)
+            {
+                cam.orthographic = true;
+                cam.orthographicSize = 5f;
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = new Color(0.38f, 0.46f, 0.54f);
+            }
             float ortho = 5f;
 
             if (Object.FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
@@ -103,14 +110,15 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             float camH = ortho * 2f, camW = camH * (9f / 16f);
 
-            // Background (sortingOrder -100)
+            // Background (sortingOrder -100) — overscan + сдвиг вверх, чтобы не было щели под clear color
             if (bgSpr != null)
             {
                 var bg = new GameObject("Background");
                 var bgSr = bg.AddComponent<SpriteRenderer>(); bgSr.sprite = bgSpr; bgSr.sortingOrder = -100;
-                float sc = Mathf.Max(camW / bgSpr.bounds.size.x, camH / bgSpr.bounds.size.y);
+                const float bgOverscan = 1.24f;
+                float sc = Mathf.Max(camW / bgSpr.bounds.size.x, camH / bgSpr.bounds.size.y) * bgOverscan;
                 bg.transform.localScale = Vector3.one * sc;
-                bg.transform.position = new Vector3(0, 0, 10);
+                bg.transform.position = new Vector3(0, 0.38f, 10);
             }
 
             // BottomPanel (sortingOrder -3, behind stove, in front of persons)
@@ -220,10 +228,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
+            Transform uiRoot = canvas.transform;
+
             var profileGo = new GameObject("ProfileIcon", typeof(RectTransform), typeof(Image));
-            profileGo.transform.SetParent(canvas.transform, false);
+            profileGo.transform.SetParent(uiRoot, false);
             var profileR = profileGo.GetComponent<RectTransform>();
-            profileR.anchorMin = V2(0.82f, 0.93f); profileR.anchorMax = V2(0.96f, 0.995f);
+            profileR.anchorMin = V2(0.82f, 0.86f); profileR.anchorMax = V2(0.96f, 0.94f);
             profileR.offsetMin = profileR.offsetMax = Vector2.zero;
             var profileImg = profileGo.GetComponent<Image>();
             if (profileSpr != null) { profileImg.sprite = profileSpr; profileImg.preserveAspect = true; }
@@ -238,9 +248,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (font) lvlT.font = font;
 
             var walletGo = new GameObject("WalletIcon", typeof(RectTransform), typeof(Image));
-            walletGo.transform.SetParent(canvas.transform, false);
+            walletGo.transform.SetParent(uiRoot, false);
             var walletR = walletGo.GetComponent<RectTransform>();
-            walletR.anchorMin = V2(0.82f, 0.84f); walletR.anchorMax = V2(0.96f, 0.885f);
+            walletR.anchorMin = V2(0.82f, 0.78f); walletR.anchorMax = V2(0.96f, 0.825f);
             walletR.offsetMin = walletR.offsetMax = Vector2.zero;
             var walletImg = walletGo.GetComponent<Image>();
             if (walletSpr != null) { walletImg.sprite = walletSpr; walletImg.preserveAspect = true; }
@@ -255,19 +265,21 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (font) coinT.font = font;
 
             var tbvGo = new GameObject("TopBarView", typeof(RectTransform));
-            tbvGo.transform.SetParent(canvas.transform, false);
+            tbvGo.transform.SetParent(uiRoot, false);
             var tbv = tbvGo.AddComponent<TopBarView>();
             SetField(tbv, "coinsText", coinT);
             SetField(tbv, "levelText", lvlT);
 
-            var orderPanel = MkPanel(canvas.transform, "OrderPanel", V2(0, 0.44f), V2(0.44f, 1f), new Color(0, 0, 0, 0));
+            // Панель до верха экрана (+ чуть выше), чтобы OrderList уходил за верхний край
+            var orderPanel = MkPanel(uiRoot, "OrderPanel", V2(0, 0.42f), V2(0.44f, 1.02f), new Color(0, 0, 0, 0));
 
             if (orderListSpr != null)
             {
                 var rope = new GameObject("Rope", typeof(RectTransform), typeof(Image));
                 rope.transform.SetParent(orderPanel.transform, false);
                 var ropeR = rope.GetComponent<RectTransform>();
-                ropeR.anchorMin = V2(-0.08f, 0f); ropeR.anchorMax = V2(0.48f, 1.08f);
+                ropeR.anchorMin = V2(-0.08f, 0f);
+                ropeR.anchorMax = V2(0.48f, 1.06f);
                 ropeR.offsetMin = ropeR.offsetMax = Vector2.zero;
                 var ropeI = rope.GetComponent<Image>(); ropeI.sprite = orderListSpr;
                 ropeI.type = Image.Type.Simple; ropeI.preserveAspect = false; ropeI.raycastTarget = false;
@@ -276,7 +288,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var cardsContainer = new GameObject("Cards", typeof(RectTransform));
             cardsContainer.transform.SetParent(orderPanel.transform, false);
             var cardsRect = cardsContainer.GetComponent<RectTransform>();
-            cardsRect.anchorMin = V2(0.1f, 0); cardsRect.anchorMax = V2(1.02f, 1);
+            cardsRect.anchorMin = V2(0.1f, 0); cardsRect.anchorMax = V2(1f, 1f);
             cardsRect.offsetMin = cardsRect.offsetMax = Vector2.zero;
 
             var cardPrefab = MkOrderCard(cardsContainer.transform, font, orderItemSpr, rewardInfoSpr,
@@ -286,34 +298,34 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(olv, "cardPrefab", cardPrefab);
             SetField(olv, "container", cardsContainer.transform);
 
-            var chargeGo = MkPanel(canvas.transform, "ChargeIndicator", V2(0.25f, 0.88f), V2(0.75f, 0.94f), new Color(0.15f, 0.15f, 0.15f, 0.7f));
+            var chargeGo = MkPanel(uiRoot, "ChargeIndicator", V2(0.25f, 0.84f), V2(0.75f, 0.9f), new Color(0.15f, 0.15f, 0.15f, 0.7f));
             var fillGo2 = new GameObject("Fill", typeof(RectTransform), typeof(Image));
             fillGo2.transform.SetParent(chargeGo.transform, false); Fill(fillGo2);
             var fillI = fillGo2.GetComponent<Image>(); fillI.color = Color.yellow;
             fillI.type = Image.Type.Filled; fillI.fillMethod = Image.FillMethod.Horizontal; fillI.fillAmount = 0;
             var cv = chargeGo.AddComponent<ChargeIndicatorView>(); SetField(cv, "fillImage", fillI);
 
-            var popup = MkLabel(canvas.transform, "RotationsPopup", "", font, 52, new Color(1, 0.95f, 0.7f), 0);
+            var popup = MkLabel(uiRoot, "RotationsPopup", "", font, 52, new Color(1, 0.95f, 0.7f), 0);
             var popupR = popup.GetComponent<RectTransform>();
             popupR.anchorMin = V2(0.5f, 0.5f); popupR.anchorMax = V2(0.5f, 0.5f);
             popupR.sizeDelta = new Vector2(400, 100);
             popup.GetComponent<Text>().fontStyle = FontStyle.Bold;
 
             var scoreUI = new GameObject("ScoreUI", typeof(RectTransform));
-            scoreUI.transform.SetParent(canvas.transform, false);
+            scoreUI.transform.SetParent(uiRoot, false);
             var sv = scoreUI.AddComponent<PancakeFlipScoreView>();
             SetField(sv, "pancake", pcBh); SetField(sv, "config", flipConfig);
             SetField(sv, "rotationsPopupText", popup.GetComponent<Text>());
 
-            var cookRoot = MkPanel(canvas.transform, "CookingIndicators", V2(0.88f, 0.35f), V2(0.97f, 0.7f), new Color(0, 0, 0, 0));
-            MkCookBar(cookRoot, "A", V2(0, 0.55f), V2(1, 1), font, out Image barA, out Text lblA);
-            MkCookBar(cookRoot, "B", V2(0, 0), V2(1, 0.45f), font, out Image barB, out Text lblB);
+            var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.34f, 0.05f), V2(0.98f, 0.26f), new Color(0, 0, 0, 0));
+            MkCookBar(cookRoot, "A", V2(0, 0.52f), V2(1, 1f), font, out Image barA, out Text lblA);
+            MkCookBar(cookRoot, "B", V2(0, 0), V2(1, 0.48f), font, out Image barB, out Text lblB);
             var civ = cookRoot.AddComponent<CookingIndicatorView>();
             SetField(civ, "pancake", pcBh); SetField(civ, "config", flipConfig);
             SetField(civ, "barA", barA); SetField(civ, "labelA", lblA);
             SetField(civ, "barB", barB); SetField(civ, "labelB", lblB);
 
-            var ingScr = MkPanel(canvas.transform, "IngredientsScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.1f, 0.12f, 0.1f, 0.95f));
+            var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.1f, 0.12f, 0.1f, 0.95f));
             var iVlg = ingScr.AddComponent<VerticalLayoutGroup>(); iVlg.padding = new RectOffset(20, 20, 20, 20); iVlg.spacing = 10; iVlg.childForceExpandHeight = false;
             MkLabel(ingScr.transform, "Title", "Ингредиенты", font, 38, Color.white, 0).AddComponent<LayoutElement>().preferredHeight = 50;
             var iList = new GameObject("List", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
@@ -330,7 +342,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var stoveV = Object.FindObjectOfType<StoveView>();
             if (stoveV != null) { SetField(stoveV, "ingredientsScreen", isv); SetField(isv, "stove", stoveV); }
 
-            var upgScr = MkPanel(canvas.transform, "UpgradeScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.12f, 0.1f, 0.08f, 0.95f));
+            var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.12f, 0.1f, 0.08f, 0.95f));
             var uVlg = upgScr.AddComponent<VerticalLayoutGroup>(); uVlg.padding = new RectOffset(20, 20, 20, 20); uVlg.spacing = 10; uVlg.childForceExpandHeight = false;
             MkLabel(upgScr.transform, "Title", "Апгрейды сковороды", font, 38, Color.white, 0).AddComponent<LayoutElement>().preferredHeight = 50;
             var uList = new GameObject("List", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
@@ -363,8 +375,36 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(msc, "upgradeScreen", usv);
             SetField(msc, "customerAnimator", custAnim);
 
-            EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
-            Debug.Log("PancakeFlip: всё создано одной кнопкой.");
+            EnsureFolder("Assets/Scenes");
+            var active = EditorSceneManager.GetActiveScene();
+            if (!EditorSceneManager.SaveScene(active, OutputScenePath))
+            {
+                Debug.LogError($"PancakeFlip: SaveScene не удалось — путь «{OutputScenePath}». Проверь права и что не открыт Play.");
+                return;
+            }
+
+            AssetDatabase.Refresh();
+            EditorSceneManager.OpenScene(OutputScenePath, OpenSceneMode.Single);
+
+            var sceneAsset = AssetDatabase.LoadAssetAtPath<Object>(OutputScenePath);
+            if (sceneAsset != null)
+                EditorGUIUtility.PingObject(sceneAsset);
+
+            Debug.Log($"PancakeFlip: сцена записана и сразу открыта: {OutputScenePath} (иерархия обновлена).");
+        }
+
+        [MenuItem("PancakeFlip/Open PancakeFlip Scene")]
+        public static void OpenPancakeFlipScene()
+        {
+            if (Application.isPlaying) { Debug.LogWarning("Останови Play."); return; }
+            if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, "Scenes/PancakeFlip.unity")))
+            {
+                Debug.LogWarning("Файла сцены ещё нет — сначала PancakeFlip → Build Everything.");
+                return;
+            }
+            EditorSceneManager.OpenScene(OutputScenePath, OpenSceneMode.Single);
+            var o = AssetDatabase.LoadAssetAtPath<Object>(OutputScenePath);
+            if (o != null) EditorGUIUtility.PingObject(o);
         }
 
         static IngredientConfig CreateIngredient(string n, int cost, int lvl, bool inf)
@@ -533,17 +573,26 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
         static void MkCookBar(GameObject root, string side, Vector2 amin, Vector2 amax, Font f, out Image bar, out Text lbl)
         {
-            var bg = MkPanel(root.transform, $"Bar{side}_BG", amin, amax, new Color(0.12f, 0.12f, 0.12f, 0.6f));
+            var row = new GameObject($"CookRow{side}", typeof(RectTransform));
+            row.transform.SetParent(root.transform, false);
+            Anch(row, amin.x, amin.y, amax.x, amax.y);
+
+            var lblGo = MkLabel(row.transform, $"Lbl{side}", side, f, 22, new Color(0.95f, 0.92f, 0.85f), 0);
+            var lblRt = lblGo.GetComponent<RectTransform>();
+            lblRt.anchorMin = new Vector2(0f, 0.1f);
+            lblRt.anchorMax = new Vector2(0.14f, 0.9f);
+            lblRt.offsetMin = lblRt.offsetMax = Vector2.zero;
+            lbl = lblGo.GetComponent<Text>();
+            lbl.alignment = TextAnchor.MiddleLeft;
+
+            var bg = MkPanel(row.transform, $"Bar{side}_BG", new Vector2(0.16f, 0.08f), new Vector2(0.99f, 0.92f), new Color(0.15f, 0.14f, 0.13f, 0.75f));
             var fill = new GameObject($"Bar{side}", typeof(RectTransform), typeof(Image));
             fill.transform.SetParent(bg.transform, false); Fill(fill);
             bar = fill.GetComponent<Image>(); bar.type = Image.Type.Filled;
-            bar.fillMethod = Image.FillMethod.Vertical; bar.fillOrigin = 0; bar.fillAmount = 0;
+            bar.fillMethod = Image.FillMethod.Horizontal;
+            bar.fillOrigin = (int)Image.OriginHorizontal.Left;
+            bar.fillAmount = 0f;
             bar.color = new Color(1, 0.95f, 0.8f);
-            var lg = MkLabel(bg.transform, $"Lbl{side}", side, f, 20, Color.white, 0);
-            var lr = lg.GetComponent<RectTransform>();
-            lr.anchorMin = V2(0, 0); lr.anchorMax = V2(1, 0.2f);
-            lr.offsetMin = lr.offsetMax = Vector2.zero;
-            lbl = lg.GetComponent<Text>();
         }
 
         static void SetField(Object obj, string prop, Object val)
