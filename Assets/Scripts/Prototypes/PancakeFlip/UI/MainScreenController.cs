@@ -8,6 +8,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] IngredientsScreenView ingredientsScreen;
         [SerializeField] PanUpgradeScreenView upgradeScreen;
         [SerializeField] Text statusText;
+        [SerializeField] CustomerAnimator customerAnimator;
 
         public void OpenIngredients()
         {
@@ -49,9 +50,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
 
             if (!s.TryServe())
+            {
                 ShowStatus("Не удалось сдать блин");
+            }
             else
+            {
                 ShowStatus("Заказ сдан!");
+                if (customerAnimator != null)
+                    customerAnimator.PlayServe();
+            }
         }
 
         public void ServeBase()

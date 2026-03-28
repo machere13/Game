@@ -7,7 +7,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] Text coinsText;
         [SerializeField] Text levelText;
-        [SerializeField] Image xpFill;
 
         void Update()
         {
@@ -17,9 +16,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (coinsText != null)
                 coinsText.text = s.Wallet.Coins.ToString();
             if (levelText != null)
-                levelText.text = $"Ур. {s.Wallet.Level}";
-            if (xpFill != null)
-                xpFill.fillAmount = s.Wallet.LevelProgress01();
+                levelText.text = $"Level {s.Wallet.Level}";
         }
     }
 }

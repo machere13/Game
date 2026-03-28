@@ -37,6 +37,15 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var stoveOpenS = LoadSprite("image 4");
             var orderListSpr = LoadSprite("OrderList");
             var orderItemSpr = LoadSprite("OrderItem");
+            var profileSpr = LoadSprite("Profile");
+            var walletSpr = LoadSprite("Wallet");
+            var backPanSpr = LoadSprite("BackPan");
+            var frontPanSpr = LoadSprite("FrontPan");
+            var bottomPanelSpr = LoadSprite("BottomPanel");
+            var person1 = LoadSprite("Person1");
+            var person2 = LoadSprite("Person2");
+            var person3 = LoadSprite("Person3");
+            var person4 = LoadSprite("Person4");
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             EnsureFolder("Assets/Data");
@@ -58,24 +67,64 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
+            float camH = ortho * 2f, camW = camH * (9f / 16f);
+
+            // Background (sortingOrder -100)
             if (bgSpr != null)
             {
                 var bg = new GameObject("Background");
                 var bgSr = bg.AddComponent<SpriteRenderer>(); bgSr.sprite = bgSpr; bgSr.sortingOrder = -100;
-                float camH = ortho * 2f, camW = camH * (9f / 16f);
                 float sc = Mathf.Max(camW / bgSpr.bounds.size.x, camH / bgSpr.bounds.size.y);
                 bg.transform.localScale = Vector3.one * sc;
                 bg.transform.position = new Vector3(0, 0, 10);
             }
 
+            // BottomPanel (sortingOrder -3, behind stove, in front of persons)
+            if (bottomPanelSpr != null)
+            {
+                var bpGo = new GameObject("BottomPanel");
+                var bpSr = bpGo.AddComponent<SpriteRenderer>(); bpSr.sprite = bottomPanelSpr; bpSr.sortingOrder = -3;
+                float bpSc = camW / bottomPanelSpr.bounds.size.x;
+                bpGo.transform.localScale = Vector3.one * bpSc;
+                float bpH = bottomPanelSpr.bounds.size.y * bpSc;
+                bpGo.transform.position = new Vector3(0, -ortho + bpH * 0.5f, 0);
+            }
+
+            // Customer (sortingOrder -4, behind BottomPanel)
+            float rightOffscreen = camW * 0.5f + 2f;
+            float leftOffscreen = -camW * 0.5f - 2f;
+            float counterX = 0f;
+            var custGo = new GameObject("Customer");
+            var custSr = custGo.AddComponent<SpriteRenderer>(); custSr.sortingOrder = -4;
+            custGo.transform.localScale = Vector3.one * 0.35f;
+            custGo.transform.position = new Vector3(rightOffscreen, -1.5f, 0);
+            var custAnim = custGo.AddComponent<CustomerAnimator>();
+            SetField(custAnim, "sr", custSr);
+            {
+                var so = new SerializedObject(custAnim);
+                so.FindProperty("startX").floatValue = rightOffscreen;
+                so.FindProperty("targetX").floatValue = counterX;
+                so.FindProperty("exitX").floatValue = leftOffscreen;
+                var arr = so.FindProperty("personSprites");
+                if (arr != null)
+                {
+                    arr.arraySize = 4;
+                    arr.GetArrayElementAtIndex(0).objectReferenceValue = person1;
+                    arr.GetArrayElementAtIndex(1).objectReferenceValue = person2;
+                    arr.GetArrayElementAtIndex(2).objectReferenceValue = person3;
+                    arr.GetArrayElementAtIndex(3).objectReferenceValue = person4;
+                }
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            // Stove (sortingOrder -2)
             float stoveScale = 0.55f, burnerY = -1.5f;
             if (stoveClosedS != null)
             {
                 var stoveGo = new GameObject("Stove");
                 var stoveSr = stoveGo.AddComponent<SpriteRenderer>(); stoveSr.sprite = stoveClosedS; stoveSr.sortingOrder = -2;
                 float sprW = stoveClosedS.bounds.size.x;
-                float camW2 = ortho * 2f * (9f / 16f);
-                stoveScale = (camW2 * 0.85f) / sprW;
+                stoveScale = (camW * 0.85f) / sprW;
                 float sprH = stoveClosedS.bounds.size.y * stoveScale;
                 float stoveY = -ortho + sprH * 0.5f - 0.2f;
                 stoveGo.transform.localScale = Vector3.one * stoveScale;
@@ -88,19 +137,32 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 if (stoveOpenS != null) SetField(stoveGo.GetComponent<StoveView>(), "openSprite", stoveOpenS);
             }
 
+            // Pan: parent GO with collider + PanBehaviour, two child SpriteRenderers
             const float worldScale = 0.25f;
             const float panLiftWorld = 0.12f;
 
             var panGo = new GameObject("Pan");
             panGo.transform.position = new Vector3(0, burnerY + panLiftWorld, 0);
             panGo.transform.localScale = Vector3.one * worldScale;
-            var panSrC = panGo.AddComponent<SpriteRenderer>();
-            panSrC.sprite = panSpr != null ? panSpr : AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-            panSrC.color = panSpr != null ? Color.white : new Color(0.4f, 0.25f, 0.1f);
-            panSrC.sortingOrder = 0;
             panGo.AddComponent<BoxCollider2D>();
             var panBh = panGo.AddComponent<PanBehaviour>();
 
+            // BackPan (sortingOrder 0) — behind pancake
+            var backPanGo = new GameObject("BackPan");
+            backPanGo.transform.SetParent(panGo.transform, false);
+            var backPanSr = backPanGo.AddComponent<SpriteRenderer>();
+            if (backPanSpr != null) { backPanSr.sprite = backPanSpr; backPanSr.color = Color.white; }
+            else if (panSpr != null) { backPanSr.sprite = panSpr; backPanSr.color = Color.white; }
+            backPanSr.sortingOrder = 0;
+
+            // FrontPan (sortingOrder 2) — in front of pancake
+            var frontPanGo = new GameObject("FrontPan");
+            frontPanGo.transform.SetParent(panGo.transform, false);
+            var frontPanSr = frontPanGo.AddComponent<SpriteRenderer>();
+            if (frontPanSpr != null) { frontPanSr.sprite = frontPanSpr; frontPanSr.color = Color.white; }
+            frontPanSr.sortingOrder = 2;
+
+            // Pancake (sortingOrder 1) — between BackPan and FrontPan
             const float pancakeY = -1.2f;
 
             var pcGo = new GameObject("Pancake");
@@ -124,25 +186,45 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            var topBar = MkPanel(canvas.transform, "TopBar", V2(0, 0.95f), V2(1, 1), new Color(0.1f, 0.1f, 0.15f, 0.5f));
-            var topHlg = topBar.AddComponent<HorizontalLayoutGroup>();
-            topHlg.padding = new RectOffset(20, 20, 5, 5); topHlg.spacing = 15;
-            topHlg.childAlignment = TextAnchor.MiddleCenter; topHlg.childForceExpandWidth = false;
-            MkLabel(topBar.transform, "CoinIcon", "\u00a4", font, 28, Color.yellow, 35);
-            var coinTxt = MkLabel(topBar.transform, "CoinText", "0", font, 32, Color.white, 120);
-            var lvlTxt = MkLabel(topBar.transform, "LevelText", "Ур.1", font, 28, Color.white, 80);
-            var xpBg = new GameObject("XpBg", typeof(RectTransform), typeof(Image));
-            xpBg.transform.SetParent(topBar.transform, false);
-            xpBg.GetComponent<Image>().color = new Color(0.08f, 0.08f, 0.1f);
-            var xpLe2 = xpBg.AddComponent<LayoutElement>(); xpLe2.flexibleWidth = 1; xpLe2.preferredHeight = 24;
-            var xpFill = new GameObject("XpFill", typeof(RectTransform), typeof(Image));
-            xpFill.transform.SetParent(xpBg.transform, false); Fill(xpFill);
-            var xpImg = xpFill.GetComponent<Image>(); xpImg.color = new Color(0.3f, 0.8f, 1f);
-            xpImg.type = Image.Type.Filled; xpImg.fillMethod = Image.FillMethod.Horizontal; xpImg.fillAmount = 0;
-            var tbv = topBar.AddComponent<TopBarView>();
-            SetField(tbv, "coinsText", coinTxt.GetComponent<Text>());
-            SetField(tbv, "levelText", lvlTxt.GetComponent<Text>());
-            SetField(tbv, "xpFill", xpImg);
+            var profileGo = new GameObject("ProfileIcon", typeof(RectTransform), typeof(Image));
+            profileGo.transform.SetParent(canvas.transform, false);
+            var profileR = profileGo.GetComponent<RectTransform>();
+            profileR.anchorMin = V2(0.82f, 0.93f); profileR.anchorMax = V2(0.96f, 0.995f);
+            profileR.offsetMin = profileR.offsetMax = Vector2.zero;
+            var profileImg = profileGo.GetComponent<Image>();
+            if (profileSpr != null) { profileImg.sprite = profileSpr; profileImg.preserveAspect = true; }
+            else profileImg.color = new Color(0.8f, 0.3f, 0.3f);
+            profileImg.raycastTarget = false;
+
+            var lvlTxt = new GameObject("LevelText", typeof(RectTransform));
+            lvlTxt.transform.SetParent(profileGo.transform, false);
+            Anch(lvlTxt, -0.2f, -0.45f, 1.2f, 0f);
+            var lvlT = lvlTxt.AddComponent<Text>(); lvlT.text = "Level 1"; lvlT.fontSize = 42;
+            lvlT.alignment = TextAnchor.MiddleCenter; lvlT.color = Color.white; lvlT.fontStyle = FontStyle.Bold;
+            if (font) lvlT.font = font;
+
+            var walletGo = new GameObject("WalletIcon", typeof(RectTransform), typeof(Image));
+            walletGo.transform.SetParent(canvas.transform, false);
+            var walletR = walletGo.GetComponent<RectTransform>();
+            walletR.anchorMin = V2(0.82f, 0.84f); walletR.anchorMax = V2(0.96f, 0.885f);
+            walletR.offsetMin = walletR.offsetMax = Vector2.zero;
+            var walletImg = walletGo.GetComponent<Image>();
+            if (walletSpr != null) { walletImg.sprite = walletSpr; walletImg.preserveAspect = true; }
+            else walletImg.color = new Color(0.2f, 0.7f, 0.2f);
+            walletImg.raycastTarget = false;
+
+            var coinTxt = new GameObject("CoinText", typeof(RectTransform));
+            coinTxt.transform.SetParent(walletGo.transform, false);
+            Anch(coinTxt, -1.5f, 0f, 0f, 1f);
+            var coinT = coinTxt.AddComponent<Text>(); coinT.text = "0"; coinT.fontSize = 42;
+            coinT.alignment = TextAnchor.MiddleRight; coinT.color = Color.white; coinT.fontStyle = FontStyle.Bold;
+            if (font) coinT.font = font;
+
+            var tbvGo = new GameObject("TopBarView", typeof(RectTransform));
+            tbvGo.transform.SetParent(canvas.transform, false);
+            var tbv = tbvGo.AddComponent<TopBarView>();
+            SetField(tbv, "coinsText", coinT);
+            SetField(tbv, "levelText", lvlT);
 
             var orderPanel = MkPanel(canvas.transform, "OrderPanel", V2(0, 0.32f), V2(0.36f, 0.98f), new Color(0, 0, 0, 0));
 
@@ -240,6 +322,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetFieldArr(sess, "allIngredients", new Object[] { dough, jam, cheese });
             SetFieldArr(sess, "allUpgrades", new Object[] { upg1, upg2 });
 
+            var mscGo = new GameObject("MainScreenController");
+            var msc = mscGo.AddComponent<MainScreenController>();
+            SetField(msc, "ingredientsScreen", isv);
+            SetField(msc, "upgradeScreen", usv);
+            SetField(msc, "customerAnimator", custAnim);
+
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
             Debug.Log("PancakeFlip: всё создано одной кнопкой.");
         }
@@ -273,7 +361,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
         static void ForceAllSprites()
         {
-            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake" })
+            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4" })
             {
                 string p = $"{ArtDir}/{n}.png";
                 if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, p.Replace("Assets/", "")))) continue;
