@@ -21,6 +21,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         float _totalRotationDegrees;
         int _fullRotations;
         float _lastAngleDeg;
+        float _throwStartRotationDeg;
 
         float _cookA;
         float _cookB;
@@ -83,6 +84,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _totalRotationDegrees = 0f;
             _fullRotations = 0;
             _lastAngleDeg = _rb.rotation;
+            _throwStartRotationDeg = _rb.rotation;
 
             if (_panCol != null && _col != null)
                 Physics2D.IgnoreCollision(_col, _panCol, false);
@@ -125,10 +127,16 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void UpdateSideFromAngle()
         {
-            float angle = _rb.rotation % 360f;
-            if (angle < 0f) angle += 360f;
-            bool flipped = angle > 90f && angle < 270f;
-            _currentSide = flipped ? Side.B : Side.A;
+            float net = Mathf.DeltaAngle(_throwStartRotationDeg, _rb.rotation);
+            _currentSide = SideFromNetRotationDegrees(net);
+        }
+
+        static Side SideFromNetRotationDegrees(float netDegrees)
+        {
+            float a = Mathf.Repeat(netDegrees, 360f);
+            if (a < 0f) a += 360f;
+            bool flipped = a > 90f && a < 270f;
+            return flipped ? Side.B : Side.A;
         }
 
         void CookCurrentSide()
