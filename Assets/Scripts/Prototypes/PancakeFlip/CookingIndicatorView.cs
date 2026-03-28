@@ -3,60 +3,65 @@ using UnityEngine.UI;
 
 namespace IdlePancake.Prototypes.PancakeFlip
 {
+    /// <summary>
+    /// Превью стороны на UI: один спрайт блина; степень прожарки — через умножающий тинт (сырое → белый → подгоревшее).
+    /// </summary>
     public sealed class CookingIndicatorView : MonoBehaviour
     {
         [SerializeField] PancakeBehaviour pancake;
         [SerializeField] PancakeFlipConfig config;
 
-        [Header("Side A")]
-        [SerializeField] Image barA;
-        [SerializeField] Text labelA;
+        [Header("Side A (верх)")]
+        [SerializeField] Image pancakeA;
 
-        [Header("Side B")]
-        [SerializeField] Image barB;
-        [SerializeField] Text labelB;
+        [Header("Side B (низ)")]
+        [SerializeField] Image pancakeB;
 
-        [Header("Colors")]
-        [SerializeField] Color rawColor = new Color(1f, 0.95f, 0.8f);
-        [SerializeField] Color perfectColor = new Color(0.85f, 0.55f, 0.1f);
-        [SerializeField] Color overcookedColor = new Color(0.25f, 0.12f, 0.05f);
+        [Header("Тинт поверх текстуры")]
+        [SerializeField] Color rawTint = new Color(0.82f, 0.76f, 0.68f);
+        [Tooltip("Цвет в зоне perfectMin…perfectMax — чуть теплее белого, чтобы окно «можно сдавать» читалось")]
+        [SerializeField] Color readyTint = new Color(1f, 0.98f, 0.94f);
+        [SerializeField] Color overcookedTint = new Color(0.32f, 0.18f, 0.1f);
 
         void Update()
         {
             if (pancake == null || config == null) return;
 
-            UpdateBar(barA, labelA, pancake.CookA);
-            UpdateBar(barB, labelB, pancake.CookB);
+            ApplyTint(pancakeA, pancake.CookA);
+            ApplyTint(pancakeB, pancake.CookB);
         }
 
-        void UpdateBar(Image bar, Text label, float cook01)
+        void ApplyTint(Image img, float cook01)
         {
-            if (bar != null)
+            if (img == null) return;
+            img.color = GetPancakeTint(cook01);
+        }
+
+        /// <summary>Двойной SmoothStep — мягче края, без резких скачков.</summary>
+        static float EaseInOut01(float x)
+        {
+            x = Mathf.Clamp01(x);
+            return Mathf.SmoothStep(0f, 1f, Mathf.SmoothStep(0f, 1f, x));
+        }
+
+        Color GetPancakeTint(float cook01)
+        {
+            float pm = config.perfectMin;
+            float pM = config.perfectMax;
+
+            if (cook01 < pm)
             {
-                bar.fillAmount = cook01;
-                bar.color = GetCookColor(cook01);
+                float u = cook01 / Mathf.Max(0.001f, pm);
+                float t = EaseInOut01(u);
+                return Color.Lerp(rawTint, readyTint, t);
             }
 
-            if (label != null)
-                label.text = GetCookLabel(cook01);
-        }
+            if (cook01 <= pM)
+                return readyTint;
 
-        Color GetCookColor(float cook01)
-        {
-            if (cook01 < config.perfectMin)
-                return Color.Lerp(rawColor, perfectColor, cook01 / Mathf.Max(0.01f, config.perfectMin));
-            if (cook01 <= config.perfectMax)
-                return perfectColor;
-            float t = (cook01 - config.perfectMax) / Mathf.Max(0.01f, 1f - config.perfectMax);
-            return Color.Lerp(perfectColor, overcookedColor, t);
-        }
-
-        string GetCookLabel(float cook01)
-        {
-            if (cook01 < config.perfectMin) return "Сырой";
-            if (cook01 <= config.perfectMax) return "Готов";
-            if (cook01 >= config.overcookedThreshold) return "Сгорел";
-            return "Пережар";
+            float burnU = (cook01 - pM) / Mathf.Max(0.001f, 1f - pM);
+            float burnT = EaseInOut01(burnU);
+            return Color.Lerp(readyTint, overcookedTint, burnT);
         }
     }
 }

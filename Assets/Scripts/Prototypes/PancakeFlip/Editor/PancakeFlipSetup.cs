@@ -61,6 +61,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var cheeseHamPancakeSpr = LoadSprite("CheeseHamPancake");
             var chocoStrawberrySpr = LoadSprite("ChocolateStrawberryPancake");
             var xpIconSpr = LoadSprite("XPIcon");
+            var pancakeSideUiSpr = LoadSprite("PancakeSide");
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             EnsureFolder("Assets/Data");
@@ -233,7 +234,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var profileGo = new GameObject("ProfileIcon", typeof(RectTransform), typeof(Image));
             profileGo.transform.SetParent(uiRoot, false);
             var profileR = profileGo.GetComponent<RectTransform>();
-            profileR.anchorMin = V2(0.82f, 0.86f); profileR.anchorMax = V2(0.96f, 0.94f);
+            profileR.anchorMin = V2(0.82f, 0.91f); profileR.anchorMax = V2(0.97f, 0.99f);
             profileR.offsetMin = profileR.offsetMax = Vector2.zero;
             var profileImg = profileGo.GetComponent<Image>();
             if (profileSpr != null) { profileImg.sprite = profileSpr; profileImg.preserveAspect = true; }
@@ -242,15 +243,15 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var lvlTxt = new GameObject("LevelText", typeof(RectTransform));
             lvlTxt.transform.SetParent(profileGo.transform, false);
-            Anch(lvlTxt, -0.2f, -0.45f, 1.2f, 0f);
-            var lvlT = lvlTxt.AddComponent<Text>(); lvlT.text = "Level 1"; lvlT.fontSize = 42;
+            Anch(lvlTxt, -0.2f, -0.42f, 1.2f, 0f);
+            var lvlT = lvlTxt.AddComponent<Text>(); lvlT.text = "Level 1"; lvlT.fontSize = 36;
             lvlT.alignment = TextAnchor.MiddleCenter; lvlT.color = Color.white; lvlT.fontStyle = FontStyle.Bold;
             if (font) lvlT.font = font;
 
             var walletGo = new GameObject("WalletIcon", typeof(RectTransform), typeof(Image));
             walletGo.transform.SetParent(uiRoot, false);
             var walletR = walletGo.GetComponent<RectTransform>();
-            walletR.anchorMin = V2(0.82f, 0.78f); walletR.anchorMax = V2(0.96f, 0.825f);
+            walletR.anchorMin = V2(0.82f, 0.805f); walletR.anchorMax = V2(0.97f, 0.865f);
             walletR.offsetMin = walletR.offsetMax = Vector2.zero;
             var walletImg = walletGo.GetComponent<Image>();
             if (walletSpr != null) { walletImg.sprite = walletSpr; walletImg.preserveAspect = true; }
@@ -260,7 +261,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var coinTxt = new GameObject("CoinText", typeof(RectTransform));
             coinTxt.transform.SetParent(walletGo.transform, false);
             Anch(coinTxt, -1.5f, 0f, 0f, 1f);
-            var coinT = coinTxt.AddComponent<Text>(); coinT.text = "0"; coinT.fontSize = 42;
+            var coinT = coinTxt.AddComponent<Text>(); coinT.text = "0"; coinT.fontSize = 36;
             coinT.alignment = TextAnchor.MiddleRight; coinT.color = Color.white; coinT.fontStyle = FontStyle.Bold;
             if (font) coinT.font = font;
 
@@ -317,13 +318,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sv, "pancake", pcBh); SetField(sv, "config", flipConfig);
             SetField(sv, "rotationsPopupText", popup.GetComponent<Text>());
 
-            var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.34f, 0.05f), V2(0.98f, 0.26f), new Color(0, 0, 0, 0));
-            MkCookBar(cookRoot, "A", V2(0, 0.52f), V2(1, 1f), font, out Image barA, out Text lblA);
-            MkCookBar(cookRoot, "B", V2(0, 0), V2(1, 0.48f), font, out Image barB, out Text lblB);
+            var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.76f, 0.34f), V2(0.998f, 0.81f), new Color(0, 0, 0, 0));
+            MkCookPancakePreview(cookRoot, "A", V2(0, 0.515f), V2(1, 0.792f), pancakeSideUiSpr, font, out Image imgA);
+            MkCookPancakePreview(cookRoot, "B", V2(0, 0.21f), V2(1, 0.485f), pancakeSideUiSpr, font, out Image imgB);
             var civ = cookRoot.AddComponent<CookingIndicatorView>();
             SetField(civ, "pancake", pcBh); SetField(civ, "config", flipConfig);
-            SetField(civ, "barA", barA); SetField(civ, "labelA", lblA);
-            SetField(civ, "barB", barB); SetField(civ, "labelB", lblB);
+            SetField(civ, "pancakeA", imgA); SetField(civ, "pancakeB", imgB);
 
             var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.05f, 0.18f), V2(0.95f, 0.93f), new Color(0.1f, 0.12f, 0.1f, 0.95f));
             var iVlg = ingScr.AddComponent<VerticalLayoutGroup>(); iVlg.padding = new RectOffset(20, 20, 20, 20); iVlg.spacing = 10; iVlg.childForceExpandHeight = false;
@@ -437,7 +437,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
         static void ForceAllSprites()
         {
-            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4", "Person1Icon", "Person2Icon", "Person3Icon", "RewardInfo", "CommonPancake", "CheeseHamPancake", "ChocolateStrawberryPancake", "XPIcon" })
+            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "PancakeSide", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4", "Person1Icon", "Person2Icon", "Person3Icon", "RewardInfo", "CommonPancake", "CheeseHamPancake", "ChocolateStrawberryPancake", "XPIcon" })
             {
                 string p = $"{ArtDir}/{n}.png";
                 if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, p.Replace("Assets/", "")))) continue;
@@ -503,25 +503,25 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var rbImg = rewardBg.GetComponent<Image>();
             if (rewardSpr != null) { rbImg.sprite = rewardSpr; rbImg.color = Color.white; rbImg.preserveAspect = true; }
             else rbImg.color = new Color(0.9f, 0.85f, 0.6f);
-            Anch(rewardBg, 0.42f, 0.42f, 1.22f, 1.18f);
+            Anch(rewardBg, 0.48f, 0.48f, 1.12f, 1.12f);
 
             var coinTxtGo = new GameObject("CoinTxt", typeof(RectTransform));
-            coinTxtGo.transform.SetParent(rewardBg.transform, false); Anch(coinTxtGo, 0.05f, 0.5f, 0.6f, 0.9f);
-            var coinT = coinTxtGo.AddComponent<Text>(); coinT.fontSize = 64; coinT.color = new Color(0.2f, 0.15f, 0.1f);
+            coinTxtGo.transform.SetParent(rewardBg.transform, false); Anch(coinTxtGo, 0.04f, 0.56f, 0.54f, 0.88f);
+            var coinT = coinTxtGo.AddComponent<Text>(); coinT.fontSize = 38; coinT.color = new Color(0.2f, 0.15f, 0.1f);
             coinT.alignment = TextAnchor.MiddleRight; coinT.fontStyle = FontStyle.Bold; if (f) coinT.font = f;
 
             var coinIco = new GameObject("CoinIcon", typeof(RectTransform), typeof(Image));
-            coinIco.transform.SetParent(rewardBg.transform, false); Anch(coinIco, 0.62f, 0.52f, 0.92f, 0.88f);
+            coinIco.transform.SetParent(rewardBg.transform, false); Anch(coinIco, 0.56f, 0.58f, 0.88f, 0.86f);
             var coinIcoImg = coinIco.GetComponent<Image>(); coinIcoImg.preserveAspect = true;
             if (coinSpr != null) { coinIcoImg.sprite = coinSpr; coinIcoImg.color = Color.white; }
 
             var xpTxtGo = new GameObject("XpTxt", typeof(RectTransform));
-            xpTxtGo.transform.SetParent(rewardBg.transform, false); Anch(xpTxtGo, 0.05f, 0.1f, 0.6f, 0.5f);
-            var xpT = xpTxtGo.AddComponent<Text>(); xpT.fontSize = 64; xpT.color = new Color(0.2f, 0.15f, 0.1f);
+            xpTxtGo.transform.SetParent(rewardBg.transform, false); Anch(xpTxtGo, 0.04f, 0.32f, 0.54f, 0.54f);
+            var xpT = xpTxtGo.AddComponent<Text>(); xpT.fontSize = 38; xpT.color = new Color(0.2f, 0.15f, 0.1f);
             xpT.alignment = TextAnchor.MiddleRight; xpT.fontStyle = FontStyle.Bold; if (f) xpT.font = f;
 
             var xpIco = new GameObject("XpIcon", typeof(RectTransform), typeof(Image));
-            xpIco.transform.SetParent(rewardBg.transform, false); Anch(xpIco, 0.62f, 0.12f, 0.92f, 0.48f);
+            xpIco.transform.SetParent(rewardBg.transform, false); Anch(xpIco, 0.56f, 0.34f, 0.88f, 0.52f);
             var xpIcoImg = xpIco.GetComponent<Image>(); xpIcoImg.preserveAspect = true;
             if (xpSpr != null) { xpIcoImg.sprite = xpSpr; xpIcoImg.color = Color.white; }
 
@@ -571,28 +571,35 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             r.anchorMin = V2(xmin, ymin); r.anchorMax = V2(xmax, ymax);
             r.offsetMin = r.offsetMax = Vector2.zero;
         }
-        static void MkCookBar(GameObject root, string side, Vector2 amin, Vector2 amax, Font f, out Image bar, out Text lbl)
+        const float CookPancakePreviewSize = 172f;
+
+        static void MkCookPancakePreview(GameObject root, string side, Vector2 amin, Vector2 amax, Sprite pancakeSideSpr, Font f, out Image pancakeImg)
         {
             var row = new GameObject($"CookRow{side}", typeof(RectTransform));
             row.transform.SetParent(root.transform, false);
             Anch(row, amin.x, amin.y, amax.x, amax.y);
 
-            var lblGo = MkLabel(row.transform, $"Lbl{side}", side, f, 22, new Color(0.95f, 0.92f, 0.85f), 0);
+            var lblGo = MkLabel(row.transform, $"Lbl{side}", side, f, 18, new Color(0.95f, 0.92f, 0.85f), 0);
             var lblRt = lblGo.GetComponent<RectTransform>();
             lblRt.anchorMin = new Vector2(0f, 0.1f);
-            lblRt.anchorMax = new Vector2(0.14f, 0.9f);
+            lblRt.anchorMax = new Vector2(0.12f, 0.9f);
             lblRt.offsetMin = lblRt.offsetMax = Vector2.zero;
-            lbl = lblGo.GetComponent<Text>();
-            lbl.alignment = TextAnchor.MiddleLeft;
+            lblGo.GetComponent<Text>().alignment = TextAnchor.MiddleLeft;
 
-            var bg = MkPanel(row.transform, $"Bar{side}_BG", new Vector2(0.16f, 0.08f), new Vector2(0.99f, 0.92f), new Color(0.15f, 0.14f, 0.13f, 0.75f));
-            var fill = new GameObject($"Bar{side}", typeof(RectTransform), typeof(Image));
-            fill.transform.SetParent(bg.transform, false); Fill(fill);
-            bar = fill.GetComponent<Image>(); bar.type = Image.Type.Filled;
-            bar.fillMethod = Image.FillMethod.Horizontal;
-            bar.fillOrigin = (int)Image.OriginHorizontal.Left;
-            bar.fillAmount = 0f;
-            bar.color = new Color(1, 0.95f, 0.8f);
+            var imgGo = new GameObject("PancakePreview", typeof(RectTransform), typeof(Image));
+            imgGo.transform.SetParent(row.transform, false);
+            var rt = imgGo.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(0.62f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(CookPancakePreviewSize, CookPancakePreviewSize);
+            rt.anchoredPosition = Vector2.zero;
+
+            pancakeImg = imgGo.GetComponent<Image>();
+            pancakeImg.sprite = pancakeSideSpr;
+            pancakeImg.type = Image.Type.Simple;
+            pancakeImg.preserveAspect = true;
+            pancakeImg.color = Color.white;
+            pancakeImg.raycastTarget = false;
         }
 
         static void SetField(Object obj, string prop, Object val)
