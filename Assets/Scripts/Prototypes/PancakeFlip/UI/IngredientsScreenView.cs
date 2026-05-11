@@ -58,14 +58,24 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 var buyBtn = go.GetComponentInChildren<Button>();
                 if (buyBtn != null)
                 {
-                    var captured = ing;
-                    buyBtn.onClick.AddListener(() =>
-                    {
-                        s.BuyIngredient(captured);
-                        Rebuild();
-                    });
+                    bool canAfford = s.Wallet.Coins >= ing.coinCost;
                     var btnText = buyBtn.GetComponentInChildren<Text>();
-                    if (btnText != null) btnText.text = $"Купить ({ing.coinCost}c)";
+                    if (btnText != null)
+                        btnText.text = canAfford ? $"Купить — {ing.coinCost}¢" : $"Нужно {ing.coinCost}¢";
+
+                    ShopBuyButtonStyle.Apply(buyBtn, btnText, canAfford);
+                    buyBtn.interactable = canAfford;
+
+                    buyBtn.onClick.RemoveAllListeners();
+                    if (canAfford)
+                    {
+                        var captured = ing;
+                        buyBtn.onClick.AddListener(() =>
+                        {
+                            s.BuyIngredient(captured);
+                            Rebuild();
+                        });
+                    }
                 }
             }
         }
@@ -75,7 +85,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var row = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup));
             row.transform.SetParent(parent, false);
             var rect = row.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(0f, 64f);
+            rect.sizeDelta = new Vector2(0f, 88f);
+            var rowH = row.GetComponent<HorizontalLayoutGroup>();
+            rowH.childControlWidth = true;
+            rowH.childControlHeight = true;
+            rowH.childForceExpandWidth = false;
+            rowH.childForceExpandHeight = false;
 
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
@@ -91,16 +106,22 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var btnGo = new GameObject("Btn", typeof(RectTransform));
             btnGo.transform.SetParent(row.transform, false);
             var btnImg = btnGo.AddComponent<Image>();
-            btnImg.color = new Color(0.35f, 0.62f, 0.38f, 1f);
+            btnImg.color = ShopBuyButtonStyle.BuyGreen;
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = btnImg;
+            btn.transition = Selectable.Transition.None;
             var btnLe = btnGo.AddComponent<LayoutElement>();
-            btnLe.preferredWidth = 180;
+            btnLe.minWidth = ShopBuyButtonStyle.PreferredButtonWidth;
+            btnLe.preferredWidth = ShopBuyButtonStyle.PreferredButtonWidth;
+            btnLe.flexibleWidth = 0f;
+            btnLe.minHeight = ShopBuyButtonStyle.PreferredButtonHeight;
+            btnLe.preferredHeight = ShopBuyButtonStyle.PreferredButtonHeight;
+            btnLe.flexibleHeight = 0f;
 
             var btnTxtGo = new GameObject("Text", typeof(RectTransform));
             btnTxtGo.transform.SetParent(btnGo.transform, false);
             var btnTxt = btnTxtGo.AddComponent<Text>();
-            btnTxt.fontSize = 24;
+            btnTxt.fontSize = ShopBuyButtonStyle.ButtonFontSize;
             btnTxt.alignment = TextAnchor.MiddleCenter;
             btnTxt.color = Color.white;
             if (font != null) btnTxt.font = font;

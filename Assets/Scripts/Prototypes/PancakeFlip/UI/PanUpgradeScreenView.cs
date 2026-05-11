@@ -5,10 +5,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class PanUpgradeScreenView : MonoBehaviour
     {
-        static readonly Color BuyGreen = new Color(0.28f, 0.62f, 0.38f, 1f);
-        static readonly Color BuyRed = new Color(0.72f, 0.32f, 0.28f, 1f);
-        static readonly Color OwnedGrey = new Color(0.5f, 0.5f, 0.52f, 1f);
-
         [SerializeField] Transform upgradeListContainer;
         [SerializeField] GameObject upgradeRowPrefab;
         [SerializeField] Button closeButton;
@@ -78,8 +74,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (btn == null) return;
 
-            btn.transition = Selectable.Transition.None;
-
             bool owned = s.Upgrades.IsOwned(upg);
             bool locked = upg.unlockLevel > s.Wallet.Level;
             bool canAfford = s.Wallet.Coins >= upg.coinCost;
@@ -90,17 +84,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (owned) btnTxt.text = "Куплено";
                 else if (locked) btnTxt.text = $"Ур. {upg.unlockLevel}";
                 else if (!canAfford) btnTxt.text = $"Нужно {upg.coinCost}¢";
-                else btnTxt.text = "Купить";
+                else btnTxt.text = $"Купить — {upg.coinCost}¢";
             }
 
-            Color bg;
-            if (owned) bg = OwnedGrey;
-            else if (canBuy) bg = BuyGreen;
-            else bg = BuyRed;
-
+            ShopBuyButtonStyle.Apply(btn, btnTxt, canBuy);
             btn.interactable = canBuy;
-            var img = btn.GetComponent<Image>();
-            if (img != null) img.color = bg;
 
             btn.onClick.RemoveAllListeners();
             if (canBuy)
@@ -186,19 +174,22 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var btnGo = new GameObject("BuyBtn", typeof(RectTransform), typeof(Image), typeof(Button));
             btnGo.transform.SetParent(row.transform, false);
             var btnImg = btnGo.GetComponent<Image>();
-            btnImg.color = BuyGreen;
+            btnImg.color = ShopBuyButtonStyle.BuyGreen;
             var btn = btnGo.GetComponent<Button>();
             btn.targetGraphic = btnImg;
+            btn.transition = Selectable.Transition.None;
             var btnLe = btnGo.AddComponent<LayoutElement>();
-            btnLe.preferredWidth = 168f;
-            btnLe.minWidth = 168f;
+            btnLe.preferredWidth = ShopBuyButtonStyle.PreferredButtonWidth;
+            btnLe.minWidth = ShopBuyButtonStyle.PreferredButtonWidth;
             btnLe.flexibleWidth = 0f;
-            btnLe.preferredHeight = 72f;
+            btnLe.preferredHeight = ShopBuyButtonStyle.PreferredButtonHeight;
+            btnLe.minHeight = ShopBuyButtonStyle.PreferredButtonHeight;
+            btnLe.flexibleHeight = 0f;
 
             var btnTxtGo = new GameObject("Text", typeof(RectTransform));
             btnTxtGo.transform.SetParent(btnGo.transform, false);
             var btnTxt = btnTxtGo.AddComponent<Text>();
-            btnTxt.fontSize = 22;
+            btnTxt.fontSize = ShopBuyButtonStyle.ButtonFontSize;
             btnTxt.alignment = TextAnchor.MiddleCenter;
             btnTxt.color = Color.white;
             if (font != null) btnTxt.font = font;
