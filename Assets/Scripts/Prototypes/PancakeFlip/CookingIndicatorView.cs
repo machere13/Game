@@ -48,6 +48,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             float pm = config.perfectMin;
             float pM = config.perfectMax;
+            var sess = GameSession.Instance;
+            if (sess != null)
+            {
+                pm = sess.GetEffectivePerfectMin();
+                pM = sess.GetEffectivePerfectMax();
+            }
 
             if (cook01 < pm)
             {

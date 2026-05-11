@@ -3,8 +3,7 @@
   "rootNamespace": "IdlePancake.Composition",
   "references": [
     "IdlePancake.Core",
-    "IdlePancake.Features",
-    "IdlePancake.Infrastructure"
+    "IdlePancake.Features"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

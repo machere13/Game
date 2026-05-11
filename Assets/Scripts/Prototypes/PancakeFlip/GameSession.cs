@@ -66,12 +66,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             float cookA = pancake.CookA;
             float cookB = pancake.CookB;
-            float minReady = flipConfig != null ? flipConfig.perfectMin : 0.4f;
+            float minReady = GetEffectivePerfectMin();
 
             if (cookA < minReady || cookB < minReady)
                 return false;
 
-            float overcook = flipConfig != null ? flipConfig.overcookedThreshold : 0.85f;
+            float overcook = GetEffectiveOvercookedThreshold();
             float coinMult = 1f;
             if (cookA >= overcook) coinMult *= 0.5f;
             if (cookB >= overcook) coinMult *= 0.5f;
@@ -103,7 +103,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             float cookA = pancake.CookA;
             float cookB = pancake.CookB;
-            float minReady = flipConfig != null ? flipConfig.perfectMin : 0.4f;
+            float minReady = GetEffectivePerfectMin();
             if (cookA < minReady || cookB < minReady) return false;
 
             bool hasIngredients = Inventory.HasIngredients(baseRecipe);
@@ -170,8 +170,56 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void ApplyUpgrades()
         {
-            if (flipConfig == null) return;
-            // Upgrades modify config at runtime — prototype approach
+            // Множители читаются через Upgrades.GetMultiplier при каждом вызове.
+        }
+
+        public float GetEffectivePerfectMin()
+        {
+            if (flipConfig == null) return 0.4f;
+            float w = Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.WiderPerfectZone);
+            float c = (flipConfig.perfectMin + flipConfig.perfectMax) * 0.5f;
+            float half = (flipConfig.perfectMax - flipConfig.perfectMin) * 0.5f * w;
+            float lo = Mathf.Clamp01(c - half);
+            float hi = Mathf.Clamp01(c + half);
+            if (lo > hi) { float t = lo; lo = hi; hi = t; }
+            return lo;
+        }
+
+        public float GetEffectivePerfectMax()
+        {
+            if (flipConfig == null) return 0.7f;
+            float w = Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.WiderPerfectZone);
+            float c = (flipConfig.perfectMin + flipConfig.perfectMax) * 0.5f;
+            float half = (flipConfig.perfectMax - flipConfig.perfectMin) * 0.5f * w;
+            float lo = Mathf.Clamp01(c - half);
+            float hi = Mathf.Clamp01(c + half);
+            if (lo > hi) { float t = lo; lo = hi; hi = t; }
+            return hi;
+        }
+
+        public float GetEffectiveOvercookedThreshold()
+        {
+            if (flipConfig == null) return 0.85f;
+            float m = Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.SlowerOvercook);
+            float b = flipConfig.overcookedThreshold;
+            return Mathf.Clamp(1f - (1f - b) / Mathf.Max(1.001f, m), b, 0.99f);
+        }
+
+        public float ForceFromChargeWithUpgrades(float charge01)
+        {
+            if (flipConfig == null) return 0f;
+            float f = flipConfig.ForceFromCharge(charge01);
+            f *= Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.EasierFlip);
+            return f;
+        }
+
+        public float SpinFromChargeWithUpgrades(float charge01)
+        {
+            if (flipConfig == null) return 0f;
+            float s = flipConfig.SpinFromCharge(charge01);
+            float stab = Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.StablerSpin);
+            if (stab > 1.001f) s /= stab;
+            return s;
         }
     }
 }

@@ -56,19 +56,16 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 return;
             }
 
-            if (s.FlipConfig != null)
+            var pancake = Object.FindFirstObjectByType<PancakeBehaviour>();
+            if (pancake != null)
             {
-                var pancake = Object.FindFirstObjectByType<PancakeBehaviour>();
-                if (pancake != null)
+                float min = s.GetEffectivePerfectMin();
+                if (pancake.CookA < min || pancake.CookB < min)
                 {
-                    float min = s.FlipConfig.perfectMin;
-                    if (pancake.CookA < min || pancake.CookB < min)
-                    {
-                        string sideA = pancake.CookA < min ? $"A:{pancake.CookA:P0}" : "";
-                        string sideB = pancake.CookB < min ? $"B:{pancake.CookB:P0}" : "";
-                        ShowStatus($"Блин не готов! {sideA} {sideB}".Trim());
-                        return;
-                    }
+                    string sideA = pancake.CookA < min ? $"A:{pancake.CookA:P0}" : "";
+                    string sideB = pancake.CookB < min ? $"B:{pancake.CookB:P0}" : "";
+                    ShowStatus($"Блин не готов! {sideA} {sideB}".Trim());
+                    return;
                 }
             }
 

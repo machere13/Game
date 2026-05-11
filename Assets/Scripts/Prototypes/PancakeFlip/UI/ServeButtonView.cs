@@ -44,7 +44,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 if (statusText == null) return;
                 var p = Object.FindFirstObjectByType<PancakeBehaviour>();
-                float min = s.FlipConfig != null ? s.FlipConfig.perfectMin : 0.4f;
+                float min = s.GetEffectivePerfectMin();
                 if (p != null && (p.CookA < min || p.CookB < min))
                     statusText.text = "Блин не готов!";
                 else if (s.ActiveOrder != null && s.ActiveOrder.Recipe != null && !s.Inventory.HasIngredients(s.ActiveOrder.Recipe))
@@ -62,7 +62,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 if (statusText == null) return;
                 var p = Object.FindFirstObjectByType<PancakeBehaviour>();
-                float min = s.FlipConfig != null ? s.FlipConfig.perfectMin : 0.4f;
+                float min = s.GetEffectivePerfectMin();
                 if (p != null && (p.CookA < min || p.CookB < min))
                     statusText.text = "Блин не готов!";
                 else if (s.BaseRecipe != null && !s.Inventory.HasIngredients(s.BaseRecipe))

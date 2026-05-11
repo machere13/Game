@@ -11,17 +11,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         [SerializeField] PancakeFlipConfig config;
         [SerializeField] Transform panCenter;
+        [Tooltip("Внешний вид физической стороны A (когда она смотрит на игрока — другая сторона на сковороде).")]
+        [SerializeField] Sprite spriteFaceA;
+        [Tooltip("Внешний вид физической стороны B.")]
+        [SerializeField] Sprite spriteFaceB;
 
         Rigidbody2D _rb;
         Collider2D _col;
         Collider2D _panCol;
+        SpriteRenderer _sr;
+        Sprite _fallbackSprite;
         State _state = State.OnPan;
         Side _currentSide = Side.A;
 
         float _totalRotationDegrees;
         int _fullRotations;
         float _lastAngleDeg;
-        float _throwStartRotationDeg;
+        float _flightSignedRotationSum;
 
         float _cookA;
         float _cookB;
@@ -41,6 +47,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _cookA = 0f;
             _cookB = 0f;
             _currentSide = Side.A;
+            if (_state == State.OnPan)
+                ApplyRestOnPanPose();
         }
 
         public struct LandingResult
@@ -55,8 +63,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             _rb = GetComponent<Rigidbody2D>();
             _col = GetComponent<Collider2D>();
+            _sr = GetComponent<SpriteRenderer>();
+            if (_sr != null)
+                _fallbackSprite = _sr.sprite;
+            _rb.bodyType = RigidbodyType2D.Kinematic;
+            _rb.simulated = true;
             _rb.gravityScale = 0f;
-            _rb.constraints = RigidbodyConstraints2D.None;
+            _rb.interpolation = RigidbodyInterpolation2D.None;
+            _rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         }
 
         void Start()
@@ -69,6 +83,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (_panCol != null && _col != null)
                     Physics2D.IgnoreCollision(_col, _panCol, true);
             }
+
+            if (_state == State.OnPan)
+                ApplyRestOnPanPose();
         }
 
         public void SetPanCenter(Transform center)
@@ -80,15 +97,24 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (_state != State.OnPan) return;
 
+            _rb.rotation = 0f;
+            transform.rotation = Quaternion.identity;
+            _lastAngleDeg = 0f;
+            _flightSignedRotationSum = 0f;
+
             _state = State.InFlight;
             _totalRotationDegrees = 0f;
             _fullRotations = 0;
-            _lastAngleDeg = _rb.rotation;
-            _throwStartRotationDeg = _rb.rotation;
 
             if (_panCol != null && _col != null)
                 Physics2D.IgnoreCollision(_col, _panCol, false);
 
+            if (_sr != null)
+                _sr.flipX = false;
+
+            _rb.bodyType = RigidbodyType2D.Dynamic;
+            _rb.constraints = RigidbodyConstraints2D.None;
+            _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             _rb.gravityScale = config != null ? config.gravityScale : 1f;
             _rb.linearVelocity = new Vector2(0f, verticalForce);
             _rb.angularVelocity = -spinDegPerSec;
@@ -101,6 +127,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 float currentAngle = _rb.rotation;
                 float delta = Mathf.DeltaAngle(_lastAngleDeg, currentAngle);
                 _lastAngleDeg = currentAngle;
+                _flightSignedRotationSum += delta;
                 _totalRotationDegrees += Mathf.Abs(delta);
                 _fullRotations = Mathf.RoundToInt(_totalRotationDegrees / 360f);
 
@@ -115,26 +142,20 @@ namespace IdlePancake.Prototypes.PancakeFlip
             else
             {
                 CookCurrentSide();
-
-                _rb.position = _restPosition;
-                _rb.linearVelocity = Vector2.zero;
-                _rb.angularVelocity = 0f;
-                _rb.gravityScale = 0f;
-                _rb.rotation = 0f;
-                transform.rotation = Quaternion.identity;
+                ApplyRestOnPanPose();
             }
         }
 
         void UpdateSideFromAngle()
         {
-            float net = Mathf.DeltaAngle(_throwStartRotationDeg, _rb.rotation);
-            _currentSide = SideFromNetRotationDegrees(net);
+            _currentSide = SideFromNetRotationDegrees(_flightSignedRotationSum);
         }
 
-        static Side SideFromNetRotationDegrees(float netDegrees)
+        static Side SideFromNetRotationDegrees(float totalDegrees)
         {
-            float a = Mathf.Repeat(netDegrees, 360f);
+            float a = Mathf.Repeat(totalDegrees, 360f);
             if (a < 0f) a += 360f;
+            // 90°…270° — перевёрнута «другая» сторона к сковороде; края 90/270 — боком, считаем как до переворота
             bool flipped = a > 90f && a < 270f;
             return flipped ? Side.B : Side.A;
         }
@@ -159,18 +180,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public void Land()
         {
+            float currentAngle = _rb.rotation;
+            float delta = Mathf.DeltaAngle(_lastAngleDeg, currentAngle);
+            _flightSignedRotationSum += delta;
+            _lastAngleDeg = currentAngle;
+
             UpdateSideFromAngle();
 
             _state = State.OnPan;
-            _rb.gravityScale = 0f;
-            _rb.linearVelocity = Vector2.zero;
-            _rb.angularVelocity = 0f;
-            _rb.rotation = 0f;
-            _rb.position = _restPosition;
-            transform.rotation = Quaternion.identity;
 
             if (_panCol != null && _col != null)
                 Physics2D.IgnoreCollision(_col, _panCol, true);
+
+            ApplyRestOnPanPose();
 
             OnLanded?.Invoke(new LandingResult
             {
@@ -179,6 +201,41 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 cookA = _cookA,
                 cookB = _cookB
             });
+        }
+
+        void ApplyRestOnPanPose()
+        {
+            _rb.bodyType = RigidbodyType2D.Kinematic;
+            _rb.interpolation = RigidbodyInterpolation2D.None;
+            _rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            _rb.gravityScale = 0f;
+            _rb.angularVelocity = 0f;
+            _rb.linearVelocity = Vector2.zero;
+
+            Sprite resA = spriteFaceA != null ? spriteFaceA : _fallbackSprite;
+            Sprite resB = spriteFaceB != null ? spriteFaceB : _fallbackSprite;
+            if (_sr != null)
+            {
+                bool sideAOnPan = _currentSide == Side.A;
+                _sr.sprite = sideAOnPan ? resB : resA;
+
+                bool sameArt = resA == resB;
+                _sr.flipX = sameArt && _currentSide == Side.B;
+            }
+
+            _rb.MoveRotation(0f);
+            _rb.MovePosition(_restPosition);
+            _rb.rotation = 0f;
+            transform.rotation = Quaternion.identity;
+        }
+
+        void LateUpdate()
+        {
+            if (_state != State.OnPan) return;
+            if (Mathf.Approximately(_rb.rotation, 0f))
+                return;
+            _rb.MoveRotation(0f);
+            transform.rotation = Quaternion.identity;
         }
     }
 }

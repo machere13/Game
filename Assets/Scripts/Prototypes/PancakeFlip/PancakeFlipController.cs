@@ -52,7 +52,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 float charge = Mathf.Min(1f, _chargeTime / config.maxHoldTime);
                 charge = Mathf.Clamp01(charge);
-                pancake.Throw(config.ForceFromCharge(charge), config.SpinFromCharge(charge));
+                pancake.Throw(ForceForCharge(charge), SpinForCharge(charge));
                 pan.PlayNod();
                 _isCharging = false;
                 _chargeTime = 0f;
@@ -68,7 +68,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
                 if (_chargeTime >= config.maxHoldTime && pan != null)
                 {
-                    pancake.Throw(config.ForceFromCharge(1f), config.SpinFromCharge(1f));
+                    pancake.Throw(ForceForCharge(1f), SpinForCharge(1f));
                     pan.PlayNod();
                     _isCharging = false;
                     _chargeTime = 0f;
@@ -87,10 +87,24 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (config == null || pancake == null || pan == null || !_isCharging) return;
             float charge = Mathf.Clamp01(_chargeTime / config.maxHoldTime);
-            pancake.Throw(config.ForceFromCharge(charge), config.SpinFromCharge(charge));
+            pancake.Throw(ForceForCharge(charge), SpinForCharge(charge));
             pan.PlayNod();
             _isCharging = false; _chargeTime = 0f;
             if (chargeIndicator != null) chargeIndicator.SetCharge(0f);
+        }
+
+        float ForceForCharge(float charge01)
+        {
+            var sess = GameSession.Instance;
+            if (sess != null) return sess.ForceFromChargeWithUpgrades(charge01);
+            return config.ForceFromCharge(charge01);
+        }
+
+        float SpinForCharge(float charge01)
+        {
+            var sess = GameSession.Instance;
+            if (sess != null) return sess.SpinFromChargeWithUpgrades(charge01);
+            return config.SpinFromCharge(charge01);
         }
 
         static bool GetSpaceOrMouseFromNewInputSystem()
