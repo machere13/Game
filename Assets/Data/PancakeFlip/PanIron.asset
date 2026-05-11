@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed70b213c64a75141aeda1f4546a947b, type: 3}
+  m_Name: PanIron
+  m_EditorClassIdentifier: 
+  displayName: "\u0427\u0443\u0433\u0443\u043D\u043D\u0430\u044F"
+  description: "\u0422\u044F\u0436\u0451\u043B\u0430\u044F, \u0440\u043E\u0432\u043D\u0435\u0435
+    \u0436\u0430\u0440. \u0411\u0430\u0437\u0430 +5% \u043A \u043A\u0430\u0436\u0434\u043E\u0439
+    \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0435."
+  icon: {fileID: 21300000, guid: e07d23aec3ba7b14fad6614505e94743, type: 3}
+  isStarter: 0
+  coinCost: 120
+  unlockLevel: 3
+  widerPerfectZone: 1.05
+  slowerOvercook: 1.05
+  stablerSpin: 1.05
+  easierFlip: 1.05

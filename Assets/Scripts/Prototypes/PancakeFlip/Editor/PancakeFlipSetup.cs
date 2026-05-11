@@ -13,6 +13,53 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         const string DataDir = "Assets/Data/PancakeFlip";
         const string OutputScenePath = "Assets/Scenes/PancakeFlip.unity";
 
+        [MenuItem("PancakeFlip/Подставить ссылки GameSession (сковородки)")]
+        public static void WireGameSessionPanData()
+        {
+            if (Application.isPlaying) { Debug.LogWarning("Останови Play."); return; }
+            ForceAllSprites();
+            var panSpr = LoadSprite("Pan");
+            var frontPanSpr = LoadSprite("FrontPan");
+            EnsureDefaultPanProgressionAssets(panSpr, frontPanSpr);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            var all = Object.FindObjectsByType<GameSession>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            if (all.Length == 0)
+            {
+                Debug.LogWarning("PancakeFlip: в загруженных сценах нет GameSession.");
+                return;
+            }
+            foreach (var gs in all)
+            {
+                gs.AutowirePanAssetsIfEmpty();
+                EditorUtility.SetDirty(gs);
+                if (gs.gameObject.scene.IsValid())
+                    EditorSceneManager.MarkSceneDirty(gs.gameObject.scene);
+            }
+            Debug.Log($"PancakeFlip: подставлены statTracks / panTiers в {all.Length} GameSession. Сохрани сцену (Ctrl+S), если нужно.");
+        }
+
+        public static void EnsureDefaultPanProgressionAssets(Sprite panSpr, Sprite frontPanSpr)
+        {
+            EnsureFolder("Assets/Data");
+            EnsureFolder(DataDir);
+            CreateStatTrack("StatWidePerfect", "Прожарка: шире норма", PanUpgradeConfig.EffectType.WiderPerfectZone, 1, 25,
+                "До 5 уровней: шире зона идеальной прожарки.", panSpr);
+            CreateStatTrack("StatSlowOver", "Меньше пережар", PanUpgradeConfig.EffectType.SlowerOvercook, 1, 25,
+                "До 5 уровней: выше порог пережарки.", panSpr);
+            CreateStatTrack("StatStableSpin", "Стабильное вращение", PanUpgradeConfig.EffectType.StablerSpin, 2, 30,
+                "До 5 уровней: спокойнее падение на сковороду.", panSpr);
+            CreateStatTrack("StatEasyFlip", "Легче подброс", PanUpgradeConfig.EffectType.EasierFlip, 2, 30,
+                "До 5 уровней: сильнее толчок при том же заряде.", panSpr);
+            CreatePanTier("PanStarter", "Сковорода из ларька", true, 0, 0, panSpr,
+                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f);
+            CreatePanTier("PanIron", "Чугунная", false, 120, 3, frontPanSpr != null ? frontPanSpr : panSpr,
+                "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f);
+            CreatePanTier("PanPro", "Профи", false, 280, 5, panSpr,
+                "Рабочая сковорода. База +10%.", 1.1f, 1.1f, 1.1f, 1.1f);
+        }
+
         [MenuItem("PancakeFlip/Build Everything")]
         public static void BuildEverything()
         {
@@ -112,10 +159,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
                 }, chocoStrawberrySpr);
 
-            var upg1 = CreateUpgrade("Широкая норма", 30, 1, PanUpgradeConfig.EffectType.WiderPerfectZone, 1.2f,
-                "Зона «идеальной» прожарки шире — проще довести обе стороны до подачи.", panSpr);
-            var upg2 = CreateUpgrade("Медленный пережар", 50, 2, PanUpgradeConfig.EffectType.SlowerOvercook, 1.3f,
-                "Порог пережарки выше — дольше можно жарить без штрафа к монетам.", panSpr);
+            EnsureDefaultPanProgressionAssets(panSpr, frontPanSpr);
+            var statWide = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatWidePerfect.asset");
+            var statOver = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatSlowOver.asset");
+            var statSpin = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatStableSpin.asset");
+            var statFlip = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatEasyFlip.asset");
+            var panStarter = AssetDatabase.LoadAssetAtPath<PanTierConfig>($"{DataDir}/PanStarter.asset");
+            var panIron = AssetDatabase.LoadAssetAtPath<PanTierConfig>($"{DataDir}/PanIron.asset");
+            var panPro = AssetDatabase.LoadAssetAtPath<PanTierConfig>($"{DataDir}/PanPro.asset");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
@@ -426,7 +477,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetFieldArr(sess, "startingRecipes", new Object[] { baseRecipe, cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe });
             SetFieldArr(sess, "allIngredients", new Object[] { dough, salami, cheese, banana, chocolate, mushroom, strawberry });
             SetField(sess, "doughIngredient", dough);
-            SetFieldArr(sess, "allUpgrades", new Object[] { upg1, upg2 });
+            SetFieldArr(sess, "statTracks", new Object[] { statWide, statOver, statSpin, statFlip });
+            SetFieldArr(sess, "panTiers", new Object[] { panStarter, panIron, panPro });
+            SetField(sess, "defaultPanTier", panStarter);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
@@ -519,6 +572,36 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             o.displayName = n; o.unlockLevel = lvl; o.rewardCoins = coins; o.rewardXp = xp; o.ingredients = ing;
             o.icon = icon;
             EditorUtility.SetDirty(o); return o;
+        }
+        static PanStatTrackConfig CreateStatTrack(string assetName, string title, PanUpgradeConfig.EffectType effectType, int unlockLvl, int costBase, string description, Sprite icon)
+        {
+            var o = GetOrCreate<PanStatTrackConfig>(DataDir, assetName);
+            o.displayName = title;
+            o.effectType = effectType;
+            o.unlockLevel = unlockLvl;
+            o.coinCostBase = costBase;
+            o.description = description;
+            if (icon != null) o.icon = icon;
+            EditorUtility.SetDirty(o);
+            return o;
+        }
+
+        static PanTierConfig CreatePanTier(string assetName, string title, bool starter, int cost, int unlockLvl, Sprite icon, string description,
+            float wide, float slowCook, float spin, float flip)
+        {
+            var o = GetOrCreate<PanTierConfig>(DataDir, assetName);
+            o.displayName = title;
+            o.isStarter = starter;
+            o.coinCost = cost;
+            o.unlockLevel = unlockLvl;
+            o.description = description;
+            if (icon != null) o.icon = icon;
+            o.widerPerfectZone = wide;
+            o.slowerOvercook = slowCook;
+            o.stablerSpin = spin;
+            o.easierFlip = flip;
+            EditorUtility.SetDirty(o);
+            return o;
         }
         static PanUpgradeConfig CreateUpgrade(string n, int cost, int lvl, PanUpgradeConfig.EffectType t, float v, string description, Sprite icon)
         {

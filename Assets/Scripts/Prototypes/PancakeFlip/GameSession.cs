@@ -1,9 +1,13 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class GameSession : MonoBehaviour
     {
+        public const string PanDataDir = "Assets/Data/PancakeFlip";
         [Header("Config")]
         [SerializeField] PancakeFlipConfig flipConfig;
         [SerializeField] LevelTableConfig levelTable;
@@ -11,7 +15,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] RecipeConfig baseRecipe;
         [SerializeField] IngredientConfig[] allIngredients;
         [SerializeField] IngredientConfig doughIngredient;
-        [SerializeField] PanUpgradeConfig[] allUpgrades;
+        [SerializeField] PanStatTrackConfig[] statTracks;
+        [SerializeField] PanTierConfig[] panTiers;
+        [SerializeField] PanTierConfig defaultPanTier;
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
@@ -24,7 +30,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public RecipeConfig BaseRecipe => baseRecipe;
         public IngredientConfig[] AllIngredients => allIngredients;
         public IngredientConfig DoughIngredient => doughIngredient;
-        public PanUpgradeConfig[] AllUpgrades => allUpgrades;
+        public PanStatTrackConfig[] StatTracks => statTracks;
+        public PanTierConfig[] PanTiers => panTiers;
+        public PanTierConfig EquippedPanTier => Upgrades != null ? Upgrades.EquippedPan : null;
         public RecipeConfig[] RecipeCatalog => startingRecipes;
 
         public static GameSession Instance { get; private set; }
@@ -37,10 +45,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void Awake()
         {
+            AutowirePanAssetsIfEmpty();
             Instance = this;
             Wallet = new Wallet(levelTable);
             Inventory = new Inventory();
             Upgrades = new PanUpgradeState();
+            Upgrades.Initialize(defaultPanTier);
             Orders = new OrderQueue(startingRecipes, 3, 3);
 
             if (pancake != null)
@@ -136,16 +146,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 Inventory.Add(ingredient, amount);
         }
 
-        public void BuyUpgrade(PanUpgradeConfig upgrade)
-        {
-            if (upgrade == null || Upgrades.IsOwned(upgrade)) return;
-            if (Wallet.Level < upgrade.unlockLevel) return;
-            if (Wallet.SpendCoins(upgrade.coinCost))
-            {
-                Upgrades.Purchase(upgrade);
-                ApplyUpgrades();
-            }
-        }
+        public bool TryBuyStatStep(PanStatTrackConfig track) =>
+            track != null && Upgrades.TryBuyStatStep(track, Wallet);
+
+        public bool TryBuyPanTier(PanTierConfig tier) =>
+            tier != null && Upgrades.TryBuyPan(tier, Wallet);
+
+        public void EquipPanTier(PanTierConfig tier) => Upgrades.EquipPan(tier);
 
         /// <summary>Клик по миске: бесплатно +1 теста, если миска пуста (в инвентаре 0).</summary>
         public void TapDough(IngredientConfig dough)
@@ -221,5 +228,102 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (stab > 1.001f) s /= stab;
             return s;
         }
+
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+            if (EditorApplication.isPlaying) return;
+            AutowirePanAssetsIfEmpty();
+        }
+
+        [ContextMenu("PancakeFlip/Подставить ассеты сковородки (Data/PancakeFlip)")]
+        void ContextAutowirePanAssets()
+        {
+            AutowirePanAssetsIfEmpty();
+            EditorUtility.SetDirty(this);
+        }
+#endif
+
+        /// <summary>В редакторе подставляет statTracks / panTiers / defaultPanTier из стандартных имён сетапа, если что-то пусто.</summary>
+        public void AutowirePanAssetsIfEmpty()
+        {
+#if UNITY_EDITOR
+            const string d = PanDataDir;
+            bool changed = false;
+
+            if (statTracks == null || statTracks.Length != 4 || AnyNull(statTracks))
+            {
+                var statPaths = new[]
+                {
+                    $"{d}/StatWidePerfect.asset",
+                    $"{d}/StatSlowOver.asset",
+                    $"{d}/StatStableSpin.asset",
+                    $"{d}/StatEasyFlip.asset",
+                };
+                var mergedStats = new PanStatTrackConfig[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    var disk = LoadStat(statPaths[i]);
+                    var keep = (statTracks != null && i < statTracks.Length) ? statTracks[i] : null;
+                    mergedStats[i] = disk != null ? disk : keep;
+                }
+                if (!AnyNull(mergedStats))
+                {
+                    statTracks = mergedStats;
+                    changed = true;
+                }
+            }
+
+            if (panTiers == null || panTiers.Length != 3 || AnyNull(panTiers))
+            {
+                var tierPaths = new[]
+                {
+                    $"{d}/PanStarter.asset",
+                    $"{d}/PanIron.asset",
+                    $"{d}/PanPro.asset",
+                };
+                var mergedTiers = new PanTierConfig[3];
+                for (int i = 0; i < 3; i++)
+                {
+                    var disk = LoadTier(tierPaths[i]);
+                    var keep = (panTiers != null && i < panTiers.Length) ? panTiers[i] : null;
+                    mergedTiers[i] = disk != null ? disk : keep;
+                }
+                if (!AnyNull(mergedTiers))
+                {
+                    panTiers = mergedTiers;
+                    changed = true;
+                }
+            }
+
+            var starter = LoadTier($"{d}/PanStarter.asset");
+            if (defaultPanTier == null && starter != null)
+            {
+                defaultPanTier = starter;
+                changed = true;
+            }
+
+            if (changed && !Application.isPlaying)
+                EditorUtility.SetDirty(this);
+#endif
+        }
+
+#if UNITY_EDITOR
+        static bool AnyNull<T>(T[] a) where T : Object
+        {
+            if (a == null) return true;
+            foreach (var x in a)
+            {
+                if (x == null) return true;
+            }
+            return false;
+        }
+
+        static PanStatTrackConfig LoadStat(string path) =>
+            AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>(path);
+
+        static PanTierConfig LoadTier(string path) =>
+            AssetDatabase.LoadAssetAtPath<PanTierConfig>(path);
+#endif
     }
 }
