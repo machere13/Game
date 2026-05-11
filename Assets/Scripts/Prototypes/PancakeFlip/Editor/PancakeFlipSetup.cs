@@ -1,4 +1,6 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.Events;
@@ -30,9 +32,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 Debug.LogWarning("PancakeFlip: в загруженных сценах нет GameSession.");
                 return;
             }
+            var uiFont = LoadPancakeFlipUiFont();
             foreach (var gs in all)
             {
                 gs.AutowirePanAssetsIfEmpty();
+                SetField(gs, "uiFont", uiFont);
                 EditorUtility.SetDirty(gs);
                 if (gs.gameObject.scene.IsValid())
                     EditorSceneManager.MarkSceneDirty(gs.gameObject.scene);
@@ -117,7 +121,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var doughFullSpr = LoadSprite("Full");
             var receiptBtnSpr = LoadSprite("ReceiptButton");
             var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var uiFont = LoadPancakeFlipUiFont();
+            var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
             EnsureFolder("Assets/Data");
             EnsureFolder(DataDir);
@@ -278,10 +283,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(pcBh, "spriteFaceB", faceB != null ? faceB : pancakeSpr);
 
             var canvasGo = new GameObject("Canvas");
-            var canvas = canvasGo.AddComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             var scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 1f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
@@ -300,9 +307,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var lvlTxt = new GameObject("LevelText", typeof(RectTransform));
             lvlTxt.transform.SetParent(profileGo.transform, false);
             Anch(lvlTxt, -0.2f, -0.42f, 1.2f, 0f);
-            var lvlT = lvlTxt.AddComponent<Text>(); lvlT.text = "Level 1"; lvlT.fontSize = 36;
-            lvlT.alignment = TextAnchor.MiddleCenter; lvlT.color = Color.white; lvlT.fontStyle = FontStyle.Bold;
-            if (font) lvlT.font = font;
+            var lvlT = lvlTxt.AddComponent<TextMeshProUGUI>();
+            lvlT.text = "Level 1";
+            lvlT.fontSize = PancakeFlipUiTypography.TopBarCoinsLevel;
+            lvlT.alignment = TextAlignmentOptions.Center;
+            lvlT.color = Color.white;
+            lvlT.fontStyle = FontStyles.Bold;
+            lvlT.raycastTarget = false;
+            if (tmpFont != null) lvlT.font = tmpFont;
 
             var walletGo = new GameObject("WalletIcon", typeof(RectTransform), typeof(Image));
             walletGo.transform.SetParent(uiRoot, false);
@@ -317,9 +329,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var coinTxt = new GameObject("CoinText", typeof(RectTransform));
             coinTxt.transform.SetParent(walletGo.transform, false);
             Anch(coinTxt, -1.5f, 0f, 0f, 1f);
-            var coinT = coinTxt.AddComponent<Text>(); coinT.text = "0"; coinT.fontSize = 36;
-            coinT.alignment = TextAnchor.MiddleRight; coinT.color = Color.white; coinT.fontStyle = FontStyle.Bold;
-            if (font) coinT.font = font;
+            var coinT = coinTxt.AddComponent<TextMeshProUGUI>();
+            coinT.text = "0";
+            coinT.fontSize = PancakeFlipUiTypography.TopBarCoinsLevel;
+            coinT.alignment = TextAlignmentOptions.MidlineRight;
+            coinT.color = Color.white;
+            coinT.fontStyle = FontStyles.Bold;
+            coinT.raycastTarget = false;
+            if (tmpFont != null) coinT.font = tmpFont;
 
             var tbvGo = new GameObject("TopBarView", typeof(RectTransform));
             tbvGo.transform.SetParent(uiRoot, false);
@@ -347,7 +364,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             cardsRect.anchorMin = V2(0.1f, 0); cardsRect.anchorMax = V2(1f, 1f);
             cardsRect.offsetMin = cardsRect.offsetMax = Vector2.zero;
 
-            var cardPrefab = MkOrderCard(cardsContainer.transform, font, orderItemSpr, rewardInfoSpr,
+            var cardPrefab = MkOrderCard(cardsContainer.transform, tmpFont, orderItemSpr, rewardInfoSpr,
                 new[] { person1Icon, person2Icon, person3Icon }, walletSpr, xpIconSpr);
             cardPrefab.gameObject.SetActive(false);
             var olv = orderPanel.AddComponent<OrderListView>();
@@ -363,22 +380,22 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             fillI.type = Image.Type.Filled; fillI.fillMethod = Image.FillMethod.Horizontal; fillI.fillAmount = 0;
             var cv = chargeGo.AddComponent<ChargeIndicatorView>(); SetField(cv, "fillImage", fillI);
 
-            var popup = MkLabel(uiRoot, "RotationsPopup", "", font, 52, new Color(1, 0.95f, 0.7f), 0);
+            var popup = MkLabel(uiRoot, "RotationsPopup", "", tmpFont, PancakeFlipUiTypography.RotationsPopup, new Color(1, 0.95f, 0.7f), 0);
             var popupR = popup.GetComponent<RectTransform>();
             popupR.anchorMin = V2(0.5f, 0.5f); popupR.anchorMax = V2(0.5f, 0.5f);
             popupR.sizeDelta = new Vector2(400, 100);
-            popup.GetComponent<Text>().fontStyle = FontStyle.Bold;
+            popup.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
 
             var scoreUI = new GameObject("ScoreUI", typeof(RectTransform));
             scoreUI.transform.SetParent(uiRoot, false);
             var sv = scoreUI.AddComponent<PancakeFlipScoreView>();
             SetField(sv, "pancake", pcBh); SetField(sv, "config", flipConfig);
-            SetField(sv, "rotationsPopupText", popup.GetComponent<Text>());
+            SetField(sv, "rotationsPopupText", popup.GetComponent<TextMeshProUGUI>());
 
             var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.74f, 0.34f), V2(0.97f, 0.81f), new Color(0, 0, 0, 0));
             cookRoot.GetComponent<Image>().raycastTarget = false;
-            MkCookPancakePreview(cookRoot, "A", V2(0, 0.53f), V2(1, 0.778f), pancakeSideUiSpr, font, out Image imgA);
-            MkCookPancakePreview(cookRoot, "B", V2(0, 0.232f), V2(1, 0.498f), pancakeSideUiSpr, font, out Image imgB);
+            MkCookPancakePreview(cookRoot, "A", V2(0, 0.53f), V2(1, 0.778f), pancakeSideUiSpr, tmpFont, out Image imgA);
+            MkCookPancakePreview(cookRoot, "B", V2(0, 0.232f), V2(1, 0.498f), pancakeSideUiSpr, tmpFont, out Image imgB);
             var civ = cookRoot.AddComponent<CookingIndicatorView>();
             SetField(civ, "pancake", pcBh); SetField(civ, "config", flipConfig);
             SetField(civ, "pancakeA", imgA); SetField(civ, "pancakeB", imgB);
@@ -388,24 +405,25 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             AddModalCanvasLayer(recipeBookScr);
             var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
             MkPanel(recipeBookScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
-            var rbTitle = MkLabel(recipeBookScr.transform, "Title", "Рецепты", font, 22, Color.white, 0);
+            var rbTitle = MkLabel(recipeBookScr.transform, "Title", "Рецепты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var rbTitleRt = rbTitle.GetComponent<RectTransform>();
             rbTitleRt.anchorMin = V2(0.04f, 0.86f); rbTitleRt.anchorMax = V2(0.96f, 0.98f);
             rbTitleRt.offsetMin = rbTitleRt.offsetMax = Vector2.zero;
-            rbTitle.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+            rbTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
             MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform rbListContent);
-            var rbTextGo = new GameObject("Body", typeof(RectTransform), typeof(Text), typeof(ContentSizeFitter), typeof(LayoutElement));
+            var rbTextGo = new GameObject("Body", typeof(RectTransform), typeof(TextMeshProUGUI), typeof(ContentSizeFitter), typeof(LayoutElement));
             rbTextGo.transform.SetParent(rbListContent, false);
             var rbLe = rbTextGo.GetComponent<LayoutElement>();
             rbLe.flexibleWidth = 1f;
             rbLe.minHeight = 80f;
-            var rbTxt = rbTextGo.GetComponent<Text>();
-            rbTxt.font = font;
-            rbTxt.fontSize = 22;
+            var rbTxt = rbTextGo.GetComponent<TextMeshProUGUI>();
+            if (tmpFont != null) rbTxt.font = tmpFont;
+            rbTxt.fontSize = PancakeFlipUiTypography.ModalBody;
             rbTxt.color = new Color(0.15f, 0.12f, 0.1f);
-            rbTxt.alignment = TextAnchor.UpperLeft;
-            rbTxt.horizontalOverflow = HorizontalWrapMode.Wrap;
-            rbTxt.verticalOverflow = VerticalWrapMode.Overflow;
+            rbTxt.alignment = TextAlignmentOptions.TopLeft;
+            rbTxt.enableWordWrapping = true;
+            rbTxt.overflowMode = TextOverflowModes.Overflow;
+            rbTxt.raycastTarget = false;
             var rbTxtRt = rbTextGo.GetComponent<RectTransform>();
             rbTxtRt.anchorMin = new Vector2(0f, 1f);
             rbTxtRt.anchorMax = new Vector2(1f, 1f);
@@ -415,7 +433,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var rbCsf = rbTextGo.GetComponent<ContentSizeFitter>();
             rbCsf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             rbCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            var rbCloseBtn = MkButton(recipeBookScr.transform, "CloseBtn", "Закрыть", font, new Color(0.52f, 0.3f, 0.24f, 1f));
+            var rbCloseBtn = MkButton(recipeBookScr.transform, "CloseBtn", "Закрыть", tmpFont, new Color(0.52f, 0.3f, 0.24f, 1f));
             var rbCloseRt = rbCloseBtn.GetComponent<RectTransform>();
             rbCloseRt.anchorMin = V2(0.28f, 0.02f); rbCloseRt.anchorMax = V2(0.72f, 0.1f);
             rbCloseRt.offsetMin = rbCloseRt.offsetMax = Vector2.zero;
@@ -428,13 +446,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             AddModalCanvasLayer(ingScr);
             var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
             MkPanel(ingScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
-            var ingTitle = MkLabel(ingScr.transform, "Title", "Ингредиенты", font, 22, Color.white, 0);
+            var ingTitle = MkLabel(ingScr.transform, "Title", "Ингредиенты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var ingTitleRt = ingTitle.GetComponent<RectTransform>();
             ingTitleRt.anchorMin = V2(0.04f, 0.86f); ingTitleRt.anchorMax = V2(0.96f, 0.98f);
             ingTitleRt.offsetMin = ingTitleRt.offsetMax = Vector2.zero;
-            ingTitle.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+            ingTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
             MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform iListContent);
-            var iCloseBtn = MkButton(ingScr.transform, "CloseBtn", "Закрыть", font, new Color(0.52f, 0.3f, 0.24f, 1f));
+            var iCloseBtn = MkButton(ingScr.transform, "CloseBtn", "Закрыть", tmpFont, new Color(0.52f, 0.3f, 0.24f, 1f));
             var iCloseRt = iCloseBtn.GetComponent<RectTransform>();
             iCloseRt.anchorMin = V2(0.28f, 0.02f); iCloseRt.anchorMax = V2(0.72f, 0.1f);
             iCloseRt.offsetMin = iCloseRt.offsetMax = Vector2.zero;
@@ -450,13 +468,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             AddModalCanvasLayer(upgScr);
             var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
             MkPanel(upgScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.45f, 0.32f, 0.22f, 1f));
-            var upgTitle = MkLabel(upgScr.transform, "Title", "Сковородки", font, 22, Color.white, 0);
+            var upgTitle = MkLabel(upgScr.transform, "Title", "Сковородки", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var upgTitleRt = upgTitle.GetComponent<RectTransform>();
             upgTitleRt.anchorMin = V2(0.04f, 0.86f); upgTitleRt.anchorMax = V2(0.96f, 0.98f);
             upgTitleRt.offsetMin = upgTitleRt.offsetMax = Vector2.zero;
-            upgTitle.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+            upgTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
             MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform uListContent);
-            var uCloseBtn = MkButton(upgScr.transform, "CloseBtn", "Закрыть", font, new Color(0.52f, 0.3f, 0.24f, 1f));
+            var uCloseBtn = MkButton(upgScr.transform, "CloseBtn", "Закрыть", tmpFont, new Color(0.52f, 0.3f, 0.24f, 1f));
             var uCloseRt = uCloseBtn.GetComponent<RectTransform>();
             uCloseRt.anchorMin = V2(0.28f, 0.02f); uCloseRt.anchorMax = V2(0.72f, 0.1f);
             uCloseRt.offsetMin = uCloseRt.offsetMax = Vector2.zero;
@@ -480,6 +498,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetFieldArr(sess, "statTracks", new Object[] { statWide, statOver, statSpin, statFlip });
             SetFieldArr(sess, "panTiers", new Object[] { panStarter, panIron, panPro });
             SetField(sess, "defaultPanTier", panStarter);
+            SetField(sess, "uiFont", uiFont);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
@@ -661,23 +680,46 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             c.sortingOrder = 100;
             go.AddComponent<GraphicRaycaster>();
         }
-        static GameObject MkLabel(Transform p, string n, string txt, Font f, int sz, Color c, float w)
+        static TMP_FontAsset _editorTmpFontAsset;
+
+        static TMP_FontAsset GetOrCreateEditorTmpFont(Font source)
+        {
+            if (_editorTmpFontAsset != null) return _editorTmpFontAsset;
+            if (source == null) return null;
+            _editorTmpFontAsset = TMP_FontAsset.CreateFontAsset(source, 72, 8, GlyphRenderMode.SDFAA, 4096, 4096);
+            if (_editorTmpFontAsset != null)
+                _editorTmpFontAsset.name = "PancakeFlip_Editor_Mouse_SDF";
+            return _editorTmpFontAsset;
+        }
+
+        static GameObject MkLabel(Transform p, string n, string txt, TMP_FontAsset font, int sz, Color c, float w)
         {
             var g = new GameObject(n, typeof(RectTransform));
             g.transform.SetParent(p, false);
-            var t = g.AddComponent<Text>(); t.text = txt; t.fontSize = sz; t.color = c;
-            t.alignment = TextAnchor.MiddleCenter; if (f) t.font = f;
+            var t = g.AddComponent<TextMeshProUGUI>();
+            t.text = txt;
+            t.fontSize = sz;
+            t.color = c;
+            t.alignment = TextAlignmentOptions.Center;
+            t.enableWordWrapping = false;
+            t.raycastTarget = false;
+            if (font != null) t.font = font;
             if (w > 0) { var le = g.AddComponent<LayoutElement>(); le.preferredWidth = w; }
             return g;
         }
-        static GameObject MkButton(Transform p, string n, string lbl, Font f, Color c)
+        static GameObject MkButton(Transform p, string n, string lbl, TMP_FontAsset font, Color c)
         {
             var g = new GameObject(n, typeof(RectTransform), typeof(Image), typeof(Button));
             g.transform.SetParent(p, false);
             g.GetComponent<Image>().color = c; g.GetComponent<Button>().targetGraphic = g.GetComponent<Image>();
             var t = new GameObject("Text", typeof(RectTransform)); t.transform.SetParent(g.transform, false); Fill(t);
-            var tx = t.AddComponent<Text>(); tx.text = lbl; tx.fontSize = 28; tx.alignment = TextAnchor.MiddleCenter;
-            tx.color = Color.white; if (f) tx.font = f;
+            var tx = t.AddComponent<TextMeshProUGUI>();
+            tx.text = lbl;
+            tx.fontSize = PancakeFlipUiTypography.PrimaryButtonLabel;
+            tx.alignment = TextAlignmentOptions.Center;
+            tx.color = Color.white;
+            tx.raycastTarget = false;
+            if (font != null) tx.font = font;
             return g;
         }
         static void Fill(GameObject g)
@@ -749,7 +791,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             return g;
         }
 
-        static OrderCardView MkOrderCard(Transform p, Font f, Sprite itemSpr, Sprite rewardSpr,
+        static OrderCardView MkOrderCard(Transform p, TMP_FontAsset f, Sprite itemSpr, Sprite rewardSpr,
             Sprite[] personIcons, Sprite coinSpr, Sprite xpSpr)
         {
             var root = new GameObject("OrderCard", typeof(RectTransform));
@@ -764,8 +806,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var coinTxtGo = new GameObject("CoinTxt", typeof(RectTransform));
             coinTxtGo.transform.SetParent(rewardBg.transform, false); Anch(coinTxtGo, 0.06f, 0.62f, 0.52f, 0.78f);
-            var coinT = coinTxtGo.AddComponent<Text>(); coinT.fontSize = 30; coinT.color = new Color(0.2f, 0.15f, 0.1f);
-            coinT.alignment = TextAnchor.MiddleRight; coinT.fontStyle = FontStyle.Bold; if (f) coinT.font = f;
+            var coinT = coinTxtGo.AddComponent<TextMeshProUGUI>();
+            coinT.fontSize = PancakeFlipUiTypography.OrderCardReward;
+            coinT.color = new Color(0.2f, 0.15f, 0.1f);
+            coinT.alignment = TextAlignmentOptions.MidlineRight;
+            coinT.fontStyle = FontStyles.Bold;
+            coinT.raycastTarget = false;
+            if (f != null) coinT.font = f;
 
             var coinIco = new GameObject("CoinIcon", typeof(RectTransform), typeof(Image));
             coinIco.transform.SetParent(rewardBg.transform, false); Anch(coinIco, 0.52f, 0.63f, 0.66f, 0.77f);
@@ -774,8 +821,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var xpTxtGo = new GameObject("XpTxt", typeof(RectTransform));
             xpTxtGo.transform.SetParent(rewardBg.transform, false); Anch(xpTxtGo, 0.06f, 0.44f, 0.52f, 0.60f);
-            var xpT = xpTxtGo.AddComponent<Text>(); xpT.fontSize = 30; xpT.color = new Color(0.2f, 0.15f, 0.1f);
-            xpT.alignment = TextAnchor.MiddleRight; xpT.fontStyle = FontStyle.Bold; if (f) xpT.font = f;
+            var xpT = xpTxtGo.AddComponent<TextMeshProUGUI>();
+            xpT.fontSize = PancakeFlipUiTypography.OrderCardReward;
+            xpT.color = new Color(0.2f, 0.15f, 0.1f);
+            xpT.alignment = TextAlignmentOptions.MidlineRight;
+            xpT.fontStyle = FontStyles.Bold;
+            xpT.raycastTarget = false;
+            if (f != null) xpT.font = f;
 
             var xpIco = new GameObject("XpIcon", typeof(RectTransform), typeof(Image));
             xpIco.transform.SetParent(rewardBg.transform, false); Anch(xpIco, 0.52f, 0.45f, 0.66f, 0.59f);
@@ -830,18 +882,18 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
         const float CookPancakePreviewSize = 172f;
 
-        static void MkCookPancakePreview(GameObject root, string side, Vector2 amin, Vector2 amax, Sprite pancakeSideSpr, Font f, out Image pancakeImg)
+        static void MkCookPancakePreview(GameObject root, string side, Vector2 amin, Vector2 amax, Sprite pancakeSideSpr, TMP_FontAsset f, out Image pancakeImg)
         {
             var row = new GameObject($"CookRow{side}", typeof(RectTransform));
             row.transform.SetParent(root.transform, false);
             Anch(row, amin.x, amin.y, amax.x, amax.y);
 
-            var lblGo = MkLabel(row.transform, $"Lbl{side}", side, f, 18, new Color(0.95f, 0.92f, 0.85f), 0);
+            var lblGo = MkLabel(row.transform, $"Lbl{side}", side, f, PancakeFlipUiTypography.CookingPreviewSideLabel, new Color(0.95f, 0.92f, 0.85f), 0);
             var lblRt = lblGo.GetComponent<RectTransform>();
             lblRt.anchorMin = new Vector2(0f, 0.1f);
             lblRt.anchorMax = new Vector2(0.12f, 0.9f);
             lblRt.offsetMin = lblRt.offsetMax = Vector2.zero;
-            lblGo.GetComponent<Text>().alignment = TextAnchor.MiddleLeft;
+            lblGo.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
 
             var imgGo = new GameObject("PancakePreview", typeof(RectTransform), typeof(Image));
             imgGo.transform.SetParent(row.transform, false);
@@ -857,6 +909,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             pancakeImg.preserveAspect = true;
             pancakeImg.color = Color.white;
             pancakeImg.raycastTarget = false;
+        }
+
+        static Font LoadPancakeFlipUiFont()
+        {
+            var f = AssetDatabase.LoadAssetAtPath<Font>("Assets/Art/PancakeFlip/MouseMemoirs.ttf");
+            return f != null ? f : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
 
         static void SetField(Object obj, string prop, Object val)

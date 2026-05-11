@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,8 +8,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] Image recipeImage;
         [SerializeField] Image rewardBg;
-        [SerializeField] Text coinText;
-        [SerializeField] Text xpText;
+        [SerializeField] TextMeshProUGUI coinText;
+        [SerializeField] TextMeshProUGUI xpText;
         [SerializeField] Image personIcon;
         [SerializeField] Button selectButton;
         [SerializeField] Image selectionHighlight;

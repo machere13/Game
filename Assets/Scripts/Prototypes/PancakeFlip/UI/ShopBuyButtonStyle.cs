@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,12 +9,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public static readonly Color BuyGreen = new Color(0.28f, 0.62f, 0.38f, 1f);
         public static readonly Color BuyRed = new Color(0.72f, 0.32f, 0.28f, 1f);
 
-        public const int ButtonFontSize = 30;
+        public const float ButtonFontSize = PancakeFlipUiTypography.ActionButton;
 
-        public const float PreferredButtonWidth = 200f;
-        public const float PreferredButtonHeight = 76f;
+        public const float PreferredButtonWidth = 268f;
+        public const float PreferredButtonHeight = 104f;
 
-        public static void Apply(Button btn, Text label, bool canBuy)
+        public static void Apply(Button btn, TextMeshProUGUI label, bool canBuy)
         {
             if (btn == null) return;
             btn.transition = Selectable.Transition.None;
@@ -22,10 +23,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (img != null)
                 img.color = canBuy ? BuyGreen : BuyRed;
             if (label != null)
+            {
                 label.fontSize = ButtonFontSize;
+                var f = PancakeFlipUiFonts.UiTmpFont;
+                if (f != null) label.font = f;
+            }
         }
 
-        /// <summary>Одна и та же ширина/высота кнопки в ингредиентах и апгрейдах (LayoutElement + без растягивания по flexible).</summary>
         public static void ApplyButtonLayout(Button btn)
         {
             if (btn == null) return;

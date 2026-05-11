@@ -1,4 +1,5 @@
 using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,7 +7,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class RecipeBookScreenView : MonoBehaviour
     {
-        [SerializeField] Text bodyText;
+        [SerializeField] TextMeshProUGUI bodyText;
         [SerializeField] Button closeButton;
         bool _runtimeUi;
 
@@ -28,6 +29,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void Rebuild()
         {
             if (bodyText == null) return;
+            var uiTmp = PancakeFlipUiFonts.UiTmpFont;
+            if (uiTmp != null) bodyText.font = uiTmp;
+            bodyText.fontSize = PancakeFlipUiTypography.ModalBody;
+
             var s = GameSession.Instance;
             if (s == null)
             {
@@ -68,7 +73,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
             bodyText.text = sb.ToString().TrimEnd();
         }
 
-        /// <summary>Если в сцене нет разметки (старый PancakeFlip.unity), создаём панель с нуля.</summary>
         public static RecipeBookScreenView EnsureUnderCanvas(Canvas canvas)
         {
             if (canvas == null) return null;
@@ -80,7 +84,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (existing != null)
                 Object.Destroy(existing.gameObject);
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var font = PancakeFlipUiFonts.UiTmpFont;
 
             var root = new GameObject("RecipeBookScreen", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             root.transform.SetParent(canvas.transform, false);
@@ -107,32 +111,34 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var hi = header.GetComponent<Image>();
             hi.color = new Color(0.32f, 0.46f, 0.4f, 1f);
 
-            var titleGo = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+            var titleGo = new GameObject("Title", typeof(RectTransform));
             titleGo.transform.SetParent(header.transform, false);
             var titleRt = titleGo.GetComponent<RectTransform>();
             titleRt.anchorMin = Vector2.zero;
             titleRt.anchorMax = Vector2.one;
             titleRt.offsetMin = titleRt.offsetMax = Vector2.zero;
-            var titleT = titleGo.GetComponent<Text>();
-            titleT.font = font;
-            titleT.fontSize = 22;
+            var titleT = titleGo.AddComponent<TextMeshProUGUI>();
+            if (font != null) titleT.font = font;
+            titleT.fontSize = PancakeFlipUiTypography.ModalHeaderTitle;
             titleT.color = Color.white;
-            titleT.alignment = TextAnchor.MiddleCenter;
+            titleT.alignment = TextAlignmentOptions.Center;
             titleT.text = "Рецепты";
+            titleT.raycastTarget = false;
 
-            var bodyGo = new GameObject("Body", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+            var bodyGo = new GameObject("Body", typeof(RectTransform));
             bodyGo.transform.SetParent(root.transform, false);
             var brt = bodyGo.GetComponent<RectTransform>();
             brt.anchorMin = new Vector2(0.04f, 0.14f);
             brt.anchorMax = new Vector2(0.96f, 0.84f);
             brt.offsetMin = brt.offsetMax = Vector2.zero;
-            var bodyT = bodyGo.GetComponent<Text>();
-            bodyT.font = font;
-            bodyT.fontSize = 22;
+            var bodyT = bodyGo.AddComponent<TextMeshProUGUI>();
+            if (font != null) bodyT.font = font;
+            bodyT.fontSize = PancakeFlipUiTypography.ModalBody;
             bodyT.color = new Color(0.15f, 0.12f, 0.1f);
-            bodyT.alignment = TextAnchor.UpperLeft;
-            bodyT.horizontalOverflow = HorizontalWrapMode.Wrap;
-            bodyT.verticalOverflow = VerticalWrapMode.Overflow;
+            bodyT.alignment = TextAlignmentOptions.TopLeft;
+            bodyT.enableWordWrapping = true;
+            bodyT.overflowMode = TextOverflowModes.Overflow;
+            bodyT.raycastTarget = false;
 
             var closeRoot = new GameObject("CloseBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             closeRoot.transform.SetParent(root.transform, false);
@@ -145,18 +151,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var cbtn = closeRoot.GetComponent<Button>();
             cbtn.targetGraphic = cimg;
 
-            var closeTxtGo = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+            var closeTxtGo = new GameObject("Text", typeof(RectTransform));
             closeTxtGo.transform.SetParent(closeRoot.transform, false);
             var ctxtRt = closeTxtGo.GetComponent<RectTransform>();
             ctxtRt.anchorMin = Vector2.zero;
             ctxtRt.anchorMax = Vector2.one;
             ctxtRt.offsetMin = ctxtRt.offsetMax = Vector2.zero;
-            var ctxt = closeTxtGo.GetComponent<Text>();
-            ctxt.font = font;
-            ctxt.fontSize = 24;
+            var ctxt = closeTxtGo.AddComponent<TextMeshProUGUI>();
+            if (font != null) ctxt.font = font;
+            ctxt.fontSize = PancakeFlipUiTypography.PrimaryButtonLabel;
             ctxt.color = Color.white;
-            ctxt.alignment = TextAnchor.MiddleCenter;
+            ctxt.alignment = TextAlignmentOptions.Center;
             ctxt.text = "Закрыть";
+            ctxt.raycastTarget = false;
 
             var rb = root.AddComponent<RecipeBookScreenView>();
             rb._runtimeUi = true;

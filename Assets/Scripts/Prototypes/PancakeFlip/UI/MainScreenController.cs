@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] RecipeBookScreenView recipeBookScreen;
         [SerializeField] PanUpgradeScreenView upgradeScreen;
-        [SerializeField] Text statusText;
+        [SerializeField] TextMeshProUGUI statusText;
         [SerializeField] CustomerAnimator customerAnimator;
 
         void Awake()
@@ -32,7 +33,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 upgradeScreen.Open();
         }
 
-        /// <summary>Тот же экран, что и клик по плите — но из UI, без OnMouseDown по спрайту.</summary>
         public void OpenIngredientsShop()
         {
             var stove = Object.FindFirstObjectByType<StoveView>();

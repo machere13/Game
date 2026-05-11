@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,7 +35,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             foreach (Transform child in upgradeListContainer)
                 Destroy(child.gameObject);
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var font = PancakeFlipUiFonts.UiTmpFont;
 
             AddSectionTitle(upgradeListContainer, "Характеристики сковороды", font);
             var tracks = s.StatTracks;
@@ -59,22 +60,24 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
         }
 
-        static void AddSectionTitle(Transform parent, string title, Font font)
+        static void AddSectionTitle(Transform parent, string title, TMP_FontAsset font)
         {
             var go = new GameObject("Section", typeof(RectTransform), typeof(LayoutElement));
             go.transform.SetParent(parent, false);
             var le = go.GetComponent<LayoutElement>();
-            le.minHeight = 40f;
-            le.preferredHeight = 40f;
+            le.minHeight = PancakeFlipUiTypography.SectionBlockMinHeight;
+            le.preferredHeight = PancakeFlipUiTypography.SectionBlockMinHeight;
             le.flexibleWidth = 1f;
             var tgo = new GameObject("Text", typeof(RectTransform));
             tgo.transform.SetParent(go.transform, false);
-            var txt = tgo.AddComponent<Text>();
+            var txt = tgo.AddComponent<TextMeshProUGUI>();
             txt.text = title;
-            txt.fontSize = 28;
-            txt.fontStyle = FontStyle.Bold;
+            txt.fontSize = PancakeFlipUiTypography.SectionHeading;
+            txt.fontStyle = FontStyles.Bold;
             txt.color = new Color(0.2f, 0.16f, 0.12f);
-            txt.alignment = TextAnchor.MiddleLeft;
+            txt.alignment = TextAlignmentOptions.MidlineLeft;
+            txt.enableWordWrapping = false;
+            txt.raycastTarget = false;
             if (font != null) txt.font = font;
             var rt = tgo.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -83,7 +86,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             rt.offsetMax = Vector2.zero;
         }
 
-        void CreateStatTrackRow(Transform parent, PanStatTrackConfig track, GameSession s, Font font)
+        void CreateStatTrackRow(Transform parent, PanStatTrackConfig track, GameSession s, TMP_FontAsset font)
         {
             var row = new GameObject("StatRow", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
             row.transform.SetParent(parent, false);
@@ -96,8 +99,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             h.childForceExpandWidth = false;
             h.childForceExpandHeight = false;
             var rowLe = row.GetComponent<LayoutElement>();
-            rowLe.minHeight = 128f;
-            rowLe.preferredHeight = 128f;
+            rowLe.minHeight = PancakeFlipUiTypography.StatRowMinHeight;
+            rowLe.preferredHeight = PancakeFlipUiTypography.StatRowMinHeight;
             rowLe.flexibleWidth = 1f;
 
             var iconGo = new GameObject("Icon", typeof(RectTransform));
@@ -121,26 +124,29 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             var titleGo = new GameObject("Title", typeof(RectTransform));
             titleGo.transform.SetParent(textsGo.transform, false);
-            var title = titleGo.AddComponent<Text>();
+            var title = titleGo.AddComponent<TextMeshProUGUI>();
             title.text = track.displayName;
-            title.fontSize = 24;
-            title.fontStyle = FontStyle.Bold;
+            title.fontSize = PancakeFlipUiTypography.ListRowTitle;
+            title.fontStyle = FontStyles.Bold;
             title.color = new Color(0.18f, 0.15f, 0.12f);
-            title.alignment = TextAnchor.UpperLeft;
+            title.alignment = TextAlignmentOptions.TopLeft;
+            title.enableWordWrapping = true;
+            title.raycastTarget = false;
             if (font != null) title.font = font;
-            titleGo.AddComponent<LayoutElement>().minHeight = 28f;
+            titleGo.AddComponent<LayoutElement>().minHeight = PancakeFlipUiTypography.TitleLineMinHeight;
 
             var descGo = new GameObject("Desc", typeof(RectTransform));
             descGo.transform.SetParent(textsGo.transform, false);
-            var desc = descGo.AddComponent<Text>();
-            desc.text = string.IsNullOrEmpty(track.description) ? "—" : track.description;
-            desc.fontSize = 18;
+            var desc = descGo.AddComponent<TextMeshProUGUI>();
+            desc.text = string.IsNullOrEmpty(track.description) ? " — " : track.description;
+            desc.fontSize = PancakeFlipUiTypography.ListRowDescription;
             desc.color = new Color(0.38f, 0.34f, 0.3f);
-            desc.alignment = TextAnchor.UpperLeft;
-            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
-            desc.verticalOverflow = VerticalWrapMode.Overflow;
+            desc.alignment = TextAlignmentOptions.TopLeft;
+            desc.enableWordWrapping = true;
+            desc.overflowMode = TextOverflowModes.Overflow;
+            desc.raycastTarget = false;
             if (font != null) desc.font = font;
-            descGo.AddComponent<LayoutElement>().preferredHeight = 44f;
+            descGo.AddComponent<LayoutElement>().preferredHeight = PancakeFlipUiTypography.DescPreferredHeight;
 
             var cellsGo = new GameObject("Cells", typeof(RectTransform), typeof(HorizontalLayoutGroup));
             cellsGo.transform.SetParent(row.transform, false);
@@ -176,10 +182,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             var btnTxtGo = new GameObject("Text", typeof(RectTransform));
             btnTxtGo.transform.SetParent(btnGo.transform, false);
-            var btnTxt = btnTxtGo.AddComponent<Text>();
+            var btnTxt = btnTxtGo.AddComponent<TextMeshProUGUI>();
             btnTxt.fontSize = ShopBuyButtonStyle.ButtonFontSize;
-            btnTxt.alignment = TextAnchor.MiddleCenter;
+            btnTxt.alignment = TextAlignmentOptions.Center;
             btnTxt.color = Color.white;
+            btnTxt.raycastTarget = false;
             if (font != null) btnTxt.font = font;
             var r = btnTxtGo.GetComponent<RectTransform>();
             r.anchorMin = Vector2.zero;
@@ -189,7 +196,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             BindStatRow(row, track, s, btn, btnTxt);
         }
 
-        void BindStatRow(GameObject row, PanStatTrackConfig track, GameSession s, Button btn, Text btnTxt)
+        void BindStatRow(GameObject row, PanStatTrackConfig track, GameSession s, Button btn, TextMeshProUGUI btnTxt)
         {
             int level = s.Upgrades.GetStatLevel(track.effectType);
             var cells = row.transform.Find("Cells");
@@ -231,7 +238,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
         }
 
-        void CreatePanTierRow(Transform parent, PanTierConfig tier, GameSession s, Font font)
+        void CreatePanTierRow(Transform parent, PanTierConfig tier, GameSession s, TMP_FontAsset font)
         {
             var row = new GameObject("PanRow", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
             row.transform.SetParent(parent, false);
@@ -244,8 +251,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             h.childForceExpandWidth = false;
             h.childForceExpandHeight = false;
             var rowLe = row.GetComponent<LayoutElement>();
-            rowLe.minHeight = 118f;
-            rowLe.preferredHeight = 118f;
+            rowLe.minHeight = PancakeFlipUiTypography.PanRowMinHeight;
+            rowLe.preferredHeight = PancakeFlipUiTypography.PanRowMinHeight;
             rowLe.flexibleWidth = 1f;
 
             var iconGo = new GameObject("Icon", typeof(RectTransform));
@@ -269,26 +276,29 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             var titleGo = new GameObject("Title", typeof(RectTransform));
             titleGo.transform.SetParent(textsGo.transform, false);
-            var title = titleGo.AddComponent<Text>();
+            var title = titleGo.AddComponent<TextMeshProUGUI>();
             title.text = tier.displayName;
-            title.fontSize = 24;
-            title.fontStyle = FontStyle.Bold;
+            title.fontSize = PancakeFlipUiTypography.ListRowTitle;
+            title.fontStyle = FontStyles.Bold;
             title.color = new Color(0.18f, 0.15f, 0.12f);
-            title.alignment = TextAnchor.UpperLeft;
+            title.alignment = TextAlignmentOptions.TopLeft;
+            title.enableWordWrapping = true;
+            title.raycastTarget = false;
             if (font != null) title.font = font;
-            titleGo.AddComponent<LayoutElement>().minHeight = 28f;
+            titleGo.AddComponent<LayoutElement>().minHeight = PancakeFlipUiTypography.TitleLineMinHeight;
 
             var descGo = new GameObject("Desc", typeof(RectTransform));
             descGo.transform.SetParent(textsGo.transform, false);
-            var desc = descGo.AddComponent<Text>();
-            desc.text = string.IsNullOrEmpty(tier.description) ? "—" : tier.description;
-            desc.fontSize = 18;
+            var desc = descGo.AddComponent<TextMeshProUGUI>();
+            desc.text = string.IsNullOrEmpty(tier.description) ? " — " : tier.description;
+            desc.fontSize = PancakeFlipUiTypography.ListRowDescription;
             desc.color = new Color(0.38f, 0.34f, 0.3f);
-            desc.alignment = TextAnchor.UpperLeft;
-            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
-            desc.verticalOverflow = VerticalWrapMode.Overflow;
+            desc.alignment = TextAlignmentOptions.TopLeft;
+            desc.enableWordWrapping = true;
+            desc.overflowMode = TextOverflowModes.Overflow;
+            desc.raycastTarget = false;
             if (font != null) desc.font = font;
-            descGo.AddComponent<LayoutElement>().preferredHeight = 44f;
+            descGo.AddComponent<LayoutElement>().preferredHeight = PancakeFlipUiTypography.DescPreferredHeight;
 
             var btnGo = new GameObject("BuyBtn", typeof(RectTransform), typeof(Image), typeof(Button));
             btnGo.transform.SetParent(row.transform, false);
@@ -298,10 +308,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             var btnTxtGo = new GameObject("Text", typeof(RectTransform));
             btnTxtGo.transform.SetParent(btnGo.transform, false);
-            var btnTxt = btnTxtGo.AddComponent<Text>();
+            var btnTxt = btnTxtGo.AddComponent<TextMeshProUGUI>();
             btnTxt.fontSize = ShopBuyButtonStyle.ButtonFontSize;
-            btnTxt.alignment = TextAnchor.MiddleCenter;
+            btnTxt.alignment = TextAlignmentOptions.Center;
             btnTxt.color = Color.white;
+            btnTxt.raycastTarget = false;
             if (font != null) btnTxt.font = font;
             var rr = btnTxtGo.GetComponent<RectTransform>();
             rr.anchorMin = Vector2.zero;
@@ -311,14 +322,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
             BindPanTierRow(tier, s, btn, btnTxt);
         }
 
-        void BindPanTierRow(PanTierConfig tier, GameSession s, Button btn, Text btnTxt)
+        void BindPanTierRow(PanTierConfig tier, GameSession s, Button btn, TextMeshProUGUI btnTxt)
         {
             bool owned = s.Upgrades.IsPanOwned(tier);
             var equipped = s.EquippedPanTier;
             bool isEquipped = equipped == tier;
             bool locked = tier.unlockLevel > s.Wallet.Level;
             bool canBuy = !tier.isStarter && !owned && !locked && s.Wallet.Coins >= tier.coinCost;
-            bool canEquip = owned && !isEquipped;
 
             if (tier.isStarter)
             {
@@ -381,7 +391,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 s.EquipPanTier(c);
                 Rebuild();
-             });
+            });
         }
     }
 }

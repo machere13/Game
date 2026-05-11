@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] Button serveButton;
         [SerializeField] Button serveBaseButton;
-        [SerializeField] Text statusText;
+        [SerializeField] TextMeshProUGUI statusText;
 
         void Start()
         {

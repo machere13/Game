@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -51,15 +52,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
                     ? Instantiate(ingredientRowPrefab, ingredientListContainer)
                     : CreateDefaultRow(ingredientListContainer);
 
-                var texts = go.GetComponentsInChildren<Text>();
-                if (texts.Length >= 1)
-                    texts[0].text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
+                var tmps = go.GetComponentsInChildren<TextMeshProUGUI>();
+                if (tmps.Length >= 1)
+                    tmps[0].text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
 
                 var buyBtn = go.GetComponentInChildren<Button>();
                 if (buyBtn != null)
                 {
                     bool canAfford = s.Wallet.Coins >= ing.coinCost;
-                    var btnText = buyBtn.GetComponentInChildren<Text>();
+                    var btnText = buyBtn.GetComponentInChildren<TextMeshProUGUI>();
                     if (btnText != null)
                         btnText.text = canAfford ? $"Купить — {ing.coinCost}¢" : $"Нужно {ing.coinCost}¢";
 
@@ -85,20 +86,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var row = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup));
             row.transform.SetParent(parent, false);
             var rect = row.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(0f, 88f);
+            rect.sizeDelta = new Vector2(0f, 118f);
             var rowH = row.GetComponent<HorizontalLayoutGroup>();
             rowH.childControlWidth = true;
             rowH.childControlHeight = true;
             rowH.childForceExpandWidth = false;
             rowH.childForceExpandHeight = false;
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var font = PancakeFlipUiFonts.UiTmpFont;
 
             var labelGo = new GameObject("Label", typeof(RectTransform));
             labelGo.transform.SetParent(row.transform, false);
-            var label = labelGo.AddComponent<Text>();
-            label.fontSize = 26;
+            var label = labelGo.AddComponent<TextMeshProUGUI>();
+            label.fontSize = PancakeFlipUiTypography.ShopIngredientRowLabel;
             label.color = new Color(0.18f, 0.15f, 0.12f);
+            label.alignment = TextAlignmentOptions.MidlineLeft;
+            label.enableWordWrapping = false;
+            label.raycastTarget = false;
             if (font != null) label.font = font;
             var le = labelGo.AddComponent<LayoutElement>();
             le.flexibleWidth = 1;
@@ -120,10 +124,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             var btnTxtGo = new GameObject("Text", typeof(RectTransform));
             btnTxtGo.transform.SetParent(btnGo.transform, false);
-            var btnTxt = btnTxtGo.AddComponent<Text>();
+            var btnTxt = btnTxtGo.AddComponent<TextMeshProUGUI>();
             btnTxt.fontSize = ShopBuyButtonStyle.ButtonFontSize;
-            btnTxt.alignment = TextAnchor.MiddleCenter;
+            btnTxt.alignment = TextAlignmentOptions.Center;
             btnTxt.color = Color.white;
+            btnTxt.raycastTarget = false;
             if (font != null) btnTxt.font = font;
             var btnTxtRect = btnTxtGo.GetComponent<RectTransform>();
             btnTxtRect.anchorMin = Vector2.zero;

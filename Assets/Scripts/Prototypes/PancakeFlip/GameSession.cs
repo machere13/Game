@@ -5,6 +5,7 @@ using UnityEditor;
 
 namespace IdlePancake.Prototypes.PancakeFlip
 {
+    [DefaultExecutionOrder(-100)]
     public sealed class GameSession : MonoBehaviour
     {
         public const string PanDataDir = "Assets/Data/PancakeFlip";
@@ -18,6 +19,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] PanStatTrackConfig[] statTracks;
         [SerializeField] PanTierConfig[] panTiers;
         [SerializeField] PanTierConfig defaultPanTier;
+        [Header("UI")]
+        [SerializeField] Font uiFont;
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
@@ -45,6 +48,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void Awake()
         {
+            PancakeFlipUiFonts.Configure(uiFont);
             AutowirePanAssetsIfEmpty();
             Instance = this;
             Wallet = new Wallet(levelTable);
@@ -55,6 +59,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (pancake != null)
                 pancake.OnLanded += OnPancakeLanded;
+        }
+
+        void Start()
+        {
+            PancakeFlipUiFonts.ApplyToAllTextsInLoadedScenes();
         }
 
         void OnDestroy()

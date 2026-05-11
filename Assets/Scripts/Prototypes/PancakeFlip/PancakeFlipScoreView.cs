@@ -1,5 +1,5 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace IdlePancake.Prototypes.PancakeFlip
 {
@@ -7,8 +7,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] PancakeBehaviour pancake;
         [SerializeField] PancakeFlipConfig config;
-        [SerializeField] Text scoreText;
-        [SerializeField] Text rotationsPopupText;
+        [SerializeField] TextMeshProUGUI scoreText;
+        [SerializeField] TextMeshProUGUI rotationsPopupText;
         [SerializeField] float popupDuration = 1.8f;
 
         float _popupHideTime = -1f;
