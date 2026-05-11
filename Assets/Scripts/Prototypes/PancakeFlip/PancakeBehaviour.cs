@@ -22,7 +22,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         SpriteRenderer _sr;
         Sprite _fallbackSprite;
         State _state = State.OnPan;
-        Side _currentSide = Side.A;
+        Side _currentSide = Side.B;
 
         float _totalRotationDegrees;
         int _fullRotations;
@@ -46,7 +46,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             _cookA = 0f;
             _cookB = 0f;
-            _currentSide = Side.A;
+            _currentSide = Side.B;
             if (_state == State.OnPan)
                 ApplyRestOnPanPose();
         }
