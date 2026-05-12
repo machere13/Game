@@ -338,34 +338,26 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void AutowirePanAssetsIfEmpty()
         {
 #if UNITY_EDITOR
-            const string d = PanDataDir;
-            const string art = "Assets/Art/PancakeFlip";
             bool changed = false;
 
             if (coinIcon == null)
             {
-                var s = AssetDatabase.LoadAssetAtPath<Sprite>($"{art}/Wallet.png");
+                var s = FindSpriteByName("Wallet");
                 if (s != null) { coinIcon = s; changed = true; }
             }
             if (closeIcon == null)
             {
-                var s = AssetDatabase.LoadAssetAtPath<Sprite>($"{art}/CloseIcon.png");
+                var s = FindSpriteByName("CloseIcon");
                 if (s != null) { closeIcon = s; changed = true; }
             }
 
             if (statTracks == null || statTracks.Length != 4 || AnyNull(statTracks))
             {
-                var statPaths = new[]
-                {
-                    $"{d}/StatWidePerfect.asset",
-                    $"{d}/StatSlowOver.asset",
-                    $"{d}/StatStableSpin.asset",
-                    $"{d}/StatEasyFlip.asset",
-                };
+                var names = new[] { "StatWidePerfect", "StatSlowOver", "StatStableSpin", "StatEasyFlip" };
                 var mergedStats = new PanStatTrackConfig[4];
                 for (int i = 0; i < 4; i++)
                 {
-                    var disk = LoadStat(statPaths[i]);
+                    var disk = FindAssetByName<PanStatTrackConfig>(names[i]);
                     var keep = (statTracks != null && i < statTracks.Length) ? statTracks[i] : null;
                     mergedStats[i] = disk != null ? disk : keep;
                 }
@@ -378,16 +370,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (panTiers == null || panTiers.Length != 3 || AnyNull(panTiers))
             {
-                var tierPaths = new[]
-                {
-                    $"{d}/PanStarter.asset",
-                    $"{d}/PanIron.asset",
-                    $"{d}/PanPro.asset",
-                };
+                var names = new[] { "PanStarter", "PanIron", "PanPro" };
                 var mergedTiers = new PanTierConfig[3];
                 for (int i = 0; i < 3; i++)
                 {
-                    var disk = LoadTier(tierPaths[i]);
+                    var disk = FindAssetByName<PanTierConfig>(names[i]);
                     var keep = (panTiers != null && i < panTiers.Length) ? panTiers[i] : null;
                     mergedTiers[i] = disk != null ? disk : keep;
                 }
@@ -398,7 +385,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 }
             }
 
-            var starter = LoadTier($"{d}/PanStarter.asset");
+            var starter = FindAssetByName<PanTierConfig>("PanStarter");
             if (defaultPanTier == null && starter != null)
             {
                 defaultPanTier = starter;
@@ -421,11 +408,32 @@ namespace IdlePancake.Prototypes.PancakeFlip
             return false;
         }
 
-        static PanStatTrackConfig LoadStat(string path) =>
-            AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>(path);
+        static T FindAssetByName<T>(string name) where T : Object
+        {
+            var guids = AssetDatabase.FindAssets($"{name} t:{typeof(T).Name}", new[] { PanDataDir });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(p) != name) continue;
+                var a = AssetDatabase.LoadAssetAtPath<T>(p);
+                if (a != null) return a;
+            }
+            return null;
+        }
 
-        static PanTierConfig LoadTier(string path) =>
-            AssetDatabase.LoadAssetAtPath<PanTierConfig>(path);
+        static Sprite FindSpriteByName(string name)
+        {
+            var guids = AssetDatabase.FindAssets($"{name} t:Sprite", new[] { "Assets/Art/PancakeFlip" });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(p) != name) continue;
+                var s = AssetDatabase.LoadAssetAtPath<Sprite>(p);
+                if (s != null) return s;
+            }
+            return null;
+        }
+
 #endif
     }
 }

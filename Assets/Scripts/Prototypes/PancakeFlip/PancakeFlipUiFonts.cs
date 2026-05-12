@@ -8,7 +8,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
     /// <summary>MouseMemoirs: исходный TTF для SDF; в билде — ссылка Font на GameSession.</summary>
     public static class PancakeFlipUiFonts
     {
-        public const string EditorAssetPath = "Assets/Art/PancakeFlip/MouseMemoirs.ttf";
+        public const string EditorAssetPath = "Assets/Art/PancakeFlip/UI/MouseMemoirs.ttf";
 
         const int TmpAtlasSize = 4096;
         const int TmpSamplingPointSize = 72;
@@ -51,8 +51,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
 #if UNITY_EDITOR
             var ed = UnityEditor.AssetDatabase.LoadAssetAtPath<Font>(EditorAssetPath);
-            if (ed != null)
-                return ed;
+            if (ed != null) return ed;
+            var guids = UnityEditor.AssetDatabase.FindAssets("MouseMemoirs t:Font", new[] { "Assets/Art/PancakeFlip" });
+            foreach (var g in guids)
+            {
+                var p = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
+                var f = UnityEditor.AssetDatabase.LoadAssetAtPath<Font>(p);
+                if (f != null) return f;
+            }
 #endif
             return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }

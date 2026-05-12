@@ -129,8 +129,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             EnsureFolder("Assets/Data");
             EnsureFolder(DataDir);
-            var flipConfig = GetOrCreate<PancakeFlipConfig>(DataDir, "PancakeFlipConfig");
-            var levelTable = GetOrCreate<LevelTableConfig>(DataDir, "LevelTable");
+            var flipConfig = GetOrCreate<PancakeFlipConfig>(ConfigsFolder, "PancakeFlipConfig");
+            var levelTable = GetOrCreate<LevelTableConfig>(ConfigsFolder, "LevelTable");
 
             var dough = CreateIngredient("Тесто", 0, 0, false, maxStock: 10, isDough: true);
             var salami = CreateIngredient("Салями", 5, 1, false);
@@ -168,13 +168,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 }, chocoStrawberrySpr);
 
             EnsureDefaultPanProgressionAssets(panSpr, frontPanSpr);
-            var statWide = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatWidePerfect.asset");
-            var statOver = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatSlowOver.asset");
-            var statSpin = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatStableSpin.asset");
-            var statFlip = AssetDatabase.LoadAssetAtPath<PanStatTrackConfig>($"{DataDir}/StatEasyFlip.asset");
-            var panStarter = AssetDatabase.LoadAssetAtPath<PanTierConfig>($"{DataDir}/PanStarter.asset");
-            var panIron = AssetDatabase.LoadAssetAtPath<PanTierConfig>($"{DataDir}/PanIron.asset");
-            var panPro = AssetDatabase.LoadAssetAtPath<PanTierConfig>($"{DataDir}/PanPro.asset");
+            var statWide = FindAssetByName<PanStatTrackConfig>("StatWidePerfect");
+            var statOver = FindAssetByName<PanStatTrackConfig>("StatSlowOver");
+            var statSpin = FindAssetByName<PanStatTrackConfig>("StatStableSpin");
+            var statFlip = FindAssetByName<PanStatTrackConfig>("StatEasyFlip");
+            var panStarter = FindAssetByName<PanTierConfig>("PanStarter");
+            var panIron = FindAssetByName<PanTierConfig>("PanIron");
+            var panPro = FindAssetByName<PanTierConfig>("PanPro");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
@@ -557,9 +557,15 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (o != null) EditorGUIUtility.PingObject(o);
         }
 
+        const string IngredientsFolder = DataDir + "/Ingredients";
+        const string RecipesFolder = DataDir + "/Recipes";
+        const string StatsFolder = DataDir + "/Stats";
+        const string PansFolder = DataDir + "/Pans";
+        const string ConfigsFolder = DataDir + "/Configs";
+
         static IngredientConfig CreateIngredient(string n, int cost, int lvl, bool inf, int maxStock = 0, bool isDough = false)
         {
-            var o = GetOrCreate<IngredientConfig>(DataDir, n);
+            var o = GetOrCreate<IngredientConfig>(IngredientsFolder, n);
             o.displayName = n; o.coinCost = cost; o.unlockLevel = lvl; o.infinite = inf;
             SetIntField(o, "maxStock", maxStock);
             SetBoolField(o, "isDough", isDough);
@@ -567,14 +573,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
         static RecipeConfig CreateRecipe(string n, int lvl, int coins, int xp, RecipeConfig.IngredientSlot[] ing, Sprite icon = null)
         {
-            var o = GetOrCreate<RecipeConfig>(DataDir, n);
+            var o = GetOrCreate<RecipeConfig>(RecipesFolder, n);
             o.displayName = n; o.unlockLevel = lvl; o.rewardCoins = coins; o.rewardXp = xp; o.ingredients = ing;
             o.icon = icon;
             EditorUtility.SetDirty(o); return o;
         }
         static PanStatTrackConfig CreateStatTrack(string assetName, string title, PanUpgradeConfig.EffectType effectType, int unlockLvl, int costBase, string description, Sprite icon)
         {
-            var o = GetOrCreate<PanStatTrackConfig>(DataDir, assetName);
+            var o = GetOrCreate<PanStatTrackConfig>(StatsFolder, assetName);
             o.displayName = title;
             o.effectType = effectType;
             o.unlockLevel = unlockLvl;
@@ -588,7 +594,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         static PanTierConfig CreatePanTier(string assetName, string title, bool starter, int cost, int unlockLvl, Sprite icon, string description,
             float wide, float slowCook, float spin, float flip)
         {
-            var o = GetOrCreate<PanTierConfig>(DataDir, assetName);
+            var o = GetOrCreate<PanTierConfig>(PansFolder, assetName);
             o.displayName = title;
             o.isStarter = starter;
             o.coinCost = cost;
@@ -604,7 +610,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
         static PanUpgradeConfig CreateUpgrade(string n, int cost, int lvl, PanUpgradeConfig.EffectType t, float v, string description, Sprite icon)
         {
-            var o = GetOrCreate<PanUpgradeConfig>(DataDir, n);
+            var o = GetOrCreate<PanUpgradeConfig>(StatsFolder, n);
             o.displayName = n; o.coinCost = cost; o.unlockLevel = lvl; o.effectType = t; o.effectValue = v;
             o.description = description;
             if (icon != null) o.icon = icon;
@@ -612,19 +618,32 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
         static T GetOrCreate<T>(string folder, string name) where T : ScriptableObject
         {
-            string p = $"{folder}/{name}.asset";
-            var e = AssetDatabase.LoadAssetAtPath<T>(p);
-            if (e != null) return e;
+            string direct = $"{folder}/{name}.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<T>(direct);
+            if (existing != null) return existing;
+
+            var guids = AssetDatabase.FindAssets($"{name} t:{typeof(T).Name}", new[] { DataDir });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(p) != name) continue;
+                var found = AssetDatabase.LoadAssetAtPath<T>(p);
+                if (found != null) return found;
+            }
+
+            EnsureFolder(folder);
             var o = ScriptableObject.CreateInstance<T>();
-            AssetDatabase.CreateAsset(o, p); return o;
+            AssetDatabase.CreateAsset(o, direct);
+            return o;
         }
 
         static void ForceAllSprites()
         {
-            foreach (var n in new[] { "Background", "OrderList", "OrderItem", "image 5", "image 4", "Pan", "Pancake", "PancakeBack", "PancakeSide", "Empty", "Full", "ReceiptButton", "PanUpgradeButton", "Profile", "Wallet", "BackPan", "FrontPan", "BottomPanel", "Person1", "Person2", "Person3", "Person4", "Person1Icon", "Person2Icon", "Person3Icon", "RewardInfo", "CommonPancake", "CheeseHamPancake", "ChocolateStrawberryPancake", "XPIcon" })
+            var guids = AssetDatabase.FindAssets("t:Texture2D", new[] { ArtDir });
+            foreach (var g in guids)
             {
-                string p = $"{ArtDir}/{n}.png";
-                if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, p.Replace("Assets/", "")))) continue;
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (!p.EndsWith(".png")) continue;
                 var imp = AssetImporter.GetAtPath(p) as TextureImporter;
                 if (imp == null) continue;
                 bool c = false;
@@ -636,10 +655,45 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
         static Sprite LoadSprite(string n)
         {
-            string p = $"{ArtDir}/{n}.png";
-            var s = AssetDatabase.LoadAssetAtPath<Sprite>(p);
-            if (s != null) return s;
-            foreach (var o in AssetDatabase.LoadAllAssetsAtPath(p)) if (o is Sprite sp) return sp;
+            var guids = AssetDatabase.FindAssets($"{n} t:Sprite", new[] { ArtDir });
+            foreach (var g in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(path) != n) continue;
+                var s = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (s != null) return s;
+            }
+            foreach (var g in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(path) != n) continue;
+                foreach (var o in AssetDatabase.LoadAllAssetsAtPath(path)) if (o is Sprite sp) return sp;
+            }
+            return null;
+        }
+
+        static string FindAssetFolder<T>(string name, string fallbackFolder) where T : Object
+        {
+            var guids = AssetDatabase.FindAssets($"{name} t:{typeof(T).Name}", new[] { DataDir });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(p) == name)
+                    return System.IO.Path.GetDirectoryName(p).Replace('\\', '/');
+            }
+            return fallbackFolder;
+        }
+
+        static T FindAssetByName<T>(string name) where T : Object
+        {
+            var guids = AssetDatabase.FindAssets($"{name} t:{typeof(T).Name}", new[] { DataDir });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(p) != name) continue;
+                var a = AssetDatabase.LoadAssetAtPath<T>(p);
+                if (a != null) return a;
+            }
             return null;
         }
 
@@ -938,8 +992,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
         static Font LoadPancakeFlipUiFont()
         {
-            var f = AssetDatabase.LoadAssetAtPath<Font>("Assets/Art/PancakeFlip/MouseMemoirs.ttf");
-            return f != null ? f : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var guids = AssetDatabase.FindAssets("MouseMemoirs t:Font", new[] { ArtDir });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                var f = AssetDatabase.LoadAssetAtPath<Font>(p);
+                if (f != null) return f;
+            }
+            return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
 
         static void SetField(Object obj, string prop, Object val)

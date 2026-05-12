@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 387a75688c056254c9d68640d5a7d887, type: 3}
+  m_Name: "\u0413\u0440\u0438\u0431"
+  m_EditorClassIdentifier: 
+  displayName: "\u0413\u0440\u0438\u0431"
+  icon: {fileID: 21300000, guid: abc1ee000000000000000000000ee005, type: 3}
+  coinCost: 4
+  unlockLevel: 3
+  infinite: 0
+  maxStock: 0
+  isDough: 0
