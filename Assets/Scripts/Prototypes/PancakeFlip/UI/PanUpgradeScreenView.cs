@@ -93,7 +93,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var h = row.GetComponent<HorizontalLayoutGroup>();
             h.childAlignment = TextAnchor.MiddleLeft;
             h.spacing = 10f;
-            h.padding = new RectOffset(12, 12, 10, 10);
+            h.padding = new RectOffset(12, 28, 10, 10);
             h.childControlWidth = true;
             h.childControlHeight = true;
             h.childForceExpandWidth = false;
@@ -108,9 +108,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var iconImg = iconGo.AddComponent<Image>();
             iconImg.sprite = track.icon != null ? track.icon : defaultPanIcon;
             iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
             var iconLe = iconGo.AddComponent<LayoutElement>();
-            iconLe.preferredWidth = 72f;
-            iconLe.preferredHeight = 72f;
+            iconLe.minWidth = 110f;
+            iconLe.preferredWidth = 110f;
+            iconLe.flexibleWidth = 0f;
+            iconLe.minHeight = 110f;
+            iconLe.preferredHeight = 110f;
+            iconLe.flexibleHeight = 0f;
 
             var textsGo = new GameObject("Texts", typeof(RectTransform), typeof(VerticalLayoutGroup));
             textsGo.transform.SetParent(row.transform, false);
@@ -245,8 +250,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             row.transform.SetParent(parent, false);
             var h = row.GetComponent<HorizontalLayoutGroup>();
             h.childAlignment = TextAnchor.MiddleLeft;
-            h.spacing = 10f;
-            h.padding = new RectOffset(12, 12, 10, 10);
+            h.spacing = 14f;
+            h.padding = new RectOffset(12, 28, 10, 10);
             h.childControlWidth = true;
             h.childControlHeight = true;
             h.childForceExpandWidth = false;
@@ -261,9 +266,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var iconImg = iconGo.AddComponent<Image>();
             iconImg.sprite = tier.icon != null ? tier.icon : defaultPanIcon;
             iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
             var iconLe = iconGo.AddComponent<LayoutElement>();
-            iconLe.preferredWidth = 88f;
-            iconLe.preferredHeight = 88f;
+            iconLe.minWidth = 260f;
+            iconLe.preferredWidth = 260f;
+            iconLe.flexibleWidth = 0f;
+            iconLe.minHeight = 160f;
+            iconLe.preferredHeight = 160f;
+            iconLe.flexibleHeight = 0f;
 
             var textsGo = new GameObject("Texts", typeof(RectTransform), typeof(VerticalLayoutGroup));
             textsGo.transform.SetParent(row.transform, false);

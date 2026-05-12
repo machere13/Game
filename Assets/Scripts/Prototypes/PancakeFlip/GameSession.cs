@@ -368,11 +368,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 }
             }
 
-            if (panTiers == null || panTiers.Length != 3 || AnyNull(panTiers))
+            if (panTiers == null || panTiers.Length != 4 || AnyNull(panTiers))
             {
-                var names = new[] { "PanStarter", "PanIron", "PanPro" };
-                var mergedTiers = new PanTierConfig[3];
-                for (int i = 0; i < 3; i++)
+                var names = new[] { "PanStarter", "PanIron", "PanPro", "PanElite" };
+                var mergedTiers = new PanTierConfig[4];
+                for (int i = 0; i < 4; i++)
                 {
                     var disk = FindAssetByName<PanTierConfig>(names[i]);
                     var keep = (panTiers != null && i < panTiers.Length) ? panTiers[i] : null;

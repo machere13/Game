@@ -28,7 +28,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public const float SectionBlockMinHeight = 62f;
         public const float StatRowMinHeight = 178f;
-        public const float PanRowMinHeight = 172f;
+        public const float PanRowMinHeight = 200f;
         public const float TitleLineMinHeight = 44f;
         public const float DescPreferredHeight = 72f;
     }
