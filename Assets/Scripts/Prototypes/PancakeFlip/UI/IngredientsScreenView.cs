@@ -200,7 +200,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
             foreach (var ing in ingredients)
             {
                 if (ing == null) continue;
-                if (ing.unlockLevel > s.Wallet.Level) continue;
                 CreateIngredientRow(ingredientListContainer, s, ing);
             }
         }

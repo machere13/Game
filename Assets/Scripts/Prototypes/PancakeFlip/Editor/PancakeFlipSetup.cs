@@ -114,6 +114,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var commonPancakeSpr = LoadSprite("CommonPancake");
             var cheeseHamPancakeSpr = LoadSprite("CheeseHamPancake");
             var chocoStrawberrySpr = LoadSprite("ChocolateStrawberryPancake");
+            var bananaChocoPancakeSpr = LoadSprite("BananaChocolatePancake");
+            var mushroomPancakeSpr = LoadSprite("MushroomPancake");
             var xpIconSpr = LoadSprite("XPIcon");
             var pancakeSideUiSpr = LoadSprite("PancakeSide");
             var pancakeBackSpr = LoadSprite("PancakeBack");
@@ -152,12 +154,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = banana, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
-                }, null);
+                }, bananaChocoPancakeSpr != null ? bananaChocoPancakeSpr : commonPancakeSpr);
             var mushroomRecipe = CreateRecipe("Грибной блин", 3, 22, 40,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = mushroom, amount = 2 }
-                }, null);
+                }, mushroomPancakeSpr != null ? mushroomPancakeSpr : commonPancakeSpr);
             var strawberryChocoRecipe = CreateRecipe("Блин с клубникой и шоколадом", 3, 25, 45,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
