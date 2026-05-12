@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "\u0411\u0430\u043D\u0430\u043D"
   m_EditorClassIdentifier: 
   displayName: "\u0411\u0430\u043D\u0430\u043D"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: abc1ba000000000000000000000ba001, type: 3}
   coinCost: 4
   unlockLevel: 2
   infinite: 0

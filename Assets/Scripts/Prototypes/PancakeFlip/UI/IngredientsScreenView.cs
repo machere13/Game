@@ -11,6 +11,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Button closeButton;
         [SerializeField] StoveView stove;
 
+        const float IconSize = 96f;
+        const string IconChildName = "Icon";
+
         void Start()
         {
             if (closeButton != null)
@@ -52,9 +55,18 @@ namespace IdlePancake.Prototypes.PancakeFlip
                     ? Instantiate(ingredientRowPrefab, ingredientListContainer)
                     : CreateDefaultRow(ingredientListContainer);
 
-                var tmps = go.GetComponentsInChildren<TextMeshProUGUI>();
-                if (tmps.Length >= 1)
-                    tmps[0].text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
+                var iconImg = FindIconImage(go.transform);
+                if (iconImg != null)
+                {
+                    iconImg.sprite = ing.icon;
+                    iconImg.enabled = ing.icon != null;
+                    iconImg.preserveAspect = true;
+                    iconImg.color = Color.white;
+                }
+
+                var label = FindLabel(go.transform);
+                if (label != null)
+                    label.text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
 
                 var buyBtn = go.GetComponentInChildren<Button>();
                 if (buyBtn != null)
@@ -81,6 +93,35 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
         }
 
+        static Image FindIconImage(Transform root)
+        {
+            var t = FindRecursive(root, IconChildName);
+            return t != null ? t.GetComponent<Image>() : null;
+        }
+
+        static TextMeshProUGUI FindLabel(Transform root)
+        {
+            var tmps = root.GetComponentsInChildren<TextMeshProUGUI>(true);
+            foreach (var t in tmps)
+            {
+                if (t == null) continue;
+                if (t.GetComponentInParent<Button>() != null) continue;
+                return t;
+            }
+            return tmps.Length > 0 ? tmps[0] : null;
+        }
+
+        static Transform FindRecursive(Transform root, string name)
+        {
+            if (root.name == name) return root;
+            for (int i = 0; i < root.childCount; i++)
+            {
+                var r = FindRecursive(root.GetChild(i), name);
+                if (r != null) return r;
+            }
+            return null;
+        }
+
         static GameObject CreateDefaultRow(Transform parent)
         {
             var row = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup));
@@ -92,8 +133,24 @@ namespace IdlePancake.Prototypes.PancakeFlip
             rowH.childControlHeight = true;
             rowH.childForceExpandWidth = false;
             rowH.childForceExpandHeight = false;
+            rowH.spacing = 12f;
+            rowH.childAlignment = TextAnchor.MiddleLeft;
+            rowH.padding = new RectOffset(8, 8, 4, 4);
 
             var font = PancakeFlipUiFonts.UiTmpFont;
+
+            var iconGo = new GameObject(IconChildName, typeof(RectTransform));
+            iconGo.transform.SetParent(row.transform, false);
+            var iconImg = iconGo.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+            var iconLe = iconGo.AddComponent<LayoutElement>();
+            iconLe.minWidth = IconSize;
+            iconLe.preferredWidth = IconSize;
+            iconLe.flexibleWidth = 0f;
+            iconLe.minHeight = IconSize;
+            iconLe.preferredHeight = IconSize;
+            iconLe.flexibleHeight = 0f;
 
             var labelGo = new GameObject("Label", typeof(RectTransform));
             labelGo.transform.SetParent(row.transform, false);
