@@ -59,17 +59,29 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _activeCooking = active;
             if (_sr != null) _sr.enabled = active;
             if (_col != null) _col.enabled = active;
-            if (!active)
+
+            _cookA = 0f;
+            _cookB = 0f;
+            _currentSide = Side.B;
+            _state = State.OnPan;
+            _totalRotationDegrees = 0f;
+            _fullRotations = 0;
+            _flightSignedRotationSum = 0f;
+            _lastAngleDeg = 0f;
+
+            if (_rb != null)
             {
-                _cookA = 0f;
-                _cookB = 0f;
-                if (_rb != null)
-                {
-                    _rb.linearVelocity = Vector2.zero;
-                    _rb.angularVelocity = 0f;
-                }
-                _state = State.OnPan;
+                _rb.linearVelocity = Vector2.zero;
+                _rb.angularVelocity = 0f;
+                _rb.bodyType = RigidbodyType2D.Kinematic;
+                _rb.gravityScale = 0f;
+                _rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
+
+            if (_panCol != null && _col != null)
+                Physics2D.IgnoreCollision(_col, _panCol, true);
+
+            if (active) ApplyRestOnPanPose();
         }
 
         public struct LandingResult
@@ -125,6 +137,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _flightSignedRotationSum = 0f;
 
             _state = State.InFlight;
+            _flightDuration = 0f;
             _totalRotationDegrees = 0f;
             _fullRotations = 0;
 
@@ -142,11 +155,22 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _rb.angularVelocity = -spinDegPerSec;
         }
 
+        float _flightDuration;
+        const float MaxFlightDuration = 6f;
+
         void FixedUpdate()
         {
             if (!_activeCooking) return;
             if (_state == State.InFlight)
             {
+                _flightDuration += Time.fixedDeltaTime;
+                if (_flightDuration > MaxFlightDuration)
+                {
+                    _flightDuration = 0f;
+                    Land();
+                    return;
+                }
+
                 float currentAngle = _rb.rotation;
                 float delta = Mathf.DeltaAngle(_lastAngleDeg, currentAngle);
                 _lastAngleDeg = currentAngle;
@@ -164,6 +188,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
             else
             {
+                _flightDuration = 0f;
                 CookCurrentSide();
                 ApplyRestOnPanPose();
             }
