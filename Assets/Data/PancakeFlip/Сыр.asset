@@ -17,3 +17,5 @@ MonoBehaviour:
   coinCost: 5
   unlockLevel: 1
   infinite: 0
+  maxStock: 0
+  isDough: 0

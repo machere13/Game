@@ -11,7 +11,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public int coinCost;
         [Tooltip("Уровень, на котором открывается")]
         public int unlockLevel;
-        [Tooltip("Бесконечный ресурс (тесто): не тратится при готовке")]
+        [Tooltip("Бесконечный ресурс: не тратится при готовке")]
         public bool infinite;
+        [Tooltip("Максимум на складе. 0 = без лимита")]
+        public int maxStock;
+        [Tooltip("Тесто-маркер: основа блина, обязательна в сборке")]
+        public bool isDough;
     }
 }

@@ -15,12 +15,34 @@ namespace IdlePancake.Prototypes.PancakeFlip
             return _stock.TryGetValue(ingredient, out int n) ? n : 0;
         }
 
-        public void Add(IngredientConfig ingredient, int amount)
+        public int Add(IngredientConfig ingredient, int amount)
         {
-            if (ingredient == null || ingredient.infinite) return;
+            if (ingredient == null || ingredient.infinite || amount <= 0) return 0;
             _stock.TryGetValue(ingredient, out int cur);
-            _stock[ingredient] = cur + amount;
+            int next = cur + amount;
+            if (ingredient.maxStock > 0 && next > ingredient.maxStock)
+                next = ingredient.maxStock;
+            int added = next - cur;
+            if (added <= 0) return 0;
+            _stock[ingredient] = next;
             OnChanged?.Invoke();
+            return added;
+        }
+
+        public bool IsAtCap(IngredientConfig ingredient)
+        {
+            if (ingredient == null || ingredient.maxStock <= 0) return false;
+            return GetAmount(ingredient) >= ingredient.maxStock;
+        }
+
+        public bool TryRemove(IngredientConfig ingredient, int amount)
+        {
+            if (ingredient == null || ingredient.infinite || amount <= 0) return false;
+            _stock.TryGetValue(ingredient, out int cur);
+            if (cur < amount) return false;
+            _stock[ingredient] = cur - amount;
+            OnChanged?.Invoke();
+            return true;
         }
 
         public bool HasIngredients(RecipeConfig recipe)

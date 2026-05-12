@@ -42,6 +42,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public event System.Action<LandingResult> OnLanded;
 
+        bool _activeCooking = true;
+        public bool IsActiveCooking => _activeCooking;
+
         public void ResetCooking()
         {
             _cookA = 0f;
@@ -49,6 +52,24 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _currentSide = Side.B;
             if (_state == State.OnPan)
                 ApplyRestOnPanPose();
+        }
+
+        public void SetActiveCooking(bool active)
+        {
+            _activeCooking = active;
+            if (_sr != null) _sr.enabled = active;
+            if (_col != null) _col.enabled = active;
+            if (!active)
+            {
+                _cookA = 0f;
+                _cookB = 0f;
+                if (_rb != null)
+                {
+                    _rb.linearVelocity = Vector2.zero;
+                    _rb.angularVelocity = 0f;
+                }
+                _state = State.OnPan;
+            }
         }
 
         public struct LandingResult
@@ -95,6 +116,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public void Throw(float verticalForce, float spinDegPerSec)
         {
+            if (!_activeCooking) return;
             if (_state != State.OnPan) return;
 
             _rb.rotation = 0f;
@@ -122,6 +144,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void FixedUpdate()
         {
+            if (!_activeCooking) return;
             if (_state == State.InFlight)
             {
                 float currentAngle = _rb.rotation;

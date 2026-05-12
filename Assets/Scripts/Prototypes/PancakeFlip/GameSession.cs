@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,6 +22,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] PanTierConfig defaultPanTier;
         [Header("UI")]
         [SerializeField] Font uiFont;
+        [SerializeField] Sprite coinIcon;
+        [SerializeField] Sprite closeIcon;
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
@@ -29,6 +32,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public Inventory Inventory { get; private set; }
         public OrderQueue Orders { get; private set; }
         public PanUpgradeState Upgrades { get; private set; }
+        public PancakeBuild Build { get; private set; }
         public PancakeFlipConfig FlipConfig => flipConfig;
         public RecipeConfig BaseRecipe => baseRecipe;
         public IngredientConfig[] AllIngredients => allIngredients;
@@ -37,14 +41,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public PanTierConfig[] PanTiers => panTiers;
         public PanTierConfig EquippedPanTier => Upgrades != null ? Upgrades.EquippedPan : null;
         public RecipeConfig[] RecipeCatalog => startingRecipes;
+        public Sprite CoinIcon => coinIcon;
+        public Sprite CloseIcon => closeIcon;
+        public bool HasCookingPancake { get; private set; }
 
         public static GameSession Instance { get; private set; }
 
         Order _activeOrder;
         public Order ActiveOrder => _activeOrder;
+        readonly Dictionary<IngredientConfig, int> _cookingIngredients = new Dictionary<IngredientConfig, int>();
 
         public event System.Action<Order> OnOrderSelected;
         public event System.Action OnServed;
+        public event System.Action OnPancakeStarted;
 
         void Awake()
         {
@@ -56,6 +65,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             Upgrades = new PanUpgradeState();
             Upgrades.Initialize(defaultPanTier);
             Orders = new OrderQueue(startingRecipes, 3, 3);
+            Build = new PancakeBuild();
 
             if (pancake != null)
                 pancake.OnLanded += OnPancakeLanded;
@@ -64,6 +74,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void Start()
         {
             PancakeFlipUiFonts.ApplyToAllTextsInLoadedScenes();
+            if (pancake != null)
+                pancake.SetActiveCooking(false);
         }
 
         void OnDestroy()
@@ -82,6 +94,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public bool TryServe()
         {
             if (pancake == null || _activeOrder == null) return false;
+            if (!HasCookingPancake) return false;
 
             float cookA = pancake.CookA;
             float cookB = pancake.CookB;
@@ -95,51 +108,92 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (cookA >= overcook) coinMult *= 0.5f;
             if (cookB >= overcook) coinMult *= 0.5f;
 
-            bool hasIngredients = _activeOrder.Recipe == null || Inventory.HasIngredients(_activeOrder.Recipe);
-            if (!hasIngredients)
-                coinMult *= 0.5f;
+            bool matches = MatchesOrderRecipe(_activeOrder.Recipe);
+            if (!matches) coinMult *= 0.5f;
 
             int coins = Mathf.RoundToInt(_activeOrder.RewardCoins * coinMult);
-            int xp = hasIngredients ? _activeOrder.RewardXp : Mathf.RoundToInt(_activeOrder.RewardXp * 0.5f);
+            int xp = matches ? _activeOrder.RewardXp : Mathf.RoundToInt(_activeOrder.RewardXp * 0.5f);
 
             Wallet.AddCoins(Mathf.Max(1, coins));
             Wallet.AddXp(Mathf.Max(1, xp));
 
-            if (hasIngredients && _activeOrder.Recipe != null)
-                Inventory.Consume(_activeOrder.Recipe);
-
             Orders.CompleteOrder(_activeOrder);
             _activeOrder = null;
 
+            ClearCookingPancake();
             ResetPancake();
             OnServed?.Invoke();
             return true;
         }
 
-        public bool TryServeBase()
+        bool MatchesOrderRecipe(RecipeConfig recipe)
         {
-            if (pancake == null || _activeOrder == null || baseRecipe == null) return false;
+            if (recipe == null) return _cookingIngredients.Count == 0;
+            if (recipe.ingredients == null) return _cookingIngredients.Count == 0;
 
-            float cookA = pancake.CookA;
-            float cookB = pancake.CookB;
-            float minReady = GetEffectivePerfectMin();
-            if (cookA < minReady || cookB < minReady) return false;
+            foreach (var slot in recipe.ingredients)
+            {
+                if (slot.ingredient == null) continue;
+                if (slot.ingredient.isDough) continue;
+                _cookingIngredients.TryGetValue(slot.ingredient, out int have);
+                if (have < slot.amount) return false;
+            }
 
-            bool hasIngredients = Inventory.HasIngredients(baseRecipe);
-            float mult = hasIngredients ? 1f : 0.5f;
+            int builtNonDough = 0;
+            foreach (var kv in _cookingIngredients)
+            {
+                if (kv.Key == null || kv.Key.isDough) continue;
+                builtNonDough += kv.Value;
+            }
+            int recipeNeed = 0;
+            foreach (var slot in recipe.ingredients)
+            {
+                if (slot.ingredient == null || slot.ingredient.isDough) continue;
+                recipeNeed += slot.amount;
+            }
+            return builtNonDough == recipeNeed;
+        }
 
-            if (hasIngredients)
-                Inventory.Consume(baseRecipe);
+        public bool TryCookFromBuild()
+        {
+            if (pancake == null) return false;
+            if (Build == null || !Build.CanCook) return false;
+            if (HasCookingPancake) return false;
 
-            Wallet.AddCoins(Mathf.Max(1, Mathf.RoundToInt(baseRecipe.rewardCoins * mult)));
-            Wallet.AddXp(Mathf.Max(1, Mathf.RoundToInt(baseRecipe.rewardXp * mult)));
+            var aggregate = Build.ToAggregate();
+            foreach (var kv in aggregate)
+            {
+                if (kv.Key == null) continue;
+                if (Inventory.GetAmount(kv.Key) < kv.Value) return false;
+            }
 
-            Orders.CompleteOrder(_activeOrder);
-            _activeOrder = null;
-            ResetPancake();
-            OnServed?.Invoke();
+            foreach (var kv in aggregate)
+            {
+                if (kv.Key == null) continue;
+                Inventory.TryRemove(kv.Key, kv.Value);
+            }
+
+            _cookingIngredients.Clear();
+            foreach (var kv in aggregate)
+                _cookingIngredients[kv.Key] = kv.Value;
+
+            Build.Clear();
+            HasCookingPancake = true;
+            pancake.SetActiveCooking(true);
+            pancake.ResetCooking();
+            OnPancakeStarted?.Invoke();
             return true;
         }
+
+        void ClearCookingPancake()
+        {
+            _cookingIngredients.Clear();
+            HasCookingPancake = false;
+            if (pancake != null)
+                pancake.SetActiveCooking(false);
+        }
+
+        public bool TryServeBase() => TryServe();
 
         public void DismissOrder(Order order)
         {
@@ -150,9 +204,36 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void BuyIngredient(IngredientConfig ingredient, int amount = 1)
         {
             if (ingredient == null || ingredient.infinite) return;
+            if (Inventory.IsAtCap(ingredient)) return;
             int totalCost = ingredient.coinCost * amount;
-            if (Wallet.SpendCoins(totalCost))
+            if (totalCost > 0 && !Wallet.SpendCoins(totalCost)) return;
+            if (totalCost == 0)
+            {
                 Inventory.Add(ingredient, amount);
+                return;
+            }
+            int added = Inventory.Add(ingredient, amount);
+            int refund = (amount - added) * ingredient.coinCost;
+            if (refund > 0) Wallet.AddCoins(refund);
+        }
+
+        public bool TryAddToBuild(IngredientConfig ingredient)
+        {
+            if (ingredient == null || Build == null) return false;
+            if (Build.IsFull) return false;
+            if (Inventory.GetAmount(ingredient) <= CountInBuild(ingredient)) return false;
+            return Build.TryAdd(ingredient);
+        }
+
+        public int CountInBuild(IngredientConfig ingredient)
+        {
+            if (ingredient == null || Build == null) return 0;
+            int n = 0;
+            foreach (var s in Build.Slots)
+            {
+                if (s == ingredient) n++;
+            }
+            return n;
         }
 
         public bool TryBuyStatStep(PanStatTrackConfig track) =>
@@ -258,7 +339,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
 #if UNITY_EDITOR
             const string d = PanDataDir;
+            const string art = "Assets/Art/PancakeFlip";
             bool changed = false;
+
+            if (coinIcon == null)
+            {
+                var s = AssetDatabase.LoadAssetAtPath<Sprite>($"{art}/Wallet.png");
+                if (s != null) { coinIcon = s; changed = true; }
+            }
+            if (closeIcon == null)
+            {
+                var s = AssetDatabase.LoadAssetAtPath<Sprite>($"{art}/CloseIcon.png");
+                if (s != null) { closeIcon = s; changed = true; }
+            }
 
             if (statTracks == null || statTracks.Length != 4 || AnyNull(statTracks))
             {

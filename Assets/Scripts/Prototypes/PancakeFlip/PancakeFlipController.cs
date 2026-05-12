@@ -24,6 +24,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (config == null || pancake == null) return;
 
+            if (!pancake.IsActiveCooking)
+            {
+                _isCharging = false;
+                _chargeTime = 0f;
+                _wasKeyOrMouseDown = false;
+                if (chargeIndicator != null) chargeIndicator.SetCharge(0f);
+                return;
+            }
+
             if (pancake.CurrentState == PancakeBehaviour.State.InFlight)
             {
                 _isCharging = false;
@@ -79,13 +88,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public void OnPointerDown(BaseEventData eventData)
         {
-            if (config == null || pancake == null || pancake.CurrentState == PancakeBehaviour.State.InFlight) return;
+            if (config == null || pancake == null || !pancake.IsActiveCooking || pancake.CurrentState == PancakeBehaviour.State.InFlight) return;
             if (!_isCharging) { _isCharging = true; _chargeTime = 0f; if (chargeIndicator != null) chargeIndicator.SetCharge(0f); }
         }
 
         public void OnPointerUp(BaseEventData eventData)
         {
-            if (config == null || pancake == null || pan == null || !_isCharging) return;
+            if (config == null || pancake == null || pan == null || !_isCharging || !pancake.IsActiveCooking) return;
             float charge = Mathf.Clamp01(_chargeTime / config.maxHoldTime);
             pancake.Throw(ForceForCharge(charge), SpinForCharge(charge));
             pan.PlayNod();

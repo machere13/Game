@@ -121,6 +121,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var doughFullSpr = LoadSprite("Full");
             var receiptBtnSpr = LoadSprite("ReceiptButton");
             var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
+            var closeIconSpr = LoadSprite("CloseIcon");
             var uiFont = LoadPancakeFlipUiFont();
             var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
@@ -129,7 +130,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var flipConfig = GetOrCreate<PancakeFlipConfig>(DataDir, "PancakeFlipConfig");
             var levelTable = GetOrCreate<LevelTableConfig>(DataDir, "LevelTable");
 
-            var dough = CreateIngredient("Тесто", 0, 0, false);
+            var dough = CreateIngredient("Тесто", 0, 0, false, maxStock: 10, isDough: true);
             var salami = CreateIngredient("Салями", 5, 1, false);
             var cheese = CreateIngredient("Сыр", 5, 1, false);
             var banana = CreateIngredient("Банан", 4, 2, false);
@@ -410,14 +411,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             rbTitleRt.anchorMin = V2(0.04f, 0.86f); rbTitleRt.anchorMax = V2(0.96f, 0.98f);
             rbTitleRt.offsetMin = rbTitleRt.offsetMax = Vector2.zero;
             rbTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform rbListContent);
-            var rbCloseBtn = MkButton(recipeBookScr.transform, "CloseBtn", "Закрыть", tmpFont, new Color(0.52f, 0.3f, 0.24f, 1f));
-            var rbCloseRt = rbCloseBtn.GetComponent<RectTransform>();
-            rbCloseRt.anchorMin = V2(0.28f, 0.02f); rbCloseRt.anchorMax = V2(0.72f, 0.1f);
-            rbCloseRt.offsetMin = rbCloseRt.offsetMax = Vector2.zero;
+            MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform rbListContent);
+            var rbCloseIcon = MkCloseIcon(recipeBookScr.transform, closeIconSpr);
             var rbsv = recipeBookScr.AddComponent<RecipeBookScreenView>();
             SetField(rbsv, "recipeListContainer", rbListContent);
-            SetField(rbsv, "closeButton", rbCloseBtn.GetComponent<Button>());
+            SetField(rbsv, "closeButton", rbCloseIcon);
 
             var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
             ingScr.GetComponent<Image>().raycastTarget = true;
@@ -429,14 +427,35 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             ingTitleRt.anchorMin = V2(0.04f, 0.86f); ingTitleRt.anchorMax = V2(0.96f, 0.98f);
             ingTitleRt.offsetMin = ingTitleRt.offsetMax = Vector2.zero;
             ingTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform iListContent);
-            var iCloseBtn = MkButton(ingScr.transform, "CloseBtn", "Закрыть", tmpFont, new Color(0.52f, 0.3f, 0.24f, 1f));
-            var iCloseRt = iCloseBtn.GetComponent<RectTransform>();
-            iCloseRt.anchorMin = V2(0.28f, 0.02f); iCloseRt.anchorMax = V2(0.72f, 0.1f);
-            iCloseRt.offsetMin = iCloseRt.offsetMax = Vector2.zero;
+
+            var iBuilderRow = new GameObject("BuilderRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+            iBuilderRow.transform.SetParent(ingScr.transform, false);
+            var iBuilderRt = iBuilderRow.GetComponent<RectTransform>();
+            iBuilderRt.anchorMin = V2(0.03f, 0.75f); iBuilderRt.anchorMax = V2(0.97f, 0.84f);
+            iBuilderRt.offsetMin = iBuilderRt.offsetMax = Vector2.zero;
+            var iBuilderH = iBuilderRow.GetComponent<HorizontalLayoutGroup>();
+            iBuilderH.spacing = 14f;
+            iBuilderH.childAlignment = TextAnchor.MiddleCenter;
+            iBuilderH.childControlWidth = false;
+            iBuilderH.childControlHeight = false;
+            iBuilderH.childForceExpandWidth = false;
+            iBuilderH.childForceExpandHeight = false;
+
+            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.73f), out RectTransform iListContent);
+
+            var iCookBtn = MkButton(ingScr.transform, "CookBtn", "Готовить", tmpFont, new Color(0.86f, 0.55f, 0.18f, 1f));
+            var iCookRt = iCookBtn.GetComponent<RectTransform>();
+            iCookRt.anchorMin = V2(0.18f, 0.02f); iCookRt.anchorMax = V2(0.82f, 0.11f);
+            iCookRt.offsetMin = iCookRt.offsetMax = Vector2.zero;
+            var iCookLabel = iCookBtn.GetComponentInChildren<TextMeshProUGUI>();
+
+            var iCloseIcon = MkCloseIcon(ingScr.transform, closeIconSpr);
             var isv = ingScr.AddComponent<IngredientsScreenView>();
             SetField(isv, "ingredientListContainer", iListContent);
-            SetField(isv, "closeButton", iCloseBtn.GetComponent<Button>());
+            SetField(isv, "builderContainer", iBuilderRow.transform);
+            SetField(isv, "cookButton", iCookBtn.GetComponent<Button>());
+            SetField(isv, "cookButtonLabel", iCookLabel);
+            SetField(isv, "closeIconButton", iCloseIcon);
 
             var stoveV = Object.FindObjectOfType<StoveView>();
             if (stoveV != null) { SetField(stoveV, "ingredientsScreen", isv); SetField(isv, "stove", stoveV); }
@@ -451,14 +470,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             upgTitleRt.anchorMin = V2(0.04f, 0.86f); upgTitleRt.anchorMax = V2(0.96f, 0.98f);
             upgTitleRt.offsetMin = upgTitleRt.offsetMax = Vector2.zero;
             upgTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.84f), out RectTransform uListContent);
-            var uCloseBtn = MkButton(upgScr.transform, "CloseBtn", "Закрыть", tmpFont, new Color(0.52f, 0.3f, 0.24f, 1f));
-            var uCloseRt = uCloseBtn.GetComponent<RectTransform>();
-            uCloseRt.anchorMin = V2(0.28f, 0.02f); uCloseRt.anchorMax = V2(0.72f, 0.1f);
-            uCloseRt.offsetMin = uCloseRt.offsetMax = Vector2.zero;
+            MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform uListContent);
+            var uCloseIcon = MkCloseIcon(upgScr.transform, closeIconSpr);
             var usv = upgScr.AddComponent<PanUpgradeScreenView>();
             SetField(usv, "upgradeListContainer", uListContent);
-            SetField(usv, "closeButton", uCloseBtn.GetComponent<Button>());
+            SetField(usv, "closeButton", uCloseIcon);
             SetField(usv, "defaultPanIcon", panSpr);
 
             var ctrlGo = new GameObject("PancakeFlipController");
@@ -477,6 +493,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetFieldArr(sess, "panTiers", new Object[] { panStarter, panIron, panPro });
             SetField(sess, "defaultPanTier", panStarter);
             SetField(sess, "uiFont", uiFont);
+            SetField(sess, "coinIcon", walletSpr);
+            SetField(sess, "closeIcon", closeIconSpr);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
@@ -493,26 +511,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var recipesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "RecipesBtn", V2(0.05f, 0.04f), V2(0.17f, 0.18f), receiptBtnSpr);
             var upgradesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "UpgradesBtn", V2(0.83f, 0.04f), V2(0.95f, 0.18f), panUpgradeBtnSpr);
-
-            var doughBowlRoot = new GameObject("DoughBowl", typeof(RectTransform), typeof(Image), typeof(Button));
-            doughBowlRoot.transform.SetParent(kitchenBottom.transform, false);
-            var doughRt = doughBowlRoot.GetComponent<RectTransform>();
-            doughRt.anchorMin = V2(0.04f, 0.10f); doughRt.anchorMax = V2(0.2f, 0.31f);
-            doughRt.offsetMin = doughRt.offsetMax = Vector2.zero;
-            var doughImg = doughBowlRoot.GetComponent<Image>();
-            doughImg.sprite = doughEmptySpr;
-            doughImg.preserveAspect = true;
-            doughImg.color = Color.white;
-            doughImg.type = Image.Type.Simple;
-            doughImg.raycastTarget = true;
-            var doughBtn = doughBowlRoot.GetComponent<Button>();
-            doughBtn.targetGraphic = doughImg;
-            var dbv = doughBowlRoot.AddComponent<DoughBowlView>();
-            SetField(dbv, "doughIngredient", dough);
-            SetField(dbv, "bowlButton", doughBtn);
-            SetField(dbv, "bowlImage", doughImg);
-            SetField(dbv, "emptySprite", doughEmptySpr);
-            SetField(dbv, "fullSprite", doughFullSpr);
 
             var kHud = new GameObject("KitchenHUD", typeof(RectTransform));
             kHud.transform.SetParent(uiRoot, false);
@@ -557,10 +555,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (o != null) EditorGUIUtility.PingObject(o);
         }
 
-        static IngredientConfig CreateIngredient(string n, int cost, int lvl, bool inf)
+        static IngredientConfig CreateIngredient(string n, int cost, int lvl, bool inf, int maxStock = 0, bool isDough = false)
         {
             var o = GetOrCreate<IngredientConfig>(DataDir, n);
             o.displayName = n; o.coinCost = cost; o.unlockLevel = lvl; o.infinite = inf;
+            SetIntField(o, "maxStock", maxStock);
+            SetBoolField(o, "isDough", isDough);
             EditorUtility.SetDirty(o); return o;
         }
         static RecipeConfig CreateRecipe(string n, int lvl, int coins, int xp, RecipeConfig.IngredientSlot[] ing, Sprite icon = null)
@@ -704,6 +704,51 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         {
             var r = g.GetComponent<RectTransform>(); r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one;
             r.offsetMin = r.offsetMax = Vector2.zero;
+        }
+        static Button MkCloseIcon(Transform p, Sprite spr)
+        {
+            const float CloseIconSize = 96f;
+            var g = new GameObject("CloseIcon", typeof(RectTransform), typeof(Image), typeof(Button));
+            g.transform.SetParent(p, false);
+            var rt = g.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(1f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(CloseIconSize, CloseIconSize);
+            var img = g.GetComponent<Image>();
+            img.raycastTarget = true;
+            img.preserveAspect = true;
+            var btn = g.GetComponent<Button>();
+            btn.targetGraphic = img;
+            btn.transition = Selectable.Transition.None;
+
+            if (spr != null)
+            {
+                img.sprite = spr;
+                img.color = Color.white;
+            }
+            else
+            {
+                img.color = new Color(1f, 1f, 1f, 0f);
+                var xGo = new GameObject("X", typeof(RectTransform));
+                xGo.transform.SetParent(g.transform, false);
+                var xRt = xGo.GetComponent<RectTransform>();
+                xRt.anchorMin = Vector2.zero;
+                xRt.anchorMax = Vector2.one;
+                xRt.offsetMin = xRt.offsetMax = Vector2.zero;
+                var xTmp = xGo.AddComponent<TextMeshProUGUI>();
+                var f = PancakeFlipUiFonts.UiTmpFont;
+                if (f != null) xTmp.font = f;
+                xTmp.text = "×";
+                xTmp.color = new Color(0.78f, 0.18f, 0.18f, 1f);
+                xTmp.alignment = TextAlignmentOptions.Center;
+                xTmp.fontSize = 56f;
+                xTmp.fontStyle = FontStyles.Bold;
+                xTmp.raycastTarget = false;
+            }
+
+            return btn;
         }
 
         static void MkVerticalScrollArea(Transform parent, string name, Vector2 amin, Vector2 amax, out RectTransform contentOut)
@@ -905,6 +950,18 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var so = new SerializedObject(obj);
             var p = so.FindProperty(prop);
             if (p != null && p.propertyType == SerializedPropertyType.Float) { p.floatValue = val; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+        static void SetIntField(Object obj, string prop, int val)
+        {
+            var so = new SerializedObject(obj);
+            var p = so.FindProperty(prop);
+            if (p != null && p.propertyType == SerializedPropertyType.Integer) { p.intValue = val; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+        static void SetBoolField(Object obj, string prop, bool val)
+        {
+            var so = new SerializedObject(obj);
+            var p = so.FindProperty(prop);
+            if (p != null && p.propertyType == SerializedPropertyType.Boolean) { p.boolValue = val; so.ApplyModifiedPropertiesWithoutUndo(); }
         }
         static void SetFieldArr(Object obj, string prop, Object[] vals)
         {

@@ -216,15 +216,16 @@ namespace IdlePancake.Prototypes.PancakeFlip
             bool canAfford = !maxed && !locked && s.Wallet.Coins >= cost;
             bool canBuy = !maxed && !locked && canAfford;
 
+            bool showCoin = !maxed && !locked;
             if (btnTxt != null)
             {
                 if (maxed) btnTxt.text = "Максимум";
                 else if (locked) btnTxt.text = $"Ур. {track.unlockLevel}";
-                else if (!canAfford) btnTxt.text = $"— {cost}¢";
-                else btnTxt.text = $"Купить — {cost}¢";
+                else btnTxt.text = cost.ToString();
             }
 
             ShopBuyButtonStyle.Apply(btn, btnTxt, canBuy);
+            ShopBuyButtonStyle.SetCoinIcon(btn, showCoin);
             btn.interactable = canBuy;
             btn.onClick.RemoveAllListeners();
             if (canBuy)
@@ -336,6 +337,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                     btnTxt.text = isEquipped ? "Надета" : "Надеть";
                 bool canEquipStarter = !isEquipped;
                 ShopBuyButtonStyle.Apply(btn, btnTxt, canEquipStarter);
+                ShopBuyButtonStyle.SetCoinIcon(btn, false);
                 btn.interactable = canEquipStarter;
                 btn.onClick.RemoveAllListeners();
                 if (canEquipStarter)
@@ -355,10 +357,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (btnTxt != null)
                 {
                     if (locked) btnTxt.text = $"Ур. {tier.unlockLevel}";
-                    else if (!canBuy && !locked) btnTxt.text = $"— {tier.coinCost}¢";
-                    else btnTxt.text = $"Купить — {tier.coinCost}¢";
+                    else btnTxt.text = tier.coinCost.ToString();
                 }
                 ShopBuyButtonStyle.Apply(btn, btnTxt, canBuy);
+                ShopBuyButtonStyle.SetCoinIcon(btn, !locked);
                 btn.interactable = canBuy;
                 btn.onClick.RemoveAllListeners();
                 if (canBuy)
@@ -377,6 +379,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 if (btnTxt != null) btnTxt.text = "Надета";
                 ShopBuyButtonStyle.Apply(btn, btnTxt, false);
+                ShopBuyButtonStyle.SetCoinIcon(btn, false);
                 btn.interactable = false;
                 btn.onClick.RemoveAllListeners();
                 return;
@@ -384,6 +387,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (btnTxt != null) btnTxt.text = "Надеть";
             ShopBuyButtonStyle.Apply(btn, btnTxt, true);
+            ShopBuyButtonStyle.SetCoinIcon(btn, false);
             btn.interactable = true;
             btn.onClick.RemoveAllListeners();
             var c = tier;

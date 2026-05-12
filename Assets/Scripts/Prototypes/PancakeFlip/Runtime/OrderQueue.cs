@@ -6,6 +6,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
     public sealed class OrderQueue
     {
         readonly List<Order> _visible = new();
+        readonly List<RecipeConfig> _source = new();
         readonly List<RecipeConfig> _pool = new();
         readonly int _maxVisible;
         readonly int _personCount;
@@ -19,17 +20,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _maxVisible = maxVisible;
             _personCount = Mathf.Max(1, personCount);
             if (availableRecipes != null)
-                _pool.AddRange(availableRecipes);
+            {
+                foreach (var r in availableRecipes)
+                {
+                    if (r != null) _source.Add(r);
+                }
+            }
+            _pool.AddRange(_source);
             Refill();
         }
 
         public void DismissOrder(Order order)
         {
-            if (_visible.Remove(order))
-            {
-                if (order.Recipe != null)
-                    _pool.Add(order.Recipe);
-            }
+            _visible.Remove(order);
             Refill();
             OnChanged?.Invoke();
         }
@@ -43,8 +46,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void Refill()
         {
-            while (_visible.Count < _maxVisible && _pool.Count > 0)
+            while (_visible.Count < _maxVisible)
             {
+                if (_pool.Count == 0)
+                {
+                    if (_source.Count == 0) return;
+                    _pool.AddRange(_source);
+                }
                 int idx = Random.Range(0, _pool.Count);
                 var recipe = _pool[idx];
                 _pool.RemoveAt(idx);
@@ -55,7 +63,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void AddRecipesToPool(RecipeConfig[] recipes)
         {
             if (recipes == null) return;
-            _pool.AddRange(recipes);
+            foreach (var r in recipes)
+            {
+                if (r != null)
+                {
+                    _source.Add(r);
+                    _pool.Add(r);
+                }
+            }
             Refill();
             OnChanged?.Invoke();
         }
