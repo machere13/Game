@@ -28,6 +28,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         int _fullRotations;
         float _lastAngleDeg;
         float _flightSignedRotationSum;
+        Side _sideAtThrow = Side.B;
 
         float _cookA;
         float _cookB;
@@ -135,6 +136,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             transform.rotation = Quaternion.identity;
             _lastAngleDeg = 0f;
             _flightSignedRotationSum = 0f;
+            _sideAtThrow = _currentSide;
 
             _state = State.InFlight;
             _flightDuration = 0f;
@@ -196,16 +198,18 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void UpdateSideFromAngle()
         {
-            _currentSide = SideFromNetRotationDegrees(_flightSignedRotationSum);
+            _currentSide = SideAfterRotation(_sideAtThrow, _flightSignedRotationSum);
         }
 
-        static Side SideFromNetRotationDegrees(float totalDegrees)
+        // Сторона, лежащая на сковороде, определяется ОТНОСИТЕЛЬНО стороны на момент броска:
+        // каждый чистый полуоборот (180°) переворачивает блин на другую сторону.
+        // Полный оборот (360°) возвращает ту же сторону. Чётность полуоборотов решает всё.
+        static Side SideAfterRotation(Side sideAtThrow, float netRotationDegrees)
         {
-            float a = Mathf.Repeat(totalDegrees, 360f);
-            if (a < 0f) a += 360f;
-            // 90°…270° — перевёрнута «другая» сторона к сковороде; края 90/270 — боком, считаем как до переворота
-            bool flipped = a > 90f && a < 270f;
-            return flipped ? Side.B : Side.A;
+            int halfTurns = Mathf.RoundToInt(netRotationDegrees / 180f);
+            bool flipped = (halfTurns & 1) != 0;
+            if (!flipped) return sideAtThrow;
+            return sideAtThrow == Side.A ? Side.B : Side.A;
         }
 
         void CookCurrentSide()
