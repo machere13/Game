@@ -10,6 +10,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] PanUpgradeScreenView upgradeScreen;
         [SerializeField] TextMeshProUGUI statusText;
         [SerializeField] CustomerAnimator customerAnimator;
+        [SerializeField] StoveView stove;
+        [SerializeField] IngredientsScreenView ingredientsScreen;
+
+        bool _shopResolved;
 
         void Awake()
         {
@@ -35,14 +39,18 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public void OpenIngredientsShop()
         {
-            var stove = Object.FindFirstObjectByType<StoveView>();
+            // Ссылки берём из инспектора; если не назначены — ищем один раз и кешируем.
+            if (!_shopResolved)
+            {
+                if (stove == null) stove = Object.FindFirstObjectByType<StoveView>();
+                if (ingredientsScreen == null) ingredientsScreen = Object.FindFirstObjectByType<IngredientsScreenView>();
+                _shopResolved = true;
+            }
+
             if (stove != null)
                 stove.Open();
-            else
-            {
-                var shop = Object.FindFirstObjectByType<IngredientsScreenView>();
-                shop?.Open();
-            }
+            else if (ingredientsScreen != null)
+                ingredientsScreen.Open();
         }
 
         public void Serve()
@@ -56,15 +64,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 return;
             }
 
-            var pancake = Object.FindFirstObjectByType<PancakeBehaviour>();
+            var pancake = s.Pancake;
             if (pancake != null)
             {
                 float min = s.GetEffectivePerfectMin();
                 if (pancake.CookA < min || pancake.CookB < min)
                 {
-                    string sideA = pancake.CookA < min ? $"A:{pancake.CookA:P0}" : "";
-                    string sideB = pancake.CookB < min ? $"B:{pancake.CookB:P0}" : "";
-                    ShowStatus($"Блин не готов! {sideA} {sideB}".Trim());
+                    ShowStatus(NotReadyMessage(pancake, min));
                     return;
                 }
             }
@@ -98,6 +104,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 ShowStatus("Блин не готов!");
             else
                 ShowStatus("Базовый блин сдан!");
+        }
+
+        // Сообщение «не готов» с указанием недожаренных сторон — без хака со склейкой и .Trim().
+        static string NotReadyMessage(PancakeBehaviour pancake, float min)
+        {
+            var sb = new System.Text.StringBuilder("Блин не готов!");
+            if (pancake.CookA < min) sb.Append($" A:{pancake.CookA:P0}");
+            if (pancake.CookB < min) sb.Append($" B:{pancake.CookB:P0}");
+            return sb.ToString();
         }
 
         void ShowStatus(string msg)

@@ -29,6 +29,27 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         readonly List<Button> _slotButtons = new List<Button>();
 
+        // Кэш строк списка ингредиентов: строятся один раз, дальше только обновляются.
+        // Раньше Rebuild() уничтожал и пересоздавал все строки на каждое изменение инвентаря/сборки.
+        sealed class ActionButtonUi
+        {
+            public Button button;
+            public Image background;
+            public TextMeshProUGUI label;
+        }
+
+        sealed class IngredientRowUi
+        {
+            public IngredientConfig ingredient;
+            public TextMeshProUGUI amountLabel;
+            public ActionButtonUi add;
+            public ActionButtonUi buy;
+            public bool isFree;
+        }
+
+        readonly List<IngredientRowUi> _rows = new List<IngredientRowUi>();
+        bool _rowsBuilt;
+
         void Start()
         {
             if (closeIconButton != null)
@@ -82,7 +103,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void Rebuild()
         {
             BuildBuilderArea();
-            BuildIngredientList();
+            RefreshIngredientList();
             UpdateCookButton();
         }
 
@@ -186,21 +207,60 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
         }
 
-        void BuildIngredientList()
+        // Список ингредиентов статичен по составу (s.AllIngredients), поэтому строки создаём один раз,
+        // а на каждое изменение только обновляем цифры/доступность кнопок — без Destroy/Instantiate.
+        void RefreshIngredientList()
         {
             var s = GameSession.Instance;
             if (s == null || ingredientListContainer == null) return;
 
-            foreach (Transform child in ingredientListContainer)
-                Destroy(child.gameObject);
-
-            var ingredients = OrderedIngredients(s);
-            if (ingredients == null) return;
-
-            foreach (var ing in ingredients)
+            if (!_rowsBuilt)
             {
-                if (ing == null) continue;
-                CreateIngredientRow(ingredientListContainer, s, ing);
+                _rows.Clear();
+                foreach (Transform child in ingredientListContainer)
+                    Destroy(child.gameObject);
+
+                foreach (var ing in OrderedIngredients(s))
+                {
+                    if (ing == null) continue;
+                    _rows.Add(CreateIngredientRow(ingredientListContainer, s, ing));
+                }
+                _rowsBuilt = true;
+            }
+
+            foreach (var row in _rows)
+                UpdateIngredientRow(s, row);
+        }
+
+        static void UpdateIngredientRow(GameSession s, IngredientRowUi row)
+        {
+            var ing = row.ingredient;
+            if (row.amountLabel != null)
+                row.amountLabel.text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
+
+            int inBuild = s.CountInBuild(ing);
+            bool canAdd = s.Build != null && !s.Build.IsFull && s.Inventory.GetAmount(ing) > inBuild;
+            if (row.add != null) row.add.button.interactable = canAdd;
+
+            bool canBuy;
+            string buyText;
+            if (row.isFree)
+            {
+                buyText = "Заготовить";
+                canBuy = !s.Inventory.IsAtCap(ing);
+            }
+            else
+            {
+                buyText = ing.coinCost.ToString();
+                canBuy = s.Wallet.Coins >= ing.coinCost && !s.Inventory.IsAtCap(ing);
+            }
+
+            if (row.buy != null)
+            {
+                row.buy.button.interactable = canBuy;
+                if (row.buy.label != null) row.buy.label.text = buyText;
+                if (!row.isFree && row.buy.background != null)
+                    row.buy.background.color = canBuy ? ShopBuyButtonStyle.BuyGreen : ShopBuyButtonStyle.BuyRed;
             }
         }
 
@@ -217,7 +277,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             return list;
         }
 
-        static void CreateIngredientRow(Transform parent, GameSession s, IngredientConfig ing)
+        static IngredientRowUi CreateIngredientRow(Transform parent, GameSession s, IngredientConfig ing)
         {
             var font = PancakeFlipUiFonts.UiTmpFont;
 
@@ -263,44 +323,35 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var labelLe = labelGo.GetComponent<LayoutElement>();
             labelLe.flexibleWidth = 1f;
 
-            var addBtn = CreateActionButton(row.transform, "Добавить", AddButtonColor, font, withCoinIcon: false);
-            int inBuild = s.CountInBuild(ing);
-            bool canAdd = s.Build != null && !s.Build.IsFull && s.Inventory.GetAmount(ing) > inBuild;
-            addBtn.interactable = canAdd;
-            addBtn.onClick.AddListener(() =>
+            bool isFree = ing.coinCost <= 0;
+
+            var add = CreateActionButton(row.transform, "Добавить", AddButtonColor, font, withCoinIcon: false);
+            add.button.onClick.AddListener(() =>
             {
                 var gs = GameSession.Instance;
                 if (gs != null) gs.TryAddToBuild(ing);
             });
 
-            bool isFree = ing.coinCost <= 0;
-            string buyText;
-            bool canBuy;
-            if (isFree)
-            {
-                bool atCap = s.Inventory.IsAtCap(ing);
-                buyText = "Заготовить";
-                canBuy = !atCap;
-            }
-            else
-            {
-                bool canAfford = s.Wallet.Coins >= ing.coinCost;
-                bool atCap = s.Inventory.IsAtCap(ing);
-                buyText = ing.coinCost.ToString();
-                canBuy = canAfford && !atCap;
-            }
-
-            var buyBtn = CreateActionButton(row.transform, buyText, canBuy ? ShopBuyButtonStyle.BuyGreen : ShopBuyButtonStyle.BuyRed, font, withCoinIcon: !isFree);
-            buyBtn.interactable = canBuy;
-            buyBtn.onClick.AddListener(() =>
+            var buy = CreateActionButton(row.transform, isFree ? "Заготовить" : ing.coinCost.ToString(),
+                isFree ? AddButtonColor : ShopBuyButtonStyle.BuyGreen, font, withCoinIcon: !isFree);
+            buy.button.onClick.AddListener(() =>
             {
                 var gs = GameSession.Instance;
                 if (gs == null) return;
                 gs.BuyIngredient(ing);
             });
+
+            return new IngredientRowUi
+            {
+                ingredient = ing,
+                amountLabel = label,
+                add = add,
+                buy = buy,
+                isFree = isFree,
+            };
         }
 
-        static Button CreateActionButton(Transform parent, string text, Color bgColor, TMP_FontAsset font, bool withCoinIcon)
+        static ActionButtonUi CreateActionButton(Transform parent, string text, Color bgColor, TMP_FontAsset font, bool withCoinIcon)
         {
             var btnGo = new GameObject("Btn", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGo.transform.SetParent(parent, false);
@@ -360,7 +411,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 txtRt.offsetMax = Vector2.zero;
             }
 
-            return btn;
+            return new ActionButtonUi { button = btn, background = img, label = txt };
         }
 
         void UpdateCookButton()

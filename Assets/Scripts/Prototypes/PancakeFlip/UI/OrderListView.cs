@@ -73,9 +73,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             var s = GameSession.Instance;
             if (s == null) return;
+            var visible = s.Orders.Visible;
             for (int i = 0; i < _cards.Count; i++)
             {
-                var visible = s.Orders.Visible;
                 bool sel = i < visible.Count && visible[i] == s.ActiveOrder;
                 _cards[i].SetSelected(sel);
             }

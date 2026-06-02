@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace IdlePancake.Prototypes.PancakeFlip
 {
@@ -57,31 +60,20 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (chargeIndicator != null) chargeIndicator.SetCharge(0f);
             }
 
-            if (pointerJustUp && _isCharging && pan != null)
+            if (pointerJustUp && _isCharging)
             {
-                float charge = Mathf.Min(1f, _chargeTime / config.maxHoldTime);
-                charge = Mathf.Clamp01(charge);
-                pancake.Throw(ForceForCharge(charge), SpinForCharge(charge));
-                pan.PlayNod();
-                _isCharging = false;
-                _chargeTime = 0f;
-                if (chargeIndicator != null) chargeIndicator.SetCharge(0f);
+                ReleaseThrow(ChargeFromTime());
             }
 
             if (_isCharging)
             {
                 _chargeTime += Time.deltaTime;
-                float charge = Mathf.Clamp01(_chargeTime / config.maxHoldTime);
                 if (chargeIndicator != null)
-                    chargeIndicator.SetCharge(charge);
+                    chargeIndicator.SetCharge(ChargeFromTime());
 
-                if (_chargeTime >= config.maxHoldTime && pan != null)
+                if (_chargeTime >= config.maxHoldTime)
                 {
-                    pancake.Throw(ForceForCharge(1f), SpinForCharge(1f));
-                    pan.PlayNod();
-                    _isCharging = false;
-                    _chargeTime = 0f;
-                    if (chargeIndicator != null) chargeIndicator.SetCharge(0f);
+                    ReleaseThrow(1f);
                 }
             }
         }
@@ -94,11 +86,26 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public void OnPointerUp(BaseEventData eventData)
         {
-            if (config == null || pancake == null || pan == null || !_isCharging || !pancake.IsActiveCooking) return;
-            float charge = Mathf.Clamp01(_chargeTime / config.maxHoldTime);
-            pancake.Throw(ForceForCharge(charge), SpinForCharge(charge));
-            pan.PlayNod();
-            _isCharging = false; _chargeTime = 0f;
+            if (config == null || pancake == null || !_isCharging || !pancake.IsActiveCooking) return;
+            if (pancake.CurrentState == PancakeBehaviour.State.InFlight) return;
+            ReleaseThrow(ChargeFromTime());
+        }
+
+        // Заряд (0..1) из времени удержания; защищён от maxHoldTime <= 0.
+        float ChargeFromTime()
+        {
+            float hold = Mathf.Max(0.0001f, config != null ? config.maxHoldTime : 1f);
+            return Mathf.Clamp01(_chargeTime / hold);
+        }
+
+        // Единая точка броска: убирает тройное дублирование (Update / max-hold / OnPointerUp).
+        void ReleaseThrow(float charge01)
+        {
+            charge01 = Mathf.Clamp01(charge01);
+            pancake.Throw(ForceForCharge(charge01), SpinForCharge(charge01));
+            if (pan != null) pan.PlayNod();
+            _isCharging = false;
+            _chargeTime = 0f;
             if (chargeIndicator != null) chargeIndicator.SetCharge(0f);
         }
 
@@ -116,26 +123,18 @@ namespace IdlePancake.Prototypes.PancakeFlip
             return config.SpinFromCharge(charge01);
         }
 
+        // Опрос нового Input System без рефлексии и без per-frame Type.GetType.
+        // ENABLE_INPUT_SYSTEM определён, когда установлен пакет; иначе ветка компилируется в no-op.
         static bool GetSpaceOrMouseFromNewInputSystem()
         {
-            try
-            {
-                var keyboardType = System.Type.GetType("UnityEngine.InputSystem.Keyboard, Unity.InputSystem");
-                if (keyboardType == null) return false;
-                var current = keyboardType.GetProperty("current")?.GetValue(null);
-                if (current == null) return false;
-                var spaceKey = current.GetType().GetProperty("spaceKey")?.GetValue(current);
-                if (spaceKey == null) return false;
-                var isPressed = spaceKey.GetType().GetProperty("isPressed")?.GetValue(spaceKey);
-                if (isPressed is bool b && b) return true;
-                var mouse = System.Type.GetType("UnityEngine.InputSystem.Mouse, Unity.InputSystem")?.GetProperty("current")?.GetValue(null);
-                if (mouse == null) return false;
-                var leftButton = mouse.GetType().GetProperty("leftButton")?.GetValue(mouse);
-                if (leftButton == null) return false;
-                var pressed = leftButton.GetType().GetProperty("isPressed")?.GetValue(leftButton);
-                return pressed is bool p && p;
-            }
-            catch { return false; }
+#if ENABLE_INPUT_SYSTEM
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.spaceKey.isPressed) return true;
+            var mouse = Mouse.current;
+            return mouse != null && mouse.leftButton.isPressed;
+#else
+            return false;
+#endif
         }
     }
 }

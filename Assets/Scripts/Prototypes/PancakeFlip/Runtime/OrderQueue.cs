@@ -63,14 +63,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void AddRecipesToPool(RecipeConfig[] recipes)
         {
             if (recipes == null) return;
+            bool added = false;
             foreach (var r in recipes)
             {
-                if (r != null)
-                {
-                    _source.Add(r);
-                    _pool.Add(r);
-                }
+                if (r == null || _source.Contains(r)) continue;
+                _source.Add(r);
+                _pool.Add(r);
+                added = true;
             }
+            if (!added) return;
             Refill();
             OnChanged?.Invoke();
         }

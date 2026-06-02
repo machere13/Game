@@ -16,9 +16,36 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 serveButton.onClick.AddListener(OnServe);
             if (serveBaseButton != null)
                 serveBaseButton.onClick.AddListener(OnServeBase);
+            RefreshState();
         }
 
-        void Update()
+        void OnEnable()
+        {
+            var s = GameSession.Instance;
+            if (s != null)
+            {
+                s.OnOrderSelected += OnOrderChanged;
+                s.OnServed += RefreshState;
+                if (s.Orders != null) s.Orders.OnChanged += RefreshState;
+            }
+            RefreshState();
+        }
+
+        void OnDisable()
+        {
+            var s = GameSession.Instance;
+            if (s != null)
+            {
+                s.OnOrderSelected -= OnOrderChanged;
+                s.OnServed -= RefreshState;
+                if (s.Orders != null) s.Orders.OnChanged -= RefreshState;
+            }
+        }
+
+        void OnOrderChanged(Order _) => RefreshState();
+
+        // Раньше это писалось каждый кадр в Update (лишний TMP-rebuild). Теперь — только по событиям.
+        void RefreshState()
         {
             var s = GameSession.Instance;
             if (s == null) return;
@@ -29,48 +56,32 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 serveBaseButton.gameObject.SetActive(hasOrder && s.BaseRecipe != null);
 
             if (statusText != null)
-            {
-                if (!hasOrder)
-                    statusText.text = "Выбери заказ";
-                else
-                    statusText.text = "";
-            }
+                statusText.text = hasOrder ? "" : "Выбери заказ";
         }
 
         void OnServe()
         {
             var s = GameSession.Instance;
             if (s == null) return;
-            if (!s.TryServe())
-            {
-                if (statusText == null) return;
-                var p = Object.FindFirstObjectByType<PancakeBehaviour>();
-                float min = s.GetEffectivePerfectMin();
-                if (p != null && (p.CookA < min || p.CookB < min))
-                    statusText.text = "Блин не готов!";
-                else if (s.ActiveOrder != null && s.ActiveOrder.Recipe != null && !s.Inventory.HasIngredients(s.ActiveOrder.Recipe))
-                    statusText.text = "Нет ингредиентов — «Магазин» или плита";
-                else
-                    statusText.text = "Не удалось сдать";
-            }
+            if (!s.TryServe() && statusText != null)
+                statusText.text = s.ActiveOrder != null && s.ActiveOrder.Recipe != null && !s.Inventory.HasIngredients(s.ActiveOrder.Recipe)
+                    ? "Нет ингредиентов — «Магазин» или плита"
+                    : ServeFailMessage(s);
         }
 
         void OnServeBase()
         {
             var s = GameSession.Instance;
             if (s == null) return;
-            if (!s.TryServeBase())
-            {
-                if (statusText == null) return;
-                var p = Object.FindFirstObjectByType<PancakeBehaviour>();
-                float min = s.GetEffectivePerfectMin();
-                if (p != null && (p.CookA < min || p.CookB < min))
-                    statusText.text = "Блин не готов!";
-                else if (s.BaseRecipe != null && !s.Inventory.HasIngredients(s.BaseRecipe))
-                    statusText.text = "Нет ингредиентов (нужен базовый набор)";
-                else
-                    statusText.text = "Не удалось сдать";
-            }
+            if (!s.TryServeBase() && statusText != null)
+                statusText.text = s.BaseRecipe != null && !s.Inventory.HasIngredients(s.BaseRecipe)
+                    ? "Нет ингредиентов (нужен базовый набор)"
+                    : ServeFailMessage(s);
+        }
+
+        static string ServeFailMessage(GameSession s)
+        {
+            return !s.IsPancakeCookedEnough() ? "Блин не готов!" : "Не удалось сдать";
         }
     }
 }

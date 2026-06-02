@@ -7,6 +7,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] float nodAngle = 8f;
         [SerializeField] float nodDuration = 0.15f;
+        [Tooltip("Скорость возврата в покой (чем больше — тем быстрее)")]
+        [SerializeField] float returnSmoothing = 10f;
 
         Quaternion _restRotation;
         float _nodTimer;
@@ -29,7 +31,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
             else
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, _restRotation, 10f * Time.deltaTime);
+                float t = 1f - Mathf.Exp(-returnSmoothing * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, _restRotation, t);
             }
         }
 

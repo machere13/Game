@@ -9,8 +9,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         /// <summary>+4% к множителю характеристики за каждую заполненную ячейку (уровень 5 ≈ +20%).</summary>
         public const float BonusPerStatLevel = 0.04f;
 
-        /// <summary>Должно совпадать с числом значений <see cref="PanUpgradeConfig.EffectType"/>.</summary>
-        const int EffectTypeCount = 4;
+        /// <summary>Число эффектов берётся прямо из enum — не нужно поддерживать вручную.</summary>
+        static readonly int EffectTypeCount = System.Enum.GetValues(typeof(PanUpgradeConfig.EffectType)).Length;
 
         readonly int[] _statLevels = new int[EffectTypeCount];
         readonly HashSet<PanTierConfig> _ownedPans = new();

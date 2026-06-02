@@ -10,6 +10,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
     public sealed class GameSession : MonoBehaviour
     {
         public const string PanDataDir = "Assets/Data/PancakeFlip";
+
+        const float DefaultPerfectMin = 0.4f;
+        const float DefaultPerfectMax = 0.7f;
+        const float DefaultOvercookThreshold = 0.85f;
+        const int DefaultXpPerRotation = 10;
+        const float DefaultOvercookPenalty = 0.5f;
+        const float DefaultMismatchPenalty = 0.5f;
+        const int DefaultMaxVisibleOrders = 3;
+        const int DefaultPersonCount = 3;
         [Header("Config")]
         [SerializeField] PancakeFlipConfig flipConfig;
         [SerializeField] LevelTableConfig levelTable;
@@ -27,6 +36,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
+        public PancakeBehaviour Pancake => pancake;
 
         public Wallet Wallet { get; private set; }
         public Inventory Inventory { get; private set; }
@@ -57,6 +67,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             PancakeFlipUiFonts.Configure(uiFont);
             AutowirePanAssetsIfEmpty();
             Instance = this;
@@ -64,7 +80,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
             Inventory = new Inventory();
             Upgrades = new PanUpgradeState();
             Upgrades.Initialize(defaultPanTier);
-            Orders = new OrderQueue(startingRecipes, 3, 3);
+            int maxVisible = flipConfig != null ? flipConfig.maxVisibleOrders : DefaultMaxVisibleOrders;
+            int persons = flipConfig != null ? flipConfig.personCount : DefaultPersonCount;
+            Orders = new OrderQueue(startingRecipes, maxVisible, persons);
             Build = new PancakeBuild();
 
             if (pancake != null)
@@ -104,15 +122,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 return false;
 
             float overcook = GetEffectiveOvercookedThreshold();
+            float overcookPenalty = flipConfig != null ? flipConfig.overcookCoinPenalty : DefaultOvercookPenalty;
+            float mismatchPenalty = flipConfig != null ? flipConfig.recipeMismatchPenalty : DefaultMismatchPenalty;
             float coinMult = 1f;
-            if (cookA >= overcook) coinMult *= 0.5f;
-            if (cookB >= overcook) coinMult *= 0.5f;
+            if (cookA >= overcook) coinMult *= overcookPenalty;
+            if (cookB >= overcook) coinMult *= overcookPenalty;
 
             bool matches = MatchesOrderRecipe(_activeOrder.Recipe);
-            if (!matches) coinMult *= 0.5f;
+            if (!matches) coinMult *= mismatchPenalty;
 
             int coins = Mathf.RoundToInt(_activeOrder.RewardCoins * coinMult);
-            int xp = matches ? _activeOrder.RewardXp : Mathf.RoundToInt(_activeOrder.RewardXp * 0.5f);
+            int xp = matches ? _activeOrder.RewardXp : Mathf.RoundToInt(_activeOrder.RewardXp * mismatchPenalty);
 
             Wallet.AddCoins(Mathf.Max(1, coins));
             Wallet.AddXp(Mathf.Max(1, xp));
@@ -244,7 +264,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public void EquipPanTier(PanTierConfig tier) => Upgrades.EquipPan(tier);
 
-        /// <summary>Клик по миске: бесплатно +1 теста, если миска пуста (в инвентаре 0).</summary>
         public void TapDough(IngredientConfig dough)
         {
             if (dough == null) return;
@@ -254,7 +273,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         void OnPancakeLanded(PancakeBehaviour.LandingResult result)
         {
-            int xpPerRot = flipConfig != null ? flipConfig.xpPerRotation : 10;
+            int xpPerRot = flipConfig != null ? flipConfig.xpPerRotation : DefaultXpPerRotation;
             int earned = Mathf.Max(1, result.rotations) * xpPerRot;
             Wallet.AddXp(earned);
         }
@@ -265,14 +284,16 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 pancake.ResetCooking();
         }
 
-        void ApplyUpgrades()
+        public bool IsPancakeCookedEnough()
         {
-            // Множители читаются через Upgrades.GetMultiplier при каждом вызове.
+            if (pancake == null) return false;
+            float min = GetEffectivePerfectMin();
+            return pancake.CookA >= min && pancake.CookB >= min;
         }
 
         public float GetEffectivePerfectMin()
         {
-            if (flipConfig == null) return 0.4f;
+            if (flipConfig == null) return DefaultPerfectMin;
             float w = Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.WiderPerfectZone);
             float c = (flipConfig.perfectMin + flipConfig.perfectMax) * 0.5f;
             float half = (flipConfig.perfectMax - flipConfig.perfectMin) * 0.5f * w;
@@ -284,7 +305,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public float GetEffectivePerfectMax()
         {
-            if (flipConfig == null) return 0.7f;
+            if (flipConfig == null) return DefaultPerfectMax;
             float w = Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.WiderPerfectZone);
             float c = (flipConfig.perfectMin + flipConfig.perfectMax) * 0.5f;
             float half = (flipConfig.perfectMax - flipConfig.perfectMin) * 0.5f * w;
@@ -296,7 +317,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         public float GetEffectiveOvercookedThreshold()
         {
-            if (flipConfig == null) return 0.85f;
+            if (flipConfig == null) return DefaultOvercookThreshold;
             float m = Upgrades.GetMultiplier(PanUpgradeConfig.EffectType.SlowerOvercook);
             float b = flipConfig.overcookedThreshold;
             return Mathf.Clamp(1f - (1f - b) / Mathf.Max(1.001f, m), b, 0.99f);
@@ -320,12 +341,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
         }
 
 #if UNITY_EDITOR
-        void OnValidate()
-        {
-            if (EditorApplication.isPlaying) return;
-            AutowirePanAssetsIfEmpty();
-        }
-
         [ContextMenu("PancakeFlip/Подставить ассеты сковородки (Data/PancakeFlip)")]
         void ContextAutowirePanAssets()
         {
@@ -334,7 +349,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
         }
 #endif
 
-        /// <summary>В редакторе подставляет statTracks / panTiers / defaultPanTier из стандартных имён сетапа, если что-то пусто.</summary>
         public void AutowirePanAssetsIfEmpty()
         {
 #if UNITY_EDITOR

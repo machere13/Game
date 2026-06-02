@@ -42,6 +42,18 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [Header("Scoring")]
         public int xpPerRotation = 10;
 
+        [Header("Serving")]
+        [Tooltip("Множитель монет за каждую пережаренную сторону")]
+        [Range(0f, 1f)] public float overcookCoinPenalty = 0.5f;
+        [Tooltip("Множитель награды, если состав блина не совпал с рецептом")]
+        [Range(0f, 1f)] public float recipeMismatchPenalty = 0.5f;
+
+        [Header("Orders")]
+        [Tooltip("Сколько заказов одновременно показывается игроку")]
+        [Min(1)] public int maxVisibleOrders = 3;
+        [Tooltip("Сколько разных посетителей в пуле")]
+        [Min(1)] public int personCount = 3;
+
         public float ForceFromCharge(float charge01)
         {
             return Mathf.Lerp(minForce, maxForce, Mathf.Clamp01(charge01));

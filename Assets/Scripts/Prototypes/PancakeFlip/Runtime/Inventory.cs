@@ -4,6 +4,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class Inventory
     {
+        /// <summary>Условно «бесконечный» запас для ингредиентов с флагом infinite (без риска переполнения при умножениях).</summary>
+        public const int InfiniteAmount = 999_999;
+
         readonly Dictionary<IngredientConfig, int> _stock = new();
 
         public event System.Action OnChanged;
@@ -11,7 +14,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public int GetAmount(IngredientConfig ingredient)
         {
             if (ingredient == null) return 0;
-            if (ingredient.infinite) return 999;
+            if (ingredient.infinite) return InfiniteAmount;
             return _stock.TryGetValue(ingredient, out int n) ? n : 0;
         }
 

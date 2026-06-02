@@ -51,23 +51,29 @@ namespace IdlePancake.Prototypes.PancakeFlip
         IEnumerator ServeRoutine()
         {
             _busy = true;
-            float y = transform.position.y;
-            float z = transform.position.z;
+            try
+            {
+                float y = transform.position.y;
+                float z = transform.position.z;
 
-            transform.position = new Vector3(startX, y, z);
-            SetScale(_baseScale);
+                transform.position = new Vector3(startX, y, z);
+                SetScale(_baseScale);
 
-            yield return WalkX(startX, targetX, walkDuration, y, z);
+                yield return WalkX(startX, targetX, walkDuration, y, z);
 
-            yield return ScalePop(_baseScale, _baseScale * pickupScale, pickupPause * 0.5f);
-            yield return ScalePop(_baseScale * pickupScale, _baseScale, pickupPause * 0.5f);
+                yield return ScalePop(_baseScale, _baseScale * pickupScale, pickupPause * 0.5f);
+                yield return ScalePop(_baseScale * pickupScale, _baseScale, pickupPause * 0.5f);
 
-            sr.flipX = true;
-            yield return WalkX(targetX, exitX, walkDuration, y, z);
-            sr.flipX = false;
-
-            gameObject.SetActive(false);
-            _busy = false;
+                if (sr != null) sr.flipX = true;
+                yield return WalkX(targetX, exitX, walkDuration, y, z);
+                if (sr != null) sr.flipX = false;
+            }
+            finally
+            {
+                // Гарантированно снимаем флаг занятости и прячем спрайт, даже если корутину прервали.
+                gameObject.SetActive(false);
+                _busy = false;
+            }
         }
 
         IEnumerator WalkX(float from, float to, float dur, float y, float z)
