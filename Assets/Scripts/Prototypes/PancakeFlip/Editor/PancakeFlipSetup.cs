@@ -285,6 +285,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var rb = pcGo.AddComponent<Rigidbody2D>(); rb.gravityScale = 0; rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             pcGo.AddComponent<CircleCollider2D>();
             var pcBh = pcGo.AddComponent<PancakeBehaviour>();
+            pcGo.AddComponent<PancakePlasticity>();
             pcBh.SetPanCenter(panBh.PanCenter);
             SetField(pcBh, "config", flipConfig);
             SetField(pcBh, "spriteFaceA", pancakeSpr);
