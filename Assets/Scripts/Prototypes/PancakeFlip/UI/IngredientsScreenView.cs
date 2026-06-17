@@ -97,6 +97,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
+            _rowsBuilt = false; // ингредиенты могли открыться после переезда — пересобираем строки
             Rebuild();
         }
 

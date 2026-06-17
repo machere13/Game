@@ -75,5 +75,20 @@ namespace IdlePancake.Prototypes.PancakeFlip
             Refill();
             OnChanged?.Invoke();
         }
+
+        public void SetSource(RecipeConfig[] recipes)
+        {
+            _source.Clear();
+            _pool.Clear();
+            _visible.Clear();
+            if (recipes != null)
+            {
+                foreach (var r in recipes)
+                    if (r != null) _source.Add(r);
+            }
+            _pool.AddRange(_source);
+            Refill();
+            OnChanged?.Invoke();
+        }
     }
 }
