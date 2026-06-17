@@ -310,7 +310,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var profileR = profileGo.GetComponent<RectTransform>();
             profileR.anchorMin = V2(0.82f, 0.91f); profileR.anchorMax = V2(0.97f, 0.99f);
             profileR.offsetMin = profileR.offsetMax = Vector2.zero;
-            AddResponsive(profileGo, V2(0.82f, 0.91f), V2(0.97f, 0.99f), V2(0.90f, 0.90f), V2(0.985f, 0.99f));
+            AddResponsive(profileGo, V2(0.82f, 0.91f), V2(0.97f, 0.99f), V2(0.885f, 0.85f), V2(0.965f, 0.95f));
             var profileImg = profileGo.GetComponent<Image>();
             if (profileSpr != null) { profileImg.sprite = profileSpr; profileImg.preserveAspect = true; }
             else profileImg.color = new Color(0.8f, 0.3f, 0.3f);
@@ -333,7 +333,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var walletR = walletGo.GetComponent<RectTransform>();
             walletR.anchorMin = V2(0.82f, 0.805f); walletR.anchorMax = V2(0.97f, 0.865f);
             walletR.offsetMin = walletR.offsetMax = Vector2.zero;
-            AddResponsive(walletGo, V2(0.82f, 0.805f), V2(0.97f, 0.865f), V2(0.90f, 0.80f), V2(0.985f, 0.875f));
+            AddResponsive(walletGo, V2(0.82f, 0.805f), V2(0.97f, 0.865f), V2(0.885f, 0.74f), V2(0.965f, 0.83f));
             var walletImg = walletGo.GetComponent<Image>();
             if (walletSpr != null) { walletImg.sprite = walletSpr; walletImg.preserveAspect = true; }
             else walletImg.color = new Color(0.2f, 0.7f, 0.2f);
@@ -358,7 +358,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(tbv, "levelText", lvlT);
 
             var orderPanel = MkPanel(uiRoot, "OrderPanel", V2(0, 0.42f), V2(0.44f, 1.02f), new Color(0, 0, 0, 0));
-            AddResponsive(orderPanel, V2(0f, 0.42f), V2(0.44f, 1.02f), V2(0.02f, 0.12f), V2(0.30f, 0.96f));
+            AddResponsive(orderPanel, V2(0f, 0.42f), V2(0.44f, 1.02f), V2(0.01f, 0.10f), V2(0.24f, 0.95f));
 
             if (orderListSpr != null)
             {
