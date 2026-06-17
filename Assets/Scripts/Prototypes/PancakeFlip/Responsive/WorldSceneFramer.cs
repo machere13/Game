@@ -11,10 +11,20 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] SpriteRenderer bottomPanel;
         [SerializeField] Transform stove;
         [SerializeField] SpriteRenderer stoveSr;
+        [SerializeField] Transform pan;
+        [SerializeField] Transform pancake;
         [SerializeField] CustomerAnimator customer;
 
         const float BgOverscan = 1.24f;
         const float StoveColumnFill = 0.85f;
+        // Доля высоты спрайта плиты, на которой находится конфорка (совпадает с BuildEverything).
+        const float BurnerHeightFraction = 0.44f;
+
+        // Базовая (запечённая в портрете) геометрия — захватывается один раз до первого ресейла.
+        bool _captured;
+        float _baseBurnerY;
+        float _basePanY;
+        float _basePancakeY;
 
         void OnEnable()
         {
@@ -61,16 +71,46 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (stove != null && stoveSr != null && stoveSr.sprite != null)
             {
+                // Захватываем базовую геометрию из ещё не изменённого (запечённого) масштаба плиты.
+                if (!_captured)
+                {
+                    _baseBurnerY = BurnerYFor(stove.localScale.x, ortho);
+                    _basePanY = pan != null ? pan.position.y : 0f;
+                    _basePancakeY = pancake != null ? pancake.position.y : 0f;
+                    _captured = true;
+                }
+
                 float sprW = stoveSr.sprite.bounds.size.x;
                 float sc = (columnW * StoveColumnFill) / sprW;
                 stove.localScale = Vector3.one * sc;
                 float sprH = stoveSr.sprite.bounds.size.y * sc;
                 Vector3 p = stove.position;
                 stove.position = new Vector3(0f, -ortho + sprH * 0.5f - 0.2f, p.z);
+
+                // Сдвигаем сковороду и блин на ту же дельту высоты конфорки, чтобы сохранить выравнивание.
+                float delta = BurnerYFor(sc, ortho) - _baseBurnerY;
+                if (pan != null)
+                {
+                    Vector3 pp = pan.position;
+                    pan.position = new Vector3(pp.x, _basePanY + delta, pp.z);
+                }
+                if (pancake != null)
+                {
+                    Vector3 cp = pancake.position;
+                    pancake.position = new Vector3(cp.x, _basePancakeY + delta, cp.z);
+                }
             }
 
             if (customer != null)
                 customer.SetOffscreenBounds(camW * 0.5f + 2f, -camW * 0.5f - 2f);
+        }
+
+        // Мировая Y конфорки для заданного масштаба плиты (формула совпадает с BuildEverything).
+        float BurnerYFor(float stoveScale, float ortho)
+        {
+            float sprH = stoveSr.sprite.bounds.size.y * stoveScale;
+            float stoveY = -ortho + sprH * 0.5f - 0.2f;
+            return stoveY + sprH * BurnerHeightFraction;
         }
     }
 }

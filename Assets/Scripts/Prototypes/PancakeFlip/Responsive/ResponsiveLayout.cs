@@ -7,7 +7,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
     [DefaultExecutionOrder(-200)]
     public sealed class ResponsiveLayout : MonoBehaviour
     {
-        public const float ColumnAspect = 9f / 16f;
+        // Ширина центральной игровой колонки как доля высоты экрана.
+        // ~0.71 даёт колонку ~40% ширины на 16:9 (плита читается как центр внимания).
+        public const float ColumnAspect = 0.71f;
 
         public static ResponsiveLayout Instance { get; private set; }
 

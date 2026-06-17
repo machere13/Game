@@ -558,6 +558,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     stoveGoRef != null ? stoveGoRef.transform : null;
                 so.FindProperty("stoveSr").objectReferenceValue =
                     stoveGoRef != null ? stoveGoRef.GetComponent<SpriteRenderer>() : null;
+                var panRef = Object.FindObjectOfType<PanBehaviour>();
+                so.FindProperty("pan").objectReferenceValue =
+                    panRef != null ? panRef.transform : null;
+                var pancakeRef = Object.FindObjectOfType<PancakeBehaviour>();
+                so.FindProperty("pancake").objectReferenceValue =
+                    pancakeRef != null ? pancakeRef.transform : null;
                 so.FindProperty("customer").objectReferenceValue =
                     Object.FindObjectOfType<CustomerAnimator>();
                 so.ApplyModifiedPropertiesWithoutUndo();
