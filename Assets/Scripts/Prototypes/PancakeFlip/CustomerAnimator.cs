@@ -33,6 +33,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
             exitX = leftOffscreen;
         }
 
+        // Обновляет только off-screen точки входа/выхода при ресайзе окна; точка у прилавка (targetX) не трогается.
+        public void SetOffscreenBounds(float enterFromX, float exitToX)
+        {
+            startX = enterFromX;
+            exitX = exitToX;
+        }
+
         public void PlayServe(int personIndex = -1)
         {
             if (_busy) return;

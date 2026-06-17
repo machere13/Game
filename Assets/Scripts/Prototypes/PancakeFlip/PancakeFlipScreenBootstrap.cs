@@ -4,14 +4,18 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class PancakeFlipScreenBootstrap : MonoBehaviour
     {
-        const int RefW = 1080;
-        const int RefH = 1920;
+        const int DesktopW = 1280;
+        const int DesktopH = 720;
 
         void Awake()
         {
 #if UNITY_STANDALONE
-            if (Screen.width > Screen.height)
-                Screen.SetResolution(RefW, RefH, FullScreenMode.Windowed);
+            // Desktop is a landscape platform. Start in a resizable landscape window;
+            // ResponsiveLayout handles any later resize.
+            if (Screen.fullScreenMode == FullScreenMode.ExclusiveFullScreen ||
+                Screen.fullScreenMode == FullScreenMode.FullScreenWindow)
+                return;
+            Screen.SetResolution(DesktopW, DesktopH, FullScreenMode.Windowed);
 #endif
         }
     }

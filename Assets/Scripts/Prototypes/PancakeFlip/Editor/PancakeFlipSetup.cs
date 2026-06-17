@@ -96,6 +96,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var bootGo = new GameObject("PancakeFlipScreenBootstrap");
             bootGo.AddComponent<PancakeFlipScreenBootstrap>();
+            bootGo.AddComponent<ResponsiveLayout>();
 
             ForceAllSprites();
             var bgSpr = LoadSprite("Background");
@@ -309,6 +310,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var profileR = profileGo.GetComponent<RectTransform>();
             profileR.anchorMin = V2(0.82f, 0.91f); profileR.anchorMax = V2(0.97f, 0.99f);
             profileR.offsetMin = profileR.offsetMax = Vector2.zero;
+            AddResponsive(profileGo, V2(0.82f, 0.91f), V2(0.97f, 0.99f), V2(0.885f, 0.85f), V2(0.965f, 0.95f));
             var profileImg = profileGo.GetComponent<Image>();
             if (profileSpr != null) { profileImg.sprite = profileSpr; profileImg.preserveAspect = true; }
             else profileImg.color = new Color(0.8f, 0.3f, 0.3f);
@@ -331,6 +333,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var walletR = walletGo.GetComponent<RectTransform>();
             walletR.anchorMin = V2(0.82f, 0.805f); walletR.anchorMax = V2(0.97f, 0.865f);
             walletR.offsetMin = walletR.offsetMax = Vector2.zero;
+            AddResponsive(walletGo, V2(0.82f, 0.805f), V2(0.97f, 0.865f), V2(0.885f, 0.74f), V2(0.965f, 0.83f));
             var walletImg = walletGo.GetComponent<Image>();
             if (walletSpr != null) { walletImg.sprite = walletSpr; walletImg.preserveAspect = true; }
             else walletImg.color = new Color(0.2f, 0.7f, 0.2f);
@@ -355,6 +358,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(tbv, "levelText", lvlT);
 
             var orderPanel = MkPanel(uiRoot, "OrderPanel", V2(0, 0.42f), V2(0.44f, 1.02f), new Color(0, 0, 0, 0));
+            AddResponsive(orderPanel, V2(0f, 0.42f), V2(0.44f, 1.02f), V2(0.01f, 0.10f), V2(0.24f, 0.95f));
 
             if (orderListSpr != null)
             {
@@ -384,6 +388,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetFloatField(olv, "gap", 0.004f);
 
             var chargeGo = MkPanel(uiRoot, "ChargeIndicator", V2(0.25f, 0.84f), V2(0.75f, 0.9f), new Color(0.15f, 0.15f, 0.15f, 0.7f));
+            AddResponsive(chargeGo, V2(0.25f, 0.84f), V2(0.75f, 0.9f), V2(0.38f, 0.88f), V2(0.62f, 0.94f));
             var fillGo2 = new GameObject("Fill", typeof(RectTransform), typeof(Image));
             fillGo2.transform.SetParent(chargeGo.transform, false); Fill(fillGo2);
             var fillI = fillGo2.GetComponent<Image>(); fillI.color = Color.yellow;
@@ -403,6 +408,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sv, "rotationsPopupText", popup.GetComponent<TextMeshProUGUI>());
 
             var cookRoot = MkPanel(uiRoot, "CookingIndicators", V2(0.74f, 0.34f), V2(0.97f, 0.81f), new Color(0, 0, 0, 0));
+            AddResponsive(cookRoot, V2(0.74f, 0.34f), V2(0.97f, 0.81f), V2(0.70f, 0.52f), V2(0.98f, 0.95f));
             cookRoot.GetComponent<Image>().raycastTarget = false;
             MkCookPancakePreview(cookRoot, "A", V2(0, 0.53f), V2(1, 0.778f), pancakeSideUiSpr, tmpFont, out Image imgA);
             MkCookPancakePreview(cookRoot, "B", V2(0, 0.232f), V2(1, 0.498f), pancakeSideUiSpr, tmpFont, out Image imgB);
@@ -411,6 +417,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(civ, "pancakeA", imgA); SetField(civ, "pancakeB", imgB);
 
             var recipeBookScr = MkPanel(uiRoot, "RecipeBookScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            AddResponsive(recipeBookScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             recipeBookScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(recipeBookScr);
             var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
@@ -427,6 +434,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(rbsv, "closeButton", rbCloseIcon);
 
             var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            AddResponsive(ingScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             ingScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(ingScr);
             var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
@@ -470,6 +478,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (stoveV != null) { SetField(stoveV, "ingredientsScreen", isv); SetField(isv, "stove", stoveV); }
 
             var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.98f, 0.95f, 0.9f, 0.99f));
+            AddResponsive(upgScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             upgScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(upgScr);
             var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
@@ -520,6 +529,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var recipesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "RecipesBtn", V2(0.05f, 0.04f), V2(0.17f, 0.18f), receiptBtnSpr);
             var upgradesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "UpgradesBtn", V2(0.83f, 0.04f), V2(0.95f, 0.18f), panUpgradeBtnSpr);
+            AddResponsive(recipesBtnGo, V2(0.05f, 0.04f), V2(0.17f, 0.18f), V2(0.70f, 0.06f), V2(0.82f, 0.20f));
+            AddResponsive(upgradesBtnGo, V2(0.83f, 0.04f), V2(0.95f, 0.18f), V2(0.84f, 0.06f), V2(0.96f, 0.20f));
 
             var kHud = new GameObject("KitchenHUD", typeof(RectTransform));
             kHud.transform.SetParent(uiRoot, false);
@@ -531,6 +542,32 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(kBar, "recipesButton", recipesBtnGo.GetComponent<Button>());
             SetField(kBar, "upgradesButton", upgradesBtnGo.GetComponent<Button>());
             kitchenBottom.transform.SetAsLastSibling();
+
+            var framer = bootGo.AddComponent<WorldSceneFramer>();
+            {
+                var so = new SerializedObject(framer);
+                so.FindProperty("cam").objectReferenceValue = Camera.main;
+                var bgGo = GameObject.Find("Background");
+                so.FindProperty("background").objectReferenceValue =
+                    bgGo != null ? bgGo.GetComponent<SpriteRenderer>() : null;
+                var bottomGo = GameObject.Find("BottomPanel");
+                so.FindProperty("bottomPanel").objectReferenceValue =
+                    bottomGo != null ? bottomGo.GetComponent<SpriteRenderer>() : null;
+                var stoveGoRef = GameObject.Find("Stove");
+                so.FindProperty("stove").objectReferenceValue =
+                    stoveGoRef != null ? stoveGoRef.transform : null;
+                so.FindProperty("stoveSr").objectReferenceValue =
+                    stoveGoRef != null ? stoveGoRef.GetComponent<SpriteRenderer>() : null;
+                var panRef = Object.FindObjectOfType<PanBehaviour>();
+                so.FindProperty("pan").objectReferenceValue =
+                    panRef != null ? panRef.transform : null;
+                var pancakeRef = Object.FindObjectOfType<PancakeBehaviour>();
+                so.FindProperty("pancake").objectReferenceValue =
+                    pancakeRef != null ? pancakeRef.transform : null;
+                so.FindProperty("customer").objectReferenceValue =
+                    Object.FindObjectOfType<CustomerAnimator>();
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
 
             EnsureFolder("Assets/Scenes");
             var active = EditorSceneManager.GetActiveScene();
@@ -712,6 +749,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var r = g.GetComponent<RectTransform>(); r.anchorMin = amin; r.anchorMax = amax;
             r.offsetMin = r.offsetMax = Vector2.zero;
             g.GetComponent<Image>().color = c; return g;
+        }
+
+        static void AddResponsive(GameObject go, Vector2 pMin, Vector2 pMax, Vector2 lMin, Vector2 lMax)
+        {
+            var rr = go.GetComponent<ResponsiveRect>();
+            if (rr == null) rr = go.AddComponent<ResponsiveRect>();
+            rr.Configure(pMin, pMax, lMin, lMax);
         }
 
         static void AddModalCanvasLayer(GameObject go)
