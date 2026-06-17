@@ -173,6 +173,26 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
                 }, chocoStrawberrySpr);
 
+            var locStall = CreateLocation("LocStall", "Ларёк", 5,
+                new[] { baseRecipe, cheeseHamRecipe },
+                new[] { cheeseHamRecipe },
+                new[] { salami, cheese },
+                new[] { person1, person2 });
+            var locPromenade = CreateLocation("LocPromenade", "Набережная", 8,
+                new[] { cheeseHamRecipe, bananaChocoRecipe },
+                new[] { bananaChocoRecipe },
+                new[] { banana, chocolate },
+                new[] { person2, person3 });
+            var locMarket = CreateLocation("LocMarket", "Рынок", 10,
+                new[] { bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe },
+                new[] { mushroomRecipe, strawberryChocoRecipe },
+                new[] { mushroom, strawberry },
+                new[] { person3, person4 });
+            var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
+            worldMap.locations = new[] { locStall, locPromenade, locMarket };
+            EditorUtility.SetDirty(worldMap);
+            AssetDatabase.SaveAssets();
+
             EnsureDefaultPanProgressionAssets(panSpr, frontPanSpr);
             var statWide = FindAssetByName<PanStatTrackConfig>("StatWidePerfect");
             var statOver = FindAssetByName<PanStatTrackConfig>("StatSlowOver");
@@ -495,6 +515,33 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(usv, "closeButton", uCloseIcon);
             SetField(usv, "defaultPanIcon", panSpr);
 
+            var mapScr = MkPanel(uiRoot, "MapScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.90f, 0.93f, 0.97f, 0.99f));
+            AddResponsive(mapScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
+            mapScr.GetComponent<Image>().raycastTarget = true;
+            AddModalCanvasLayer(mapScr);
+            var mapSh = mapScr.AddComponent<Shadow>(); mapSh.effectDistance = new Vector2(3, -4); mapSh.effectColor = new Color(0, 0, 0, 0.28f);
+            MkPanel(mapScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.28f, 0.42f, 0.55f, 1f));
+            var mapTitle = MkLabel(mapScr.transform, "Title", "Карта", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
+            var mapTitleRt = mapTitle.GetComponent<RectTransform>();
+            mapTitleRt.anchorMin = V2(0.04f, 0.86f); mapTitleRt.anchorMax = V2(0.96f, 0.98f);
+            mapTitleRt.offsetMin = mapTitleRt.offsetMax = Vector2.zero;
+            mapTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            var nodesRow = new GameObject("Nodes", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+            nodesRow.transform.SetParent(mapScr.transform, false);
+            var nodesRt = nodesRow.GetComponent<RectTransform>();
+            nodesRt.anchorMin = V2(0.04f, 0.16f); nodesRt.anchorMax = V2(0.96f, 0.82f);
+            nodesRt.offsetMin = nodesRt.offsetMax = Vector2.zero;
+            var nodesH = nodesRow.GetComponent<HorizontalLayoutGroup>();
+            nodesH.spacing = 24f;
+            nodesH.childAlignment = TextAnchor.MiddleCenter;
+            nodesH.childControlWidth = false;
+            nodesH.childControlHeight = false;
+            nodesH.childForceExpandWidth = false;
+            nodesH.childForceExpandHeight = false;
+            var mapCloseIcon = MkCloseIcon(mapScr.transform, closeIconSpr);
+            var mapView = mapScr.AddComponent<MapScreenView>();
+            mapView.SetRefs(nodesRow.transform, mapCloseIcon);
+
             var ctrlGo = new GameObject("PancakeFlipController");
             var ctrl = ctrlGo.AddComponent<PancakeFlipController>();
             SetField(ctrl, "pancake", pcBh); SetField(ctrl, "pan", panBh);
@@ -513,12 +560,15 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "uiFont", uiFont);
             SetField(sess, "coinIcon", walletSpr);
             SetField(sess, "closeIcon", closeIconSpr);
+            SetField(sess, "worldMap", worldMap);
+            SetField(sess, "customerAnimator", custAnim);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
             SetField(msc, "recipeBookScreen", rbsv);
             SetField(msc, "upgradeScreen", usv);
             SetField(msc, "customerAnimator", custAnim);
+            SetField(msc, "mapScreen", mapView);
 
             var kitchenBottom = new GameObject("KitchenBottom", typeof(RectTransform), typeof(KitchenUiFrontLayer));
             kitchenBottom.transform.SetParent(uiRoot, false);
@@ -531,6 +581,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var upgradesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "UpgradesBtn", V2(0.83f, 0.04f), V2(0.95f, 0.18f), panUpgradeBtnSpr);
             AddResponsive(recipesBtnGo, V2(0.05f, 0.04f), V2(0.17f, 0.18f), V2(0.70f, 0.06f), V2(0.82f, 0.20f));
             AddResponsive(upgradesBtnGo, V2(0.83f, 0.04f), V2(0.95f, 0.18f), V2(0.84f, 0.06f), V2(0.96f, 0.20f));
+            var mapBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "MapBtn", V2(0.19f, 0.04f), V2(0.31f, 0.18f), receiptBtnSpr);
+            mapBtnGo.GetComponent<Image>().color = new Color(0.6f, 0.8f, 1f, 1f);
+            AddResponsive(mapBtnGo, V2(0.19f, 0.04f), V2(0.31f, 0.18f), V2(0.70f, 0.24f), V2(0.82f, 0.38f));
 
             var kHud = new GameObject("KitchenHUD", typeof(RectTransform));
             kHud.transform.SetParent(uiRoot, false);
@@ -541,6 +594,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(kBar, "mainScreen", msc);
             SetField(kBar, "recipesButton", recipesBtnGo.GetComponent<Button>());
             SetField(kBar, "upgradesButton", upgradesBtnGo.GetComponent<Button>());
+            SetField(kBar, "mapButton", mapBtnGo.GetComponent<Button>());
             kitchenBottom.transform.SetAsLastSibling();
 
             var framer = bootGo.AddComponent<WorldSceneFramer>();
@@ -621,6 +675,19 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             o.displayName = n; o.unlockLevel = lvl; o.rewardCoins = coins; o.rewardXp = xp; o.ingredients = ing;
             o.icon = icon;
             EditorUtility.SetDirty(o); return o;
+        }
+        static LocationConfig CreateLocation(string assetName, string title, int ordersToUnlock,
+            RecipeConfig[] demand, RecipeConfig[] unlockRecipes, IngredientConfig[] unlockIngredients, Sprite[] customers)
+        {
+            var o = GetOrCreate<LocationConfig>(DataDir + "/Locations", assetName);
+            o.displayName = title;
+            o.ordersToUnlockNext = ordersToUnlock;
+            o.demandRecipes = demand;
+            o.unlockRecipes = unlockRecipes;
+            o.unlockIngredients = unlockIngredients;
+            o.customerSprites = customers;
+            EditorUtility.SetDirty(o);
+            return o;
         }
         static PanStatTrackConfig CreateStatTrack(string assetName, string title, PanUpgradeConfig.EffectType effectType, int unlockLvl, int costBase, string description, Sprite icon)
         {
