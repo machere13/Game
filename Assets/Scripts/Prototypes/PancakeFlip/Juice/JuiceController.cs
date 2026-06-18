@@ -5,13 +5,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class JuiceController : MonoBehaviour
     {
-        [SerializeField] Camera cam;
         [SerializeField] FloatingTextSpawner floatText;
         [SerializeField] CoinFlySpawner coinFly;
         [SerializeField] RectTransform walletAnchor;
         [SerializeField] RectTransform profileAnchor;
         [SerializeField] RectTransform centerAnchor;
         [SerializeField] PancakeBehaviour pancake;
+        [SerializeField] Transform pan;
         [SerializeField] Graphic profileGraphic;
 
         static readonly Color CoinColor = new Color(1f, 0.85f, 0.25f);
@@ -64,10 +64,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void OnLanded(PancakeBehaviour.LandingResult r)
         {
             if (pancake != null) Juice.PunchScale(this, pancake.transform, 0.22f, 0.2f);
-            if (cam != null)
+            // Трясём сковороду, а не камеру — иначе по бокам открывается пустота за фоном.
+            if (pan != null)
             {
-                float amp = Mathf.Clamp(r.rotations * 0.04f, 0f, 0.25f);
-                if (amp > 0.001f) Juice.Shake(this, cam.transform, amp, 0.18f);
+                float amp = Mathf.Clamp(r.rotations * 0.012f, 0f, 0.07f);
+                if (amp > 0.001f) Juice.Shake(this, pan, amp, 0.18f);
             }
             if (floatText != null && centerAnchor != null && r.rotations > 0)
                 floatText.Spawn($"x{r.rotations}!", centerAnchor, FlashTint, 64f);
@@ -92,19 +93,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (coinFly != null && centerAnchor != null && walletAnchor != null)
                     coinFly.Fly(centerAnchor, walletAnchor, Mathf.Clamp(dCoins / 5 + 1, 1, 5));
                 if (floatText != null && walletAnchor != null)
-                    floatText.Spawn($"+{dCoins}", walletAnchor, CoinColor, 48f);
+                    floatText.Spawn($"+{dCoins}", walletAnchor, CoinColor, 48f, -1f);
                 if (Sfx.Instance != null) Sfx.Instance.PlayServe();
             }
             if (dXp > 0 && floatText != null && profileAnchor != null)
-                floatText.Spawn($"+{dXp} xp", profileAnchor, XpColor, 40f);
+                floatText.Spawn($"+{dXp} xp", profileAnchor, XpColor, 40f, -1f);
         }
 
         void OnLevelUp(int level)
         {
             if (profileGraphic != null) Juice.FlashColor(this, profileGraphic, FlashTint, 0.5f);
             if (floatText != null && profileAnchor != null)
-                floatText.Spawn("LEVEL UP", profileAnchor, FlashTint, 56f);
-            if (cam != null) Juice.Shake(this, cam.transform, 0.2f, 0.25f);
+                floatText.Spawn("LEVEL UP", profileAnchor, FlashTint, 56f, -1f);
+            if (pan != null) Juice.Shake(this, pan, 0.06f, 0.25f);
             if (Sfx.Instance != null) Sfx.Instance.PlayLevelUp();
         }
 
@@ -112,7 +113,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (floatText != null && centerAnchor != null)
                 floatText.Spawn("Новая локация!", centerAnchor, FlashTint, 56f);
-            if (cam != null) Juice.Shake(this, cam.transform, 0.2f, 0.25f);
+            if (pan != null) Juice.Shake(this, pan, 0.06f, 0.25f);
             if (Sfx.Instance != null) Sfx.Instance.PlayUnlock();
         }
     }

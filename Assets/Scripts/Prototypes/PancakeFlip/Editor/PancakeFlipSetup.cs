@@ -618,7 +618,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(coinSpawner, "coinSprite", walletSpr);
 
             var juiceCtrl = juiceGo.AddComponent<JuiceController>();
-            SetField(juiceCtrl, "cam", Camera.main);
+            SetField(juiceCtrl, "pan", panGo.transform);
             SetField(juiceCtrl, "floatText", floatSpawner);
             SetField(juiceCtrl, "coinFly", coinSpawner);
             SetField(juiceCtrl, "walletAnchor", walletGo.GetComponent<RectTransform>());

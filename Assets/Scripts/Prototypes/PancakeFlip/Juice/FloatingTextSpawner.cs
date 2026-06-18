@@ -9,7 +9,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] float riseDistance = 90f;
         [SerializeField] float lifetime = 0.9f;
 
-        public void Spawn(string text, RectTransform anchor, Color color, float fontSize)
+        // riseSign: +1 — текст поднимается вверх, -1 — опускается вниз (для попапов у верхней кромки).
+        public void Spawn(string text, RectTransform anchor, Color color, float fontSize, float riseSign = 1f)
         {
             if (anchor == null || string.IsNullOrEmpty(text)) return;
 
@@ -32,10 +33,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
             tmp.enableWordWrapping = false;
             tmp.fontStyle = FontStyles.Bold;
 
-            StartCoroutine(Animate(rt, tmp));
+            StartCoroutine(Animate(rt, tmp, riseSign >= 0f ? 1f : -1f));
         }
 
-        IEnumerator Animate(RectTransform rt, TextMeshProUGUI tmp)
+        IEnumerator Animate(RectTransform rt, TextMeshProUGUI tmp, float riseSign)
         {
             Vector2 start = rt.anchoredPosition;
             Color baseColor = tmp.color;
@@ -44,7 +45,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 e += Time.deltaTime;
                 float k = Mathf.Clamp01(e / lifetime);
-                rt.anchoredPosition = start + Vector2.up * (riseDistance * k);
+                rt.anchoredPosition = start + Vector2.up * (riseDistance * k * riseSign);
                 var c = baseColor; c.a = 1f - k;
                 tmp.color = c;
                 yield return null;
