@@ -334,7 +334,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var profileImg = profileGo.GetComponent<Image>();
             if (profileSpr != null) { profileImg.sprite = profileSpr; profileImg.preserveAspect = true; }
             else profileImg.color = new Color(0.8f, 0.3f, 0.3f);
-            profileImg.raycastTarget = false;
+            profileImg.raycastTarget = true;
+            var profileBtn = profileGo.AddComponent<Button>();
+            profileBtn.targetGraphic = profileImg;
+            profileBtn.transition = Selectable.Transition.None;
 
             var lvlTxt = new GameObject("LevelText", typeof(RectTransform));
             lvlTxt.transform.SetParent(profileGo.transform, false);
@@ -581,9 +584,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var upgradesBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "UpgradesBtn", V2(0.83f, 0.04f), V2(0.95f, 0.18f), panUpgradeBtnSpr);
             AddResponsive(recipesBtnGo, V2(0.05f, 0.04f), V2(0.17f, 0.18f), V2(0.70f, 0.06f), V2(0.82f, 0.20f));
             AddResponsive(upgradesBtnGo, V2(0.83f, 0.04f), V2(0.95f, 0.18f), V2(0.84f, 0.06f), V2(0.96f, 0.20f));
-            var mapBtnGo = MkKitchenSpriteButton(kitchenBottom.transform, "MapBtn", V2(0.19f, 0.04f), V2(0.31f, 0.18f), receiptBtnSpr);
-            mapBtnGo.GetComponent<Image>().color = new Color(0.6f, 0.8f, 1f, 1f);
-            AddResponsive(mapBtnGo, V2(0.19f, 0.04f), V2(0.31f, 0.18f), V2(0.70f, 0.24f), V2(0.82f, 0.38f));
 
             var kHud = new GameObject("KitchenHUD", typeof(RectTransform));
             kHud.transform.SetParent(uiRoot, false);
@@ -594,7 +594,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(kBar, "mainScreen", msc);
             SetField(kBar, "recipesButton", recipesBtnGo.GetComponent<Button>());
             SetField(kBar, "upgradesButton", upgradesBtnGo.GetComponent<Button>());
-            SetField(kBar, "mapButton", mapBtnGo.GetComponent<Button>());
+            SetField(kBar, "mapButton", profileBtn);
             kitchenBottom.transform.SetAsLastSibling();
 
             var framer = bootGo.AddComponent<WorldSceneFramer>();
