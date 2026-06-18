@@ -58,10 +58,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void BuildSteps()
         {
             _steps.Clear();
-            _steps.Add(new Step {
-                text = "Выбери заказ слева",
-                target = orderPanelTarget, blockInput = true,
-                isComplete = () => GameSession.Instance != null && GameSession.Instance.ActiveOrder != null });
+            // Сначала готовим блин, заказ выбираем уже при сдаче.
             _steps.Add(new Step {
                 text = "Нажми на плиту — открой ингредиенты",
                 target = null, blockInput = false,
@@ -71,7 +68,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 target = ingredientListTarget, blockInput = true,
                 isComplete = () => { var s = GameSession.Instance; return s != null && s.Build != null && s.Build.Slots.Count > 0; } });
             _steps.Add(new Step {
-                text = "Поставь блин на сковороду",
+                text = "Поставь блин на сковороду — «Готовить»",
                 target = cookButtonTarget, blockInput = true,
                 isComplete = () => GameSession.Instance != null && GameSession.Instance.HasCookingPancake });
             _steps.Add(new Step {
@@ -79,7 +76,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 target = null, blockInput = false,
                 isComplete = () => GameSession.Instance != null && GameSession.Instance.IsPancakeCookedEnough() });
             _steps.Add(new Step {
-                text = "Дважды нажми на заказ — сдай блин",
+                text = "Выбери заказ слева и дважды нажми — сдай блин",
                 target = orderPanelTarget, blockInput = true,
                 isComplete = () => _served });
         }
