@@ -173,7 +173,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
                 }, chocoStrawberrySpr);
 
-            var locStall = CreateLocation("LocStall", "Ларёк", 5,
+            var locStall = CreateLocation("LocStall", "Заправка", 5,
                 new[] { baseRecipe, cheeseHamRecipe },
                 new[] { cheeseHamRecipe },
                 new[] { salami, cheese },
