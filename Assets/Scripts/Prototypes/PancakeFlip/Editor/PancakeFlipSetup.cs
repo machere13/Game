@@ -1078,10 +1078,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var riImg = recipeImg.GetComponent<Image>(); riImg.preserveAspect = true;
             riImg.color = Color.white; riImg.enabled = false;
 
-            var hl = new GameObject("Highlight", typeof(RectTransform), typeof(Image));
-            hl.transform.SetParent(card.transform, false); Fill(hl);
-            var hlI = hl.GetComponent<Image>(); hlI.color = new Color(1, 0.85f, 0.3f, 0.35f); hlI.enabled = false;
-
             var sel = new GameObject("SelectBtn", typeof(RectTransform), typeof(Image), typeof(Button));
             sel.transform.SetParent(root.transform, false); Fill(sel); sel.GetComponent<Image>().color = new Color(1, 1, 1, 0.01f);
 
@@ -1098,7 +1094,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(cv2, "xpText", xpT);
             SetField(cv2, "personIcon", piImg);
             SetField(cv2, "selectButton", sel.GetComponent<Button>());
-            SetField(cv2, "selectionHighlight", hlI);
             if (personIcons != null && personIcons.Length > 0)
             {
                 var arr = new Object[personIcons.Length];
