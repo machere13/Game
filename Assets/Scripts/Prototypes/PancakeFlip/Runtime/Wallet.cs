@@ -12,6 +12,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         readonly LevelTableConfig _levels;
 
         public event System.Action OnChanged;
+        public event System.Action<int> OnLevelUp;
 
         public Wallet(LevelTableConfig levels)
         {
@@ -37,6 +38,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             TotalXp += amount;
             XpInCurrentLevel += amount;
 
+            int startLevel = Level;
             while (_levels != null && Level < _levels.MaxLevel)
             {
                 int needed = _levels.XpForNextLevel(Level);
@@ -46,6 +48,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
 
             OnChanged?.Invoke();
+            if (Level > startLevel) OnLevelUp?.Invoke(Level);
         }
 
         public float LevelProgress01()
