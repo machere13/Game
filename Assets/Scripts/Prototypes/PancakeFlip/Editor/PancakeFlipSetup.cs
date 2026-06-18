@@ -636,6 +636,24 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     b.gameObject.AddComponent<ButtonJuice>();
             // --- end Juice setup ---
 
+            // --- Tutorial setup ---
+            var tutCanvasGo = new GameObject("TutorialCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var tutCanvas = tutCanvasGo.GetComponent<Canvas>();
+            tutCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            tutCanvas.sortingOrder = 200;
+            var tutScaler = tutCanvasGo.GetComponent<CanvasScaler>();
+            tutScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            tutScaler.referenceResolution = new Vector2(1080, 1920);
+            tutScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            tutScaler.matchWidthOrHeight = 1f;
+
+            var tut = tutCanvasGo.AddComponent<TutorialController>();
+            SetField(tut, "orderPanelTarget", orderPanel.GetComponent<RectTransform>());
+            SetField(tut, "ingredientListTarget", iListContent);
+            SetField(tut, "cookButtonTarget", iCookBtn.GetComponent<RectTransform>());
+            SetField(tut, "ingredientsScreen", isv);
+            // --- end Tutorial setup ---
+
             var framer = bootGo.AddComponent<WorldSceneFramer>();
             {
                 var so = new SerializedObject(framer);
@@ -692,6 +710,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             EditorSceneManager.OpenScene(OutputScenePath, OpenSceneMode.Single);
             var o = AssetDatabase.LoadAssetAtPath<Object>(OutputScenePath);
             if (o != null) EditorGUIUtility.PingObject(o);
+        }
+
+        [MenuItem("PancakeFlip/Сбросить тутор")]
+        public static void ResetTutorial()
+        {
+            UnityEngine.PlayerPrefs.DeleteKey(TutorialController.DoneKey);
+            UnityEngine.PlayerPrefs.Save();
+            Debug.Log("PancakeFlip: тутор сброшен — покажется при следующем запуске.");
         }
 
         const string IngredientsFolder = DataDir + "/Ingredients";
