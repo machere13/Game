@@ -173,20 +173,23 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
                 }, chocoStrawberrySpr);
 
+            // Всё текущее содержимое живёт на Заправке. Другие локации — заглушки под будущий
+            // НОВЫЙ контент (свои рецепты/ингредиенты), а не перераспределение заправочного.
+            var allRecipes = new[] { baseRecipe, cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe };
             var locStall = CreateLocation("LocStall", "Заправка", 5,
-                new[] { baseRecipe, cheeseHamRecipe },
-                new[] { cheeseHamRecipe },
-                new[] { salami, cheese },
-                new[] { person1, person2 });
+                allRecipes,
+                new[] { cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe },
+                new[] { salami, cheese, banana, chocolate, mushroom, strawberry },
+                new[] { person1, person2, person3, person4 });
             var locPromenade = CreateLocation("LocPromenade", "Набережная", 8,
-                new[] { cheeseHamRecipe, bananaChocoRecipe },
-                new[] { bananaChocoRecipe },
-                new[] { banana, chocolate },
+                allRecipes,
+                null,
+                null,
                 new[] { person2, person3 });
             var locMarket = CreateLocation("LocMarket", "Рынок", 10,
-                new[] { bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe },
-                new[] { mushroomRecipe, strawberryChocoRecipe },
-                new[] { mushroom, strawberry },
+                allRecipes,
+                null,
+                null,
                 new[] { person3, person4 });
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
             worldMap.locations = new[] { locStall, locPromenade, locMarket };
