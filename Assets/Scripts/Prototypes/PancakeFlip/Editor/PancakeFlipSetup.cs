@@ -597,6 +597,42 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(kBar, "mapButton", profileBtn);
             kitchenBottom.transform.SetAsLastSibling();
 
+            // --- Juice setup ---
+            var fxCenter = new GameObject("FxCenter", typeof(RectTransform));
+            fxCenter.transform.SetParent(canvas.transform, false);
+            var fxCenterRt = fxCenter.GetComponent<RectTransform>();
+            fxCenterRt.anchorMin = fxCenterRt.anchorMax = new Vector2(0.5f, 0.5f);
+            fxCenterRt.pivot = new Vector2(0.5f, 0.5f);
+            fxCenterRt.anchoredPosition = new Vector2(0f, 200f);
+            fxCenterRt.sizeDelta = Vector2.zero;
+
+            var juiceGo = new GameObject("Juice", typeof(AudioSource));
+            juiceGo.transform.SetParent(uiRoot, false);
+            var sfx = juiceGo.AddComponent<Sfx>();
+            SetField(sfx, "source", juiceGo.GetComponent<AudioSource>());
+
+            var floatSpawner = juiceGo.AddComponent<FloatingTextSpawner>();
+
+            var coinSpawner = juiceGo.AddComponent<CoinFlySpawner>();
+            SetField(coinSpawner, "parentCanvas", (RectTransform)canvas.transform);
+            SetField(coinSpawner, "coinSprite", walletSpr);
+
+            var juiceCtrl = juiceGo.AddComponent<JuiceController>();
+            SetField(juiceCtrl, "cam", Camera.main);
+            SetField(juiceCtrl, "floatText", floatSpawner);
+            SetField(juiceCtrl, "coinFly", coinSpawner);
+            SetField(juiceCtrl, "walletAnchor", walletGo.GetComponent<RectTransform>());
+            SetField(juiceCtrl, "profileAnchor", profileGo.GetComponent<RectTransform>());
+            SetField(juiceCtrl, "centerAnchor", fxCenterRt);
+            SetField(juiceCtrl, "pancake", pcBh);
+            SetField(juiceCtrl, "profileGraphic", profileGo.GetComponent<Image>());
+
+            // Pop every static button built so far.
+            foreach (var b in canvas.GetComponentsInChildren<Button>(true))
+                if (b.GetComponent<ButtonJuice>() == null)
+                    b.gameObject.AddComponent<ButtonJuice>();
+            // --- end Juice setup ---
+
             var framer = bootGo.AddComponent<WorldSceneFramer>();
             {
                 var so = new SerializedObject(framer);
