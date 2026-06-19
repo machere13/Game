@@ -110,6 +110,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             AutowirePanAssetsIfEmpty();
             Instance = this;
             Wallet = new Wallet(levelTable);
+            Wallet.AddCoins(500); // стартовый баланс для теста
             Inventory = new Inventory();
             Upgrades = new PanUpgradeState();
             Upgrades.Initialize(defaultPanTier);
