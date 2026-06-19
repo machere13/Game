@@ -1167,7 +1167,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             scrollGo.transform.SetParent(parent, false);
             var sRt = scrollGo.GetComponent<RectTransform>();
             sRt.anchorMin = amin; sRt.anchorMax = amax; sRt.offsetMin = sRt.offsetMax = Vector2.zero;
-            scrollGo.GetComponent<Image>().color = new Color(0.78f, 0.74f, 0.68f, 0.45f);
+            scrollGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f); // прозрачно — фон списка не нужен
 
             var vp = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
             vp.transform.SetParent(scrollGo.transform, false);
