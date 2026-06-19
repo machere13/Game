@@ -253,7 +253,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var h = row.GetComponent<HorizontalLayoutGroup>();
             h.childAlignment = TextAnchor.MiddleLeft;
             h.spacing = 14f;
-            h.padding = new RectOffset(0, 28, 10, 10);
+            h.padding = new RectOffset(14, 28, 10, 10);
             h.childControlWidth = true;
             h.childControlHeight = true;
             h.childForceExpandWidth = false;
@@ -270,11 +270,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
             iconImg.preserveAspect = true;
             iconImg.raycastTarget = false;
             var iconLe = iconGo.AddComponent<LayoutElement>();
-            iconLe.minWidth = 200f;
-            iconLe.preferredWidth = 200f;
+            iconLe.minWidth = 150f;
+            iconLe.preferredWidth = 150f;
             iconLe.flexibleWidth = 0f;
-            iconLe.minHeight = 160f;
-            iconLe.preferredHeight = 160f;
+            iconLe.minHeight = 150f;
+            iconLe.preferredHeight = 150f;
             iconLe.flexibleHeight = 0f;
 
             var textsGo = new GameObject("Texts", typeof(RectTransform), typeof(VerticalLayoutGroup));
