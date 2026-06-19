@@ -532,7 +532,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             recipeBookScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(recipeBookScr);
             var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
-            MkPanel(recipeBookScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
             var rbTitle = MkLabel(recipeBookScr.transform, "Title", "Рецепты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var rbTitleRt = rbTitle.GetComponent<RectTransform>();
             rbTitleRt.anchorMin = V2(0.04f, 0.86f); rbTitleRt.anchorMax = V2(0.96f, 0.98f);
@@ -550,7 +549,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             ingScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(ingScr);
             var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
-            MkPanel(ingScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
             var ingTitle = MkLabel(ingScr.transform, "Title", "Ингредиенты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var ingTitleRt = ingTitle.GetComponent<RectTransform>();
             ingTitleRt.anchorMin = V2(0.04f, 0.86f); ingTitleRt.anchorMax = V2(0.96f, 0.98f);
@@ -596,7 +594,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             upgScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(upgScr);
             var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
-            MkPanel(upgScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.45f, 0.32f, 0.22f, 1f));
             var upgTitle = MkLabel(upgScr.transform, "Title", "Сковородки", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var upgTitleRt = upgTitle.GetComponent<RectTransform>();
             upgTitleRt.anchorMin = V2(0.04f, 0.86f); upgTitleRt.anchorMax = V2(0.96f, 0.98f);
