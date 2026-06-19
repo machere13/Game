@@ -196,7 +196,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (loc.bottomPanel != null)
                 {
                     sceneBottomPanel.sprite = loc.bottomPanel;
-                    FitBottomPanelWidth();
+                    // Прилавки городов чуть приподнимаем; у стартовой Заправки — свой спрайт, не трогаем.
+                    FitBottomPanelWidth(index == 0 ? 0f : 0.06f);
                 }
                 sceneBottomPanel.enabled = loc.bottomPanel != null;
             }
@@ -208,7 +209,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         }
 
         // Прилавок города может иметь свою нативную ширину — растягиваем на всю ширину камеры и прижимаем к низу.
-        void FitBottomPanelWidth()
+        void FitBottomPanelWidth(float liftFactor = 0f)
         {
             var cam = Camera.main;
             if (cam == null || sceneBottomPanel == null || sceneBottomPanel.sprite == null) return;
@@ -220,7 +221,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var t = sceneBottomPanel.transform;
             t.localScale = Vector3.one * sc;
             float h = spr.bounds.size.y * sc;
-            t.position = new Vector3(0f, -ortho + h * 0.5f, t.position.z);
+            t.position = new Vector3(0f, -ortho + h * 0.5f + ortho * liftFactor, t.position.z);
         }
 
         public bool TryBuyCity(int index)
