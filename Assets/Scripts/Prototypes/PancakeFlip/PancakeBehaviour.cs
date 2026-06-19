@@ -158,7 +158,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 Physics2D.IgnoreCollision(_col, _panCol, false);
 
             if (_sr != null)
+            {
                 _sr.flipX = false;
+                _sr.flipY = false;
+            }
 
             _rb.bodyType = RigidbodyType2D.Dynamic;
             _rb.constraints = RigidbodyConstraints2D.None;
@@ -282,8 +285,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 bool sideAOnPan = _currentSide == Side.A;
                 _sr.sprite = sideAOnPan ? resB : resA;
 
+                // Одинаковая картинка с двух сторон: обратную сторону показываем повёрнутой на 180°
+                // (flipX+flipY), иначе у симметричного блина переворот незаметен.
                 bool sameArt = resA == resB;
-                _sr.flipX = sameArt && _currentSide == Side.B;
+                bool back = sameArt && _currentSide == Side.B;
+                _sr.flipX = back;
+                _sr.flipY = back;
             }
 
             _rb.MoveRotation(0f);
