@@ -303,8 +303,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             rowH.padding = new RectOffset(8, 8, 4, 4);
             rowH.childAlignment = TextAnchor.MiddleLeft;
             var rowLe = row.GetComponent<LayoutElement>();
-            rowLe.minHeight = 170f;
-            rowLe.preferredHeight = 170f;
+            rowLe.minHeight = 220f;
+            rowLe.preferredHeight = 220f;
 
             var iconGo = new GameObject(IconChildName, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
             iconGo.transform.SetParent(row.transform, false);
