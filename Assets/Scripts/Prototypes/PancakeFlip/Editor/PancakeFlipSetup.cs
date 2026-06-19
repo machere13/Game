@@ -682,7 +682,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, new Color(0.2f, 0.16f, 0.1f), 0);
             var buyTitleRt = buyTitle.GetComponent<RectTransform>();
-            buyTitleRt.anchorMin = V2(0.16f, 0.62f); buyTitleRt.anchorMax = V2(0.84f, 0.78f);
+            buyTitleRt.anchorMin = V2(0.16f, 0.66f); buyTitleRt.anchorMax = V2(0.84f, 0.82f);
             buyTitleRt.offsetMin = buyTitleRt.offsetMax = Vector2.zero;
             buyTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
 
@@ -705,7 +705,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
             StyleButtonSprite(buyConfirm, successBtnSpr);
             var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
-            buyConfirmRt.anchorMin = V2(0.34f, 0.14f); buyConfirmRt.anchorMax = V2(0.66f, 0.30f);
+            buyConfirmRt.anchorMin = V2(0.34f, 0.20f); buyConfirmRt.anchorMax = V2(0.66f, 0.36f);
             buyConfirmRt.offsetMin = buyConfirmRt.offsetMax = Vector2.zero;
             var buyCloseIcon = MkCloseIcon(buyModal.transform, closeIconSpr);
             buyModal.SetActive(false);
