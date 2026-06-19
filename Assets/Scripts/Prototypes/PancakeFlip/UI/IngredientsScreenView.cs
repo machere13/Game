@@ -372,7 +372,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (gs != null) gs.TryAddToBuild(ing);
             });
 
-            var buy = CreateActionButton(row.transform, isFree ? "Заготовить" : ing.coinCost.ToString(),
+            var buy = CreateActionButton(btnRowGo.transform, isFree ? "Заготовить" : ing.coinCost.ToString(),
                 isFree ? AddButtonColor : ShopBuyButtonStyle.BuyGreen, font, withCoinIcon: !isFree);
             SetBtnSprite(buy.background, isFree ? s.ActionButtonSprite : s.SuccessButtonSprite);
             buy.button.onClick.AddListener(() =>
