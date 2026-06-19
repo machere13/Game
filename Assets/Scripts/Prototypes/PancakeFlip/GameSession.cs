@@ -69,6 +69,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         readonly List<RecipeConfig> _book = new List<RecipeConfig>();
         readonly List<IngredientConfig> _availableIngredients = new List<IngredientConfig>();
+        readonly HashSet<int> _contentApplied = new HashSet<int>();
         bool MapActive => worldMap != null && worldMap.locations != null && worldMap.locations.Length > 0;
         public Sprite CoinIcon => coinIcon;
         public Sprite CloseIcon => closeIcon;
@@ -103,10 +104,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
             int persons = flipConfig != null ? flipConfig.personCount : DefaultPersonCount;
             if (MapActive)
             {
-                var nVals = new int[worldMap.locations.Length];
+                var reqLevels = new int[worldMap.locations.Length];
                 for (int i = 0; i < worldMap.locations.Length; i++)
-                    nVals[i] = worldMap.locations[i] != null ? worldMap.locations[i].ordersToUnlockNext : 1;
-                Map = new MapState(nVals);
+                    reqLevels[i] = worldMap.locations[i] != null ? worldMap.locations[i].requiredLevel : 1;
+                Map = new MapState(reqLevels, 0);
 
                 _book.Clear();
                 if (baseRecipe != null) _book.Add(baseRecipe);
@@ -150,12 +151,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void TravelTo(int index)
         {
             if (!MapActive || Map == null) return;
-            if (!Map.CanTravelTo(index)) return;
+            if (!Map.CanEnter(index)) return;
 
             var loc = worldMap.locations[index];
             if (loc == null) return;
 
-            if (Map.ShouldApplyUnlock(index))
+            if (_contentApplied.Add(index))
             {
                 if (loc.unlockRecipes != null)
                 {
@@ -167,7 +168,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
                     foreach (var ing in loc.unlockIngredients)
                         if (ing != null && !_availableIngredients.Contains(ing)) _availableIngredients.Add(ing);
                 }
-                Map.MarkUnlockApplied(index);
                 OnIngredientsChanged?.Invoke();
             }
 
@@ -175,8 +175,20 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (customerAnimator != null)
                 customerAnimator.SetPersonSprites(loc.customerSprites);
 
-            Map.TravelTo(index);
+            Map.SetCurrent(index);
             _activeOrder = null;
+        }
+
+        public bool TryBuyCity(int index)
+        {
+            if (!MapActive || Map == null) return false;
+            if (!Map.CanBuy(index, Wallet.Level)) return false;
+            var loc = worldMap.locations[index];
+            int cost = loc != null ? loc.cityCost : 0;
+            if (cost > 0 && !Wallet.SpendCoins(cost)) return false;
+            Map.MarkOwned(index);
+            OnNewLocationUnlocked?.Invoke();
+            return true;
         }
 
         public bool TryServe()
@@ -209,8 +221,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             Orders.CompleteOrder(_activeOrder);
             _activeOrder = null;
-            if (MapActive && Map != null && Map.RecordOrderCompleted())
-                OnNewLocationUnlocked?.Invoke();
 
             ClearCookingPancake();
             ResetPancake();

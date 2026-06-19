@@ -3,90 +3,65 @@ using IdlePancake.PancakeFlip.MapCore;
 
 public class MapStateTests
 {
-    static MapState Make() => new MapState(new[] { 5, 8, 10 });
+    static MapState Make() => new MapState(new[] { 1, 3, 5 }, 0);
 
     [Test]
-    public void New_StartsAtFirstLocation_OnlyFirstUnlocked()
+    public void New_StarterOwned_OthersNot()
     {
         var m = Make();
         Assert.AreEqual(3, m.LocationCount);
         Assert.AreEqual(0, m.CurrentIndex);
-        Assert.AreEqual(0, m.HighestUnlockedIndex);
+        Assert.IsTrue(m.IsOwned(0));
+        Assert.IsFalse(m.IsOwned(1));
     }
 
     [Test]
-    public void RecordOrders_BelowThreshold_DoesNotUnlock()
+    public void StateOf_DependsOnLevelAndOwnership()
     {
         var m = Make();
-        for (int i = 0; i < 4; i++)
-            Assert.IsFalse(m.RecordOrderCompleted());
-        Assert.AreEqual(0, m.HighestUnlockedIndex);
+        Assert.AreEqual(CityState.Owned, m.StateOf(0, 1));
+        Assert.AreEqual(CityState.Locked, m.StateOf(1, 1));
+        Assert.AreEqual(CityState.Buyable, m.StateOf(1, 3));
     }
 
     [Test]
-    public void RecordOrders_AtThreshold_UnlocksNextOnce()
+    public void CanBuy_RequiresLevelAndNotOwned()
     {
         var m = Make();
-        bool unlocked = false;
-        for (int i = 0; i < 5; i++) unlocked = m.RecordOrderCompleted();
-        Assert.IsTrue(unlocked);
-        Assert.AreEqual(1, m.HighestUnlockedIndex);
-        Assert.IsFalse(m.RecordOrderCompleted());
-        Assert.AreEqual(1, m.HighestUnlockedIndex);
+        Assert.IsFalse(m.CanBuy(1, 2));
+        Assert.IsTrue(m.CanBuy(1, 3));
+        Assert.IsFalse(m.CanBuy(0, 9));
     }
 
     [Test]
-    public void CanTravelTo_RespectsUnlockAndBounds()
+    public void MarkOwned_MakesEnterableAndOwnedState()
     {
         var m = Make();
-        Assert.IsTrue(m.CanTravelTo(0));
-        Assert.IsFalse(m.CanTravelTo(1));
-        Assert.IsFalse(m.CanTravelTo(-1));
-        Assert.IsFalse(m.CanTravelTo(3));
-        for (int i = 0; i < 5; i++) m.RecordOrderCompleted();
-        Assert.IsTrue(m.CanTravelTo(1));
+        Assert.IsFalse(m.CanEnter(1));
+        m.MarkOwned(1);
+        Assert.IsTrue(m.IsOwned(1));
+        Assert.IsTrue(m.CanEnter(1));
+        Assert.AreEqual(CityState.Owned, m.StateOf(1, 1));
     }
 
     [Test]
-    public void TravelTo_UnlockedLocation_MovesCurrent()
+    public void SetCurrent_OnlyForOwned()
     {
         var m = Make();
-        for (int i = 0; i < 5; i++) m.RecordOrderCompleted();
-        Assert.IsTrue(m.TravelTo(1));
-        Assert.AreEqual(1, m.CurrentIndex);
-        Assert.IsFalse(m.TravelTo(2));
+        Assert.IsFalse(m.SetCurrent(1));
+        Assert.AreEqual(0, m.CurrentIndex);
+        m.MarkOwned(1);
+        Assert.IsTrue(m.SetCurrent(1));
         Assert.AreEqual(1, m.CurrentIndex);
     }
 
     [Test]
-    public void ShouldApplyUnlock_OncePerLocation()
+    public void OutOfRange_IsSafe()
     {
         var m = Make();
-        Assert.IsTrue(m.ShouldApplyUnlock(0));
-        m.MarkUnlockApplied(0);
-        Assert.IsFalse(m.ShouldApplyUnlock(0));
-    }
-
-    [Test]
-    public void ReturningToEarlierLocation_DoesNotUnlockAhead()
-    {
-        var m = Make();
-        for (int i = 0; i < 5; i++) m.RecordOrderCompleted();
-        m.TravelTo(1);
-        m.TravelTo(0);
-        for (int i = 0; i < 6; i++) Assert.IsFalse(m.RecordOrderCompleted());
-        Assert.AreEqual(1, m.HighestUnlockedIndex);
-    }
-
-    [Test]
-    public void LastLocation_NeverUnlocksBeyond()
-    {
-        var m = Make();
-        for (int i = 0; i < 5; i++) m.RecordOrderCompleted();
-        m.TravelTo(1);
-        for (int i = 0; i < 8; i++) m.RecordOrderCompleted();
-        m.TravelTo(2);
-        for (int i = 0; i < 20; i++) Assert.IsFalse(m.RecordOrderCompleted());
-        Assert.AreEqual(2, m.HighestUnlockedIndex);
+        Assert.AreEqual(CityState.Locked, m.StateOf(-1, 99));
+        Assert.AreEqual(CityState.Locked, m.StateOf(5, 99));
+        Assert.IsFalse(m.CanEnter(9));
+        Assert.IsFalse(m.CanBuy(9, 99));
     }
 }

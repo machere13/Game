@@ -2,71 +2,65 @@ using System;
 
 namespace IdlePancake.PancakeFlip.MapCore
 {
+    public enum CityState { Owned, Buyable, Locked }
+
     /// <summary>
-    /// Pure progression logic for the linear location chain. No UnityEngine dependency.
+    /// Pure city-ownership + level-gate state for the world map. No UnityEngine dependency.
+    /// A city is Owned (bought), Buyable (player level >= required, not bought), or Locked.
     /// </summary>
     public sealed class MapState
     {
-        readonly int[] _ordersToUnlock;
-        readonly int[] _completed;
-        readonly bool[] _unlockApplied;
+        readonly int[] _requiredLevels;
+        readonly bool[] _owned;
 
         public int LocationCount { get; }
         public int CurrentIndex { get; private set; }
-        public int HighestUnlockedIndex { get; private set; }
 
         public event Action OnChanged;
 
-        public MapState(int[] ordersToUnlockNext)
+        public MapState(int[] requiredLevels, int startOwnedIndex = 0)
         {
-            if (ordersToUnlockNext == null || ordersToUnlockNext.Length == 0)
-                throw new ArgumentException("ordersToUnlockNext must be non-empty");
-            LocationCount = ordersToUnlockNext.Length;
-            _ordersToUnlock = (int[])ordersToUnlockNext.Clone();
-            _completed = new int[LocationCount];
-            _unlockApplied = new bool[LocationCount];
-            CurrentIndex = 0;
-            HighestUnlockedIndex = 0;
-        }
-
-        public bool RecordOrderCompleted()
-        {
-            _completed[CurrentIndex]++;
-            bool unlockedNew = false;
-            if (HighestUnlockedIndex == CurrentIndex
-                && CurrentIndex + 1 < LocationCount
-                && _completed[CurrentIndex] >= _ordersToUnlock[CurrentIndex])
+            if (requiredLevels == null || requiredLevels.Length == 0)
+                throw new ArgumentException("requiredLevels must be non-empty");
+            LocationCount = requiredLevels.Length;
+            _requiredLevels = (int[])requiredLevels.Clone();
+            _owned = new bool[LocationCount];
+            if (startOwnedIndex >= 0 && startOwnedIndex < LocationCount)
             {
-                HighestUnlockedIndex = CurrentIndex + 1;
-                unlockedNew = true;
+                _owned[startOwnedIndex] = true;
+                CurrentIndex = startOwnedIndex;
             }
-            OnChanged?.Invoke();
-            return unlockedNew;
+            else CurrentIndex = 0;
         }
 
-        public bool CanTravelTo(int index) =>
-            index >= 0 && index < LocationCount && index <= HighestUnlockedIndex;
+        bool InRange(int i) => i >= 0 && i < LocationCount;
 
-        public bool TravelTo(int index)
+        public bool IsOwned(int i) => InRange(i) && _owned[i];
+        public int RequiredLevel(int i) => InRange(i) ? _requiredLevels[i] : int.MaxValue;
+
+        public CityState StateOf(int i, int playerLevel)
         {
-            if (!CanTravelTo(index)) return false;
-            CurrentIndex = index;
+            if (!InRange(i)) return CityState.Locked;
+            if (_owned[i]) return CityState.Owned;
+            return playerLevel >= _requiredLevels[i] ? CityState.Buyable : CityState.Locked;
+        }
+
+        public bool CanEnter(int i) => IsOwned(i);
+
+        public bool CanBuy(int i, int playerLevel) =>
+            InRange(i) && !_owned[i] && playerLevel >= _requiredLevels[i];
+
+        public void MarkOwned(int i)
+        {
+            if (InRange(i) && !_owned[i]) { _owned[i] = true; OnChanged?.Invoke(); }
+        }
+
+        public bool SetCurrent(int i)
+        {
+            if (!CanEnter(i)) return false;
+            CurrentIndex = i;
             OnChanged?.Invoke();
             return true;
         }
-
-        public bool ShouldApplyUnlock(int index)
-        {
-            if (index < 0 || index >= LocationCount) return false;
-            return !_unlockApplied[index];
-        }
-
-        public void MarkUnlockApplied(int index)
-        {
-            if (index >= 0 && index < LocationCount) _unlockApplied[index] = true;
-        }
-
-        public int OrdersInCurrent() => _completed[CurrentIndex];
-        public int OrdersToUnlockCurrent() => _ordersToUnlock[CurrentIndex];
     }
 }
