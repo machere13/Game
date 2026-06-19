@@ -710,6 +710,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             buyModalImg.raycastTarget = true;
             if (globalMapPlateSpr != null) { buyModalImg.sprite = globalMapPlateSpr; buyModalImg.type = Image.Type.Simple; buyModalImg.preserveAspect = false; buyModalImg.color = Color.white; }
             AddModalCanvasLayer(buyModal);
+            buyModal.GetComponent<Canvas>().sortingOrder = 101; // выше блокера, чтобы кнопки модалки ловили клик
 
             var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, new Color(0.2f, 0.16f, 0.1f), 0);
             var buyTitleRt = buyTitle.GetComponent<RectTransform>();

@@ -17,6 +17,7 @@ MonoBehaviour:
     \u0411\u0430\u0437\u0430 +10%."
   icon: {fileID: 21300000, guid: 5c929fa9260752442a1b5949fab416c6, type: 3}
   panFront: {fileID: 21300000, guid: aa11030000000000000000000000bf03, type: 3}
+  panBack: {fileID: 21300000, guid: aa01030000000000000000000000ba03, type: 3}
   isStarter: 0
   coinCost: 280
   unlockLevel: 5
