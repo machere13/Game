@@ -194,14 +194,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 cimg.sprite = carSprite; cimg.preserveAspect = true; cimg.raycastTarget = false;
                 crt.SetAsLastSibling();
 
-                const float dur = 0.8f;
+                // Лёгкая дуга «по дороге»: контрольная точка смещена перпендикулярно курсу.
+                Vector2 dir = toPos - fromPos;
+                float len = dir.magnitude;
+                Vector2 perp = len > 0.0001f ? new Vector2(-dir.y, dir.x) / len : Vector2.zero;
+                Vector2 ctrl = (fromPos + toPos) * 0.5f + perp * 0.08f;
+
+                const float dur = 1.6f;
                 float e = 0f;
                 while (e < dur)
                 {
                     e += Time.deltaTime;
                     float k = Mathf.Clamp01(e / dur);
-                    float ease = k * k * (3f - 2f * k);
-                    crt.anchorMin = crt.anchorMax = Vector2.Lerp(fromPos, toPos, ease);
+                    // smootherstep — плавный разгон и торможение с долгой «крейсерской» серединой.
+                    float t = k * k * k * (k * (6f * k - 15f) + 10f);
+                    float inv = 1f - t;
+                    crt.anchorMin = crt.anchorMax =
+                        inv * inv * fromPos + 2f * inv * t * ctrl + t * t * toPos;
                     yield return null;
                 }
                 Destroy(carGo);
