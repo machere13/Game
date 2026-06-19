@@ -40,6 +40,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] PancakeBehaviour pancake;
         [SerializeField] CustomerAnimator customerAnimator;
         [SerializeField] SpriteRenderer sceneBackground;
+        [SerializeField] SpriteRenderer sceneBottomPanel;
         [SerializeField] StoveView stove;
         public PancakeBehaviour Pancake => pancake;
 
@@ -180,6 +181,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 customerAnimator.SetPersonSprites(loc.customerSprites);
             if (sceneBackground != null && loc.background != null)
                 sceneBackground.sprite = loc.background;
+            if (sceneBottomPanel != null)
+            {
+                if (loc.bottomPanel != null) sceneBottomPanel.sprite = loc.bottomPanel;
+                sceneBottomPanel.enabled = loc.bottomPanel != null;
+            }
             if (stove != null)
                 stove.SetSprites(loc.stoveClosed, loc.stoveOpen);
 

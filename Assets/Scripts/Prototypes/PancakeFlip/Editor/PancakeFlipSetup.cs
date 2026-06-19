@@ -118,8 +118,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var walletSpr = LoadSprite("Wallet");
             var backPanSpr = LoadSprite("BackPan");
             var frontPanSpr = LoadSprite("FrontPan");
-            // Общий нижний прилавок убран: прилавок/пол теперь часть пер-городского фона (BackgroundCityNN).
-            Sprite bottomPanelSpr = null;
+            var bottomPanelSpr = LoadSprite("BottomPanel");
             var person1 = LoadSprite("Person1");
             var person2 = LoadSprite("Person2");
             var person3 = LoadSprite("Person3");
@@ -209,13 +208,16 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             locStall.requiredLevel = 1; locStall.cityCost = 0;
             locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
             locStall.background = bgCity01; locStall.stoveClosed = stoveCity01; locStall.stoveOpen = stoveOpen01;
+            locStall.bottomPanel = bottomPanelSpr; // у Заправки прилавок отдельным спрайтом
             // Средний Сити (Рынок) открывается вторым; Бостон Сити (Набережная) — третьим.
             locMarket.requiredLevel = 3; locMarket.cityCost = 150;
             locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
             locMarket.background = bgCity02; locMarket.stoveClosed = stoveCity02; locMarket.stoveOpen = stoveOpen01;
+            locMarket.bottomPanel = null; // прилавок уже в фоне города
             locPromenade.requiredLevel = 5; locPromenade.cityCost = 300;
             locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
             locPromenade.background = bgCity03; locPromenade.stoveClosed = stoveCity03; locPromenade.stoveOpen = stoveOpen01;
+            locPromenade.bottomPanel = null; // прилавок уже в фоне города
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
@@ -641,6 +643,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "customerAnimator", custAnim);
             var bgGoRef = GameObject.Find("Background");
             SetField(sess, "sceneBackground", bgGoRef != null ? bgGoRef.GetComponent<SpriteRenderer>() : null);
+            var bottomGoRef = GameObject.Find("BottomPanel");
+            SetField(sess, "sceneBottomPanel", bottomGoRef != null ? bottomGoRef.GetComponent<SpriteRenderer>() : null);
             SetField(sess, "stove", Object.FindObjectOfType<StoveView>());
 
             var mscGo = new GameObject("MainScreenController");

@@ -14,6 +14,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public Sprite stoveClosed;
         [Tooltip("Спрайт плиты (открытой) в этом городе")]
         public Sprite stoveOpen;
+        [Tooltip("Нижний прилавок этого города (null = прилавок уже в фоне, не показывать отдельный)")]
+        public Sprite bottomPanel;
 
         [Tooltip("Сколько заказов сдать здесь, чтобы открыть следующую локацию")]
         public int ordersToUnlockNext = 5;
