@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 292313a1de94a534b8f89c75b393caa2, type: 3}
+  m_Name: WorldMap
+  m_EditorClassIdentifier: 
+  locations:
+  - {fileID: 11400000, guid: 18582a4d9017c7f48b3e792d65cf94f3, type: 2}
+  - {fileID: 11400000, guid: dbc6d22c02bae474f87ce1c43ce821ee, type: 2}
+  - {fileID: 11400000, guid: 038ede9b3ff8689439a72b0b79f2b56f, type: 2}
