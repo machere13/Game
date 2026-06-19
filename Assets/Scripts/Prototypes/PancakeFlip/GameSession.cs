@@ -38,6 +38,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Sprite actionButtonSprite;
         [SerializeField] Sprite successButtonSprite;
         [SerializeField] Sprite cancelButtonSprite;
+        [SerializeField] Sprite ingredientSpotSprite;
+        [SerializeField] Sprite recipeHudSpotSprite;
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
@@ -82,6 +84,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public Sprite ActionButtonSprite => actionButtonSprite;
         public Sprite SuccessButtonSprite => successButtonSprite;
         public Sprite CancelButtonSprite => cancelButtonSprite;
+        public Sprite IngredientSpotSprite => ingredientSpotSprite;
+        public Sprite RecipeHudSpotSprite => recipeHudSpotSprite;
         public bool HasCookingPancake { get; private set; }
 
         public static GameSession Instance { get; private set; }

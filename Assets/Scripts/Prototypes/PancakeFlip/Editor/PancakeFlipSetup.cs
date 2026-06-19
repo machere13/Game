@@ -103,6 +103,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetSpriteBorder("ActionButton", 40f);
             SetSpriteBorder("SuccessButton", 40f);
             SetSpriteBorder("CancelButton", 40f);
+            SetSpriteBorder("RecipesHud", 90f);
+            SetSpriteBorder("PanHud", 90f);
+            SetSpriteBorder("RecipeHudSpot", 40f);
+            SetSpriteBorder("IngredientSpot", 40f);
             // Пер-городские фоны/плиты (Заправка=01, Средний=02, Бостон=03). Открытая плита пока только City01.
             var bgCity01 = LoadSprite("BackgroundCity01");
             var bgCity02 = LoadSprite("BackgroundCity02");
@@ -151,6 +155,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var actionBtnSpr = LoadSprite("ActionButton");
             var successBtnSpr = LoadSprite("SuccessButton");
             var cancelBtnSpr = LoadSprite("CancelButton");
+            var recipesHudSpr = LoadSprite("RecipesHud");
+            var panHudSpr = LoadSprite("PanHud");
+            var ingredientSpotSpr = LoadSprite("IngredientSpot");
+            var recipeHudSpotSpr = LoadSprite("RecipeHudSpot");
             var uiFont = LoadPancakeFlipUiFont();
             var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
@@ -519,6 +527,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(civ, "pancakeA", imgA); SetField(civ, "pancakeB", imgB);
 
             var recipeBookScr = MkPanel(uiRoot, "RecipeBookScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            StyleButtonSprite(recipeBookScr, recipesHudSpr);
             AddResponsive(recipeBookScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             recipeBookScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(recipeBookScr);
@@ -536,6 +545,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(rbsv, "closeButton", rbCloseIcon);
 
             var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            StyleButtonSprite(ingScr, recipesHudSpr);
             AddResponsive(ingScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             ingScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(ingScr);
@@ -581,6 +591,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (stoveV != null) { SetField(stoveV, "ingredientsScreen", isv); SetField(isv, "stove", stoveV); }
 
             var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.98f, 0.95f, 0.9f, 0.99f));
+            StyleButtonSprite(upgScr, panHudSpr);
             AddResponsive(upgScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             upgScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(upgScr);
@@ -691,6 +702,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "actionButtonSprite", actionBtnSpr);
             SetField(sess, "successButtonSprite", successBtnSpr);
             SetField(sess, "cancelButtonSprite", cancelBtnSpr);
+            SetField(sess, "ingredientSpotSprite", ingredientSpotSpr);
+            SetField(sess, "recipeHudSpotSprite", recipeHudSpotSpr);
             SetField(sess, "worldMap", worldMap);
             SetField(sess, "customerAnimator", custAnim);
             var bgGoRef = GameObject.Find("Background");

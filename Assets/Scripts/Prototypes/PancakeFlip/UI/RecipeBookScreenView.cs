@@ -67,8 +67,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var row = new GameObject("RecipeRow", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
             row.transform.SetParent(parent, false);
             var rowBg = row.GetComponent<Image>();
-            rowBg.color = new Color(1f, 0.96f, 0.86f, 0.6f);
             rowBg.raycastTarget = false;
+            var rowSpot = GameSession.Instance != null ? GameSession.Instance.RecipeHudSpotSprite : null;
+            if (rowSpot != null) { rowBg.sprite = rowSpot; rowBg.type = Image.Type.Sliced; rowBg.color = Color.white; }
+            else rowBg.color = new Color(1f, 0.96f, 0.86f, 0.6f);
             var rowH = row.GetComponent<HorizontalLayoutGroup>();
             rowH.spacing = 14f;
             rowH.padding = new RectOffset(12, 12, 10, 10);

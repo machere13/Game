@@ -134,6 +134,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var bg = slot.GetComponent<Image>();
             bg.color = ingredient != null ? SlotFilledColor : SlotEmptyColor;
             bg.raycastTarget = false;
+            var spotSpr = GameSession.Instance != null ? GameSession.Instance.IngredientSpotSprite : null;
+            if (spotSpr != null) { bg.sprite = spotSpr; bg.type = Image.Type.Sliced; bg.color = Color.white; }
             var le = slot.GetComponent<LayoutElement>();
             le.minWidth = BuilderSlotSize;
             le.preferredWidth = BuilderSlotSize;
@@ -286,8 +288,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             var font = PancakeFlipUiFonts.UiTmpFont;
 
-            var row = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            var row = new GameObject("Row", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
             row.transform.SetParent(parent, false);
+            var rowBg = row.GetComponent<Image>();
+            rowBg.raycastTarget = false;
+            if (s.RecipeHudSpotSprite != null) { rowBg.sprite = s.RecipeHudSpotSprite; rowBg.type = Image.Type.Sliced; rowBg.color = Color.white; }
+            else rowBg.color = new Color(1f, 1f, 1f, 0f);
             var rowH = row.GetComponent<HorizontalLayoutGroup>();
             rowH.childControlWidth = true;
             rowH.childControlHeight = true;
