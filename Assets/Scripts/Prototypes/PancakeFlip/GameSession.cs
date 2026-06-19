@@ -48,6 +48,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] SpriteRenderer sceneBottomPanel;
         [SerializeField] StoveView stove;
         [SerializeField] SpriteRenderer panFrontRenderer;
+        [SerializeField] SpriteRenderer panBackRenderer;
         public PancakeBehaviour Pancake => pancake;
 
         public Wallet Wallet { get; private set; }
@@ -431,13 +432,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
             ApplyEquippedPanVisual();
         }
 
-        // Меняем переднюю часть сковороды в кухне под надетый тир.
+        // Меняем переднюю и заднюю части сковороды в кухне под надетый тир.
         public void ApplyEquippedPanVisual()
         {
-            if (panFrontRenderer == null) return;
             var tier = EquippedPanTier;
-            if (tier != null && tier.panFront != null)
+            if (tier == null) return;
+            if (panFrontRenderer != null && tier.panFront != null)
                 panFrontRenderer.sprite = tier.panFront;
+            if (panBackRenderer != null && tier.panBack != null)
+                panBackRenderer.sprite = tier.panBack;
         }
 
         public void TapDough(IngredientConfig dough)

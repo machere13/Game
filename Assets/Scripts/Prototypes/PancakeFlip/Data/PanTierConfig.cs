@@ -10,6 +10,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public Sprite icon;
         [Tooltip("Спрайт передней части сковороды в кухне (мир).")]
         public Sprite panFront;
+        [Tooltip("Спрайт задней части сковороды в кухне (мир).")]
+        public Sprite panBack;
 
         [Tooltip("0 = стартовая, всегда в коллекции при новой игре.")]
         public bool isStarter;

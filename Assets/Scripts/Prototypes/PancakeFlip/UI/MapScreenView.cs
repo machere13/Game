@@ -14,6 +14,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] TextMeshProUGUI statusText;
         [SerializeField] Button closeButton;
         [SerializeField] GameObject buyModal;
+        [SerializeField] GameObject buyBlocker;
         [SerializeField] TextMeshProUGUI buyTitleText;
         [SerializeField] TextMeshProUGUI buyCostText;
         [SerializeField] Image buyCoinIcon;
@@ -232,6 +233,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var loc = s.WorldMap.locations[index];
             if (loc == null) return;
 
+            if (buyBlocker != null) { buyBlocker.SetActive(true); buyBlocker.transform.SetAsLastSibling(); }
             buyModal.SetActive(true);
             buyModal.transform.SetAsLastSibling();
             if (buyTitleText != null) buyTitleText.text = loc.displayName;
@@ -263,6 +265,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         void CloseBuy()
         {
             if (buyModal != null) buyModal.SetActive(false);
+            if (buyBlocker != null) buyBlocker.SetActive(false);
         }
     }
 }

@@ -61,18 +61,23 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var pan02 = LoadSprite("PanImage02");
             var pan03 = LoadSprite("PanImage03");
             var pan04 = LoadSprite("PanImage04");
+            // Парные задник+передник по тирам.
+            var panBack01 = LoadSprite("Pan01");
+            var panBack02 = LoadSprite("Pan02");
+            var panBack03 = LoadSprite("Pan03");
+            var panBack04 = LoadSprite("Pan04");
+            var panFront01 = LoadSprite("PanFront01");
             var panFront02 = LoadSprite("PanFront02");
             var panFront03 = LoadSprite("PanFront03");
             var panFront04 = LoadSprite("PanFront04");
-            // Стартовая — классический перёд FrontPan (совпадает с BackPan).
             CreatePanTier("PanStarter", "Сковорода из ларька", true, 0, 0, pan01 != null ? pan01 : panSpr,
-                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f, frontPanSpr);
+                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f, panFront01, panBack01);
             CreatePanTier("PanIron", "Чугунная", false, 120, 3, pan02 != null ? pan02 : panSpr,
-                "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f, panFront02);
+                "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f, panFront02, panBack02);
             CreatePanTier("PanPro", "Профи", false, 280, 5, pan03 != null ? pan03 : panSpr,
-                "Рабочая сковорода. База +10%.", 1.1f, 1.1f, 1.1f, 1.1f, panFront03);
+                "Рабочая сковорода. База +10%.", 1.1f, 1.1f, 1.1f, 1.1f, panFront03, panBack03);
             CreatePanTier("PanElite", "Элитная", false, 520, 8, pan04 != null ? pan04 : panSpr,
-                "Мастерская. База +15% к каждой характеристике.", 1.15f, 1.15f, 1.15f, 1.15f, panFront04);
+                "Мастерская. База +15% к каждой характеристике.", 1.15f, 1.15f, 1.15f, 1.15f, panFront04, panBack04);
         }
 
         [MenuItem("PancakeFlip/Build Everything")]
@@ -689,6 +694,17 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var mapCloseIcon = MkCloseIcon(mapScr.transform, closeIconSpr);
 
+            // Полупрозрачный блокер на весь экран — ловит клики, чтобы они не проходили на маркеры под модалкой.
+            var buyBlocker = new GameObject("BuyBlocker", typeof(RectTransform), typeof(Image));
+            buyBlocker.transform.SetParent(mapScr.transform, false);
+            var buyBlockerRt = buyBlocker.GetComponent<RectTransform>();
+            buyBlockerRt.anchorMin = Vector2.zero; buyBlockerRt.anchorMax = Vector2.one;
+            buyBlockerRt.offsetMin = buyBlockerRt.offsetMax = Vector2.zero;
+            var buyBlockerImg = buyBlocker.GetComponent<Image>();
+            buyBlockerImg.color = new Color(0f, 0f, 0f, 0.35f);
+            buyBlockerImg.raycastTarget = true;
+            buyBlocker.SetActive(false);
+
             var buyModal = MkPanel(mapScr.transform, "BuyModal", V2(0.18f, 0.30f), V2(0.82f, 0.72f), new Color(1f, 1f, 1f, 0f));
             var buyModalImg = buyModal.GetComponent<Image>();
             buyModalImg.raycastTarget = true;
@@ -737,6 +753,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(mapView, "buyConfirmButton", buyConfirm.GetComponent<Button>());
             SetField(mapView, "buyCloseButton", buyCloseIcon);
             SetField(mapView, "buyCoinIcon", buyCoinImg);
+            SetField(mapView, "buyBlocker", buyBlocker);
 
             var ctrlGo = new GameObject("PancakeFlipController");
             var ctrl = ctrlGo.AddComponent<PancakeFlipController>();
@@ -769,6 +786,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "sceneBottomPanel", bottomGoRef != null ? bottomGoRef.GetComponent<SpriteRenderer>() : null);
             SetField(sess, "stove", Object.FindObjectOfType<StoveView>());
             SetField(sess, "panFrontRenderer", frontPanSr);
+            SetField(sess, "panBackRenderer", backPanSr);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
@@ -985,7 +1003,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
 
         static PanTierConfig CreatePanTier(string assetName, string title, bool starter, int cost, int unlockLvl, Sprite icon, string description,
-            float wide, float slowCook, float spin, float flip, Sprite panFront = null)
+            float wide, float slowCook, float spin, float flip, Sprite panFront = null, Sprite panBack = null)
         {
             var o = GetOrCreate<PanTierConfig>(PansFolder, assetName);
             o.displayName = title;
@@ -995,6 +1013,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             o.description = description;
             if (icon != null) o.icon = icon;
             o.panFront = panFront;
+            o.panBack = panBack;
             o.widerPerfectZone = wide;
             o.slowerOvercook = slowCook;
             o.stablerSpin = spin;
