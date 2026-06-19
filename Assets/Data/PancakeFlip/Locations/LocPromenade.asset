@@ -36,5 +36,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 68b6ba9a7484a574ab92f9136f57cfcd, type: 2}
   - {fileID: 11400000, guid: c19334cb8c862b944b5ed11ab562c39b, type: 2}
   customerSprites:
-  - {fileID: 21300000, guid: fbd9edbabcca58e47bf4091dc58753d4, type: 3}
-  - {fileID: 21300000, guid: fb6ea292e8299bd46828338a9e690bbc, type: 3}
+  - {fileID: 21300000, guid: b3c7e271c110d164faa50493683b38a2, type: 3}
+  - {fileID: 21300000, guid: a936b8a3360af7f4b832ef31e7d93bee, type: 3}
+  - {fileID: 21300000, guid: 0e0147ab2b9843e48a4b4443d3ee76f2, type: 3}

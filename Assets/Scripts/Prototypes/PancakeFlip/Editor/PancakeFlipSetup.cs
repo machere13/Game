@@ -257,13 +257,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 new[] { cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe },
                 new[] { salami, cheese, banana, chocolate, mushroom, strawberry },
                 new[] { person1, person2, person3, person4 });
+            // Спрос локальный: каждый город заказывает только свои рецепты (без заказов прошлого города).
             var locPromenade = CreateLocation("LocPromenade", "Бостон Сити", 8,
-                new[] { baseRecipe, salmonRecipe, caviarRecipe, scallopRecipe },
+                new[] { salmonRecipe, caviarRecipe, scallopRecipe },
                 new[] { salmonRecipe, caviarRecipe, scallopRecipe },
                 new[] { salmon, caviar, scallops },
                 new[] { personCity03_1, personCity03_2, personCity03_3 });
             var locMarket = CreateLocation("LocMarket", "Средний Сити", 10,
-                new[] { baseRecipe, cheeseHamRecipe, meatRecipe, jamRecipe, peanutRecipe },
+                new[] { meatRecipe, jamRecipe, peanutRecipe },
                 new[] { meatRecipe, jamRecipe, peanutRecipe },
                 new[] { meat, jam, peanutButter },
                 new[] { personCity02_1, personCity02_2, personCity02_3 });
