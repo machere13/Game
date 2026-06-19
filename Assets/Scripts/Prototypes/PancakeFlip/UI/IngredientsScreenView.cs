@@ -322,8 +322,21 @@ namespace IdlePancake.Prototypes.PancakeFlip
             iconLe.preferredHeight = RowIconSize;
             iconLe.flexibleHeight = 0f;
 
+            // Справа от иконки — колонка: название (строка 1), кнопки (строка 2).
+            var infoGo = new GameObject("Info", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
+            infoGo.transform.SetParent(row.transform, false);
+            var infoV = infoGo.GetComponent<VerticalLayoutGroup>();
+            infoV.childControlWidth = true;
+            infoV.childControlHeight = true;
+            infoV.childForceExpandWidth = false;
+            infoV.childForceExpandHeight = false;
+            infoV.spacing = 8f;
+            infoV.childAlignment = TextAnchor.MiddleLeft;
+            var infoLe = infoGo.GetComponent<LayoutElement>();
+            infoLe.flexibleWidth = 1f;
+
             var labelGo = new GameObject("Label", typeof(RectTransform), typeof(LayoutElement));
-            labelGo.transform.SetParent(row.transform, false);
+            labelGo.transform.SetParent(infoGo.transform, false);
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             label.fontSize = PancakeFlipUiTypography.ShopIngredientRowLabel;
             label.color = new Color(0.18f, 0.15f, 0.12f);
@@ -333,11 +346,25 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (font != null) label.font = font;
             label.text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
             var labelLe = labelGo.GetComponent<LayoutElement>();
-            labelLe.flexibleWidth = 1f;
+            labelLe.minHeight = 56f;
+            labelLe.preferredHeight = 56f;
+
+            var btnRowGo = new GameObject("Buttons", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            btnRowGo.transform.SetParent(infoGo.transform, false);
+            var btnRowH = btnRowGo.GetComponent<HorizontalLayoutGroup>();
+            btnRowH.childControlWidth = true;
+            btnRowH.childControlHeight = true;
+            btnRowH.childForceExpandWidth = false;
+            btnRowH.childForceExpandHeight = false;
+            btnRowH.spacing = 16f;
+            btnRowH.childAlignment = TextAnchor.MiddleLeft;
+            var btnRowLe = btnRowGo.GetComponent<LayoutElement>();
+            btnRowLe.minHeight = ShopBuyButtonStyle.PreferredButtonHeight;
+            btnRowLe.preferredHeight = ShopBuyButtonStyle.PreferredButtonHeight;
 
             bool isFree = ing.coinCost <= 0;
 
-            var add = CreateActionButton(row.transform, "Добавить", AddButtonColor, font, withCoinIcon: false);
+            var add = CreateActionButton(btnRowGo.transform, "Добавить", AddButtonColor, font, withCoinIcon: false);
             SetBtnSprite(add.background, s.ActionButtonSprite);
             add.button.onClick.AddListener(() =>
             {

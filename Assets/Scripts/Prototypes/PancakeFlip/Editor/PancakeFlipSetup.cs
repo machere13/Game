@@ -568,7 +568,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             iBuilderH.childForceExpandWidth = false;
             iBuilderH.childForceExpandHeight = false;
 
-            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.12f, 0.13f), V2(0.88f, 0.73f), out RectTransform iListContent);
+            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.12f, 0.20f), V2(0.88f, 0.73f), out RectTransform iListContent);
 
             var iCookBtn = MkButton(ingScr.transform, "CookBtn", "Готовить", tmpFont, new Color(0.86f, 0.55f, 0.18f, 1f));
             StyleButtonSprite(iCookBtn, successBtnSpr);

@@ -16,7 +16,7 @@ MonoBehaviour:
   mapIcon: {fileID: 21300000, guid: b1768dec0efa4684a9c335a3e691b566, type: 3}
   background: {fileID: 21300000, guid: 5890c9439a71f474bbaf53532b24c64c, type: 3}
   stoveClosed: {fileID: 21300000, guid: 6281c57eed687914ebfccc1f7eb40dd2, type: 3}
-  stoveOpen: {fileID: 21300000, guid: e93c9b97277cd6a44b5766a774ab33ca, type: 3}
+  stoveOpen: {fileID: 0}
   bottomPanel: {fileID: 0}
   ordersToUnlockNext: 10
   requiredLevel: 3
