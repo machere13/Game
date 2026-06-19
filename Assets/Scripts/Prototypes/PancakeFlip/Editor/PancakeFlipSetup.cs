@@ -568,12 +568,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             iBuilderH.childForceExpandWidth = false;
             iBuilderH.childForceExpandHeight = false;
 
-            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.12f, 0.22f), V2(0.88f, 0.73f), out RectTransform iListContent);
+            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.12f, 0.27f), V2(0.88f, 0.73f), out RectTransform iListContent);
 
             var iCookBtn = MkButton(ingScr.transform, "CookBtn", "Готовить", tmpFont, new Color(0.86f, 0.55f, 0.18f, 1f));
             StyleButtonSprite(iCookBtn, successBtnSpr);
             var iCookRt = iCookBtn.GetComponent<RectTransform>();
-            iCookRt.anchorMin = V2(0.18f, 0.05f); iCookRt.anchorMax = V2(0.82f, 0.14f);
+            iCookRt.anchorMin = V2(0.18f, 0.05f); iCookRt.anchorMax = V2(0.82f, 0.15f);
+            iCookBtn.transform.SetAsLastSibling();
             iCookRt.offsetMin = iCookRt.offsetMax = Vector2.zero;
             var iCookLabel = iCookBtn.GetComponentInChildren<TextMeshProUGUI>();
 
