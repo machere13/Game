@@ -37,6 +37,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 recipeImage.sprite = order.Recipe.icon;
                 recipeImage.enabled = true;
+                // В заказах блин показываем под наклоном ~45°.
+                recipeImage.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
             }
             else if (recipeImage != null)
                 recipeImage.enabled = false;
