@@ -705,7 +705,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
             StyleButtonSprite(buyConfirm, successBtnSpr);
             var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
-            buyConfirmRt.anchorMin = V2(0.34f, 0.17f); buyConfirmRt.anchorMax = V2(0.66f, 0.33f);
+            buyConfirmRt.anchorMin = V2(0.34f, 0.20f); buyConfirmRt.anchorMax = V2(0.66f, 0.36f);
             buyConfirmRt.offsetMin = buyConfirmRt.offsetMax = Vector2.zero;
             var buyCloseIcon = MkCloseIcon(buyModal.transform, closeIconSpr);
             buyModal.SetActive(false);
