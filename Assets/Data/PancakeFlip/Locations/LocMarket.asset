@@ -23,8 +23,6 @@ MonoBehaviour:
   cityCost: 150
   mapPosition: {x: 0.87, y: 0.44}
   demandRecipes:
-  - {fileID: 11400000, guid: cbff5a8638706214ebbd28154cc093e0, type: 2}
-  - {fileID: 11400000, guid: 254e33dd6b32e8747b70ca4d811587e5, type: 2}
   - {fileID: 11400000, guid: b2a0af63ca51f4349acef8a9124d22d7, type: 2}
   - {fileID: 11400000, guid: 5042907645fad7146b82a0d23c521e0c, type: 2}
   - {fileID: 11400000, guid: f49e80c743d3aa542a53e88281ad4194, type: 2}
