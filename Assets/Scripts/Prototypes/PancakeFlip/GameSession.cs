@@ -326,10 +326,27 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             Build.Clear();
             HasCookingPancake = true;
+
+            // Подбираем лицо блина под рецепт, который собрал игрок (null — обычный блин).
+            pancake.SetFaceArt(ResolveCookingArt());
+
             pancake.SetActiveCooking(true);
             pancake.ResetCooking();
             OnPancakeStarted?.Invoke();
             return true;
+        }
+
+        // Ищем рецепт из каталога, чьи ингредиенты совпали с тем, что сейчас на сковороде, и берём его картинку.
+        Sprite ResolveCookingArt()
+        {
+            var catalog = RecipeCatalog;
+            if (catalog == null) return null;
+            foreach (var recipe in catalog)
+            {
+                if (recipe == null || recipe.icon == null) continue;
+                if (MatchesOrderRecipe(recipe)) return recipe.icon;
+            }
+            return null;
         }
 
         void ClearCookingPancake()

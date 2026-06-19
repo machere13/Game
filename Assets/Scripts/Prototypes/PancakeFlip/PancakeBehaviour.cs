@@ -127,6 +127,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
             panCenter = center;
         }
 
+        // Лицо блина под текущий рецепт. Обратная сторона — то же изображение (отзеркаливается автоматически).
+        // null — вернуть обычный блин (запасной спрайт).
+        public void SetFaceArt(Sprite art)
+        {
+            var a = art != null ? art : _fallbackSprite;
+            spriteFaceA = a;
+            spriteFaceB = a;
+            if (_state == State.OnPan)
+                ApplyRestOnPanPose();
+        }
+
         public void Throw(float verticalForce, float spinDegPerSec)
         {
             if (!_activeCooking) return;

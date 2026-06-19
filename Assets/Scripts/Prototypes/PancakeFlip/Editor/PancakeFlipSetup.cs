@@ -149,9 +149,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var chocoStrawberrySpr = LoadSprite("ChocolateStrawberryPancake");
             var bananaChocoPancakeSpr = LoadSprite("BananaChocolatePancake");
             var mushroomPancakeSpr = LoadSprite("MushroomPancake");
+            var meatPancakeSpr = LoadSprite("MeatPancake");
+            var jamPeanutPancakeSpr = LoadSprite("JamPeanutPancake");
+            var salmonScallopsPancakeSpr = LoadSprite("SalmonScallopsPancake");
+            var blackCaviarPancakeSpr = LoadSprite("BlackCaviarPancake");
             var xpIconSpr = LoadSprite("XPIcon");
             var pancakeSideUiSpr = LoadSprite("PancakeSide");
-            var pancakeBackSpr = LoadSprite("PancakeBack");
             var receiptBtnSpr = LoadSprite("ReceiptButton");
             var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
             var closeIconSpr = LoadSprite("CloseIcon");
@@ -219,37 +222,37 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var caviar = CreateIngredient("Чёрная икра", 25, 5, false); caviar.icon = LoadSprite("BlackCaviar"); EditorUtility.SetDirty(caviar);
             var scallops = CreateIngredient("Гребешки", 18, 5, false); scallops.icon = LoadSprite("Scallops"); EditorUtility.SetDirty(scallops);
 
-            // --- Новые рецепты (иконка — общий блин, пока нет своих) ---
+            // --- Новые рецепты со своими картинками блинов ---
             var meatRecipe = CreateRecipe("Сытный блин с мясом", 3, 30, 50,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = meat, amount = 2 }
-                }, commonPancakeSpr);
+                }, meatPancakeSpr != null ? meatPancakeSpr : commonPancakeSpr);
             var jamRecipe = CreateRecipe("Блин с джемом", 3, 24, 40,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = jam, amount = 1 }
-                }, commonPancakeSpr);
+                }, jamPeanutPancakeSpr != null ? jamPeanutPancakeSpr : commonPancakeSpr);
             var peanutRecipe = CreateRecipe("Блин с арахисовой пастой", 3, 26, 42,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = peanutButter, amount = 1 }
-                }, commonPancakeSpr);
+                }, jamPeanutPancakeSpr != null ? jamPeanutPancakeSpr : commonPancakeSpr);
             var salmonRecipe = CreateRecipe("Блин с лососем", 5, 45, 70,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = salmon, amount = 1 }
-                }, commonPancakeSpr);
+                }, salmonScallopsPancakeSpr != null ? salmonScallopsPancakeSpr : commonPancakeSpr);
             var caviarRecipe = CreateRecipe("Блин с чёрной икрой", 5, 60, 90,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = caviar, amount = 1 }
-                }, commonPancakeSpr);
+                }, blackCaviarPancakeSpr != null ? blackCaviarPancakeSpr : commonPancakeSpr);
             var scallopRecipe = CreateRecipe("Блин с гребешками", 5, 50, 78,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
                     new RecipeConfig.IngredientSlot { ingredient = scallops, amount = 2 }
-                }, commonPancakeSpr);
+                }, salmonScallopsPancakeSpr != null ? salmonScallopsPancakeSpr : commonPancakeSpr);
 
             // Всё текущее содержимое живёт на Заправке. Другие локации — заглушки под будущий
             // НОВЫЙ контент (свои рецепты/ингредиенты), а не перераспределение заправочного.
@@ -407,8 +410,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             pcBh.SetPanCenter(panBh.PanCenter);
             SetField(pcBh, "config", flipConfig);
             SetField(pcBh, "spriteFaceA", pancakeSpr);
-            Sprite faceB = pancakeBackSpr != null ? pancakeBackSpr : pancakeSideUiSpr;
-            SetField(pcBh, "spriteFaceB", faceB != null ? faceB : pancakeSpr);
+            // Обратная сторона — то же изображение (отзеркаливается в рантайме).
+            SetField(pcBh, "spriteFaceB", pancakeSpr);
 
             var canvasGo = new GameObject("Canvas");
             var canvas = canvasGo.AddComponent<Canvas>();
