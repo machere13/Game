@@ -35,6 +35,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Font uiFont;
         [SerializeField] Sprite coinIcon;
         [SerializeField] Sprite closeIcon;
+        [SerializeField] Sprite actionButtonSprite;
+        [SerializeField] Sprite successButtonSprite;
+        [SerializeField] Sprite cancelButtonSprite;
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
@@ -76,6 +79,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         bool MapActive => worldMap != null && worldMap.locations != null && worldMap.locations.Length > 0;
         public Sprite CoinIcon => coinIcon;
         public Sprite CloseIcon => closeIcon;
+        public Sprite ActionButtonSprite => actionButtonSprite;
+        public Sprite SuccessButtonSprite => successButtonSprite;
+        public Sprite CancelButtonSprite => cancelButtonSprite;
         public bool HasCookingPancake { get; private set; }
 
         public static GameSession Instance { get; private set; }

@@ -144,6 +144,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var city03Spr = LoadSprite("City03");
             var blockedSpr = LoadSprite("Blocked");
             var carSpr = LoadSprite("Car");
+            var actionBtnSpr = LoadSprite("ActionButton");
+            var successBtnSpr = LoadSprite("SuccessButton");
+            var cancelBtnSpr = LoadSprite("CancelButton");
             var uiFont = LoadPancakeFlipUiFont();
             var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
@@ -556,6 +559,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.73f), out RectTransform iListContent);
 
             var iCookBtn = MkButton(ingScr.transform, "CookBtn", "Готовить", tmpFont, new Color(0.86f, 0.55f, 0.18f, 1f));
+            StyleButtonSprite(iCookBtn, successBtnSpr);
             var iCookRt = iCookBtn.GetComponent<RectTransform>();
             iCookRt.anchorMin = V2(0.18f, 0.02f); iCookRt.anchorMax = V2(0.82f, 0.11f);
             iCookRt.offsetMin = iCookRt.offsetMax = Vector2.zero;
@@ -643,6 +647,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
             buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
             var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
+            StyleButtonSprite(buyConfirm, successBtnSpr);
             var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
             buyConfirmRt.anchorMin = V2(0.2f, 0.08f); buyConfirmRt.anchorMax = V2(0.8f, 0.28f);
             buyConfirmRt.offsetMin = buyConfirmRt.offsetMax = Vector2.zero;
@@ -679,6 +684,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "uiFont", uiFont);
             SetField(sess, "coinIcon", walletSpr);
             SetField(sess, "closeIcon", closeIconSpr);
+            SetField(sess, "actionButtonSprite", actionBtnSpr);
+            SetField(sess, "successButtonSprite", successBtnSpr);
+            SetField(sess, "cancelButtonSprite", cancelBtnSpr);
             SetField(sess, "worldMap", worldMap);
             SetField(sess, "customerAnimator", custAnim);
             var bgGoRef = GameObject.Find("Background");
@@ -1056,6 +1064,16 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             tx.raycastTarget = false;
             if (font != null) tx.font = font;
             return g;
+        }
+        static void StyleButtonSprite(GameObject btnGo, Sprite sprite)
+        {
+            if (btnGo == null || sprite == null) return;
+            var img = btnGo.GetComponent<Image>();
+            if (img == null) return;
+            img.sprite = sprite;
+            img.type = Image.Type.Simple;
+            img.color = Color.white;
+            img.preserveAspect = false;
         }
         static void Fill(GameObject g)
         {

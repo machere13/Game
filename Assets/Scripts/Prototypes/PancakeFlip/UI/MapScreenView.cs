@@ -126,7 +126,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
             brt.anchorMin = new Vector2(0.22f, 0.02f); brt.anchorMax = new Vector2(0.78f, 0.24f);
             brt.offsetMin = brt.offsetMax = Vector2.zero;
             var btnImg = btnGo.GetComponent<Image>();
-            btnImg.color = btnColor;
+            var gs = GameSession.Instance;
+            Sprite btnSprite = gs == null ? null
+                : state == CityState.Owned ? gs.SuccessButtonSprite
+                : state == CityState.Buyable ? gs.ActionButtonSprite
+                : gs.CancelButtonSprite;
+            if (btnSprite != null) { btnImg.sprite = btnSprite; btnImg.type = Image.Type.Simple; btnImg.color = Color.white; }
+            else btnImg.color = btnColor;
             var btn = btnGo.GetComponent<Button>();
             btn.targetGraphic = btnImg;
 

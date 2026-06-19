@@ -261,7 +261,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 row.buy.button.interactable = canBuy;
                 if (row.buy.label != null) row.buy.label.text = buyText;
                 if (!row.isFree && row.buy.background != null)
-                    row.buy.background.color = canBuy ? ShopBuyButtonStyle.BuyGreen : ShopBuyButtonStyle.BuyRed;
+                {
+                    var spr = canBuy ? s.SuccessButtonSprite : s.CancelButtonSprite;
+                    if (spr != null) { row.buy.background.sprite = spr; row.buy.background.color = Color.white; }
+                    else row.buy.background.color = canBuy ? ShopBuyButtonStyle.BuyGreen : ShopBuyButtonStyle.BuyRed;
+                }
             }
         }
 
@@ -327,6 +331,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             bool isFree = ing.coinCost <= 0;
 
             var add = CreateActionButton(row.transform, "Добавить", AddButtonColor, font, withCoinIcon: false);
+            SetBtnSprite(add.background, s.ActionButtonSprite);
             add.button.onClick.AddListener(() =>
             {
                 var gs = GameSession.Instance;
@@ -335,6 +340,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             var buy = CreateActionButton(row.transform, isFree ? "Заготовить" : ing.coinCost.ToString(),
                 isFree ? AddButtonColor : ShopBuyButtonStyle.BuyGreen, font, withCoinIcon: !isFree);
+            SetBtnSprite(buy.background, isFree ? s.ActionButtonSprite : s.SuccessButtonSprite);
             buy.button.onClick.AddListener(() =>
             {
                 var gs = GameSession.Instance;
@@ -350,6 +356,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 buy = buy,
                 isFree = isFree,
             };
+        }
+
+        static void SetBtnSprite(Image img, Sprite spr)
+        {
+            if (img == null || spr == null) return;
+            img.sprite = spr;
+            img.type = Image.Type.Simple;
+            img.color = Color.white;
         }
 
         static ActionButtonUi CreateActionButton(Transform parent, string text, Color bgColor, TMP_FontAsset font, bool withCoinIcon)
