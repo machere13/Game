@@ -252,11 +252,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             // Средний Сити (Рынок) открывается вторым; Бостон Сити (Набережная) — третьим.
             locMarket.requiredLevel = 3; locMarket.cityCost = 150;
             locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
-            locMarket.background = bgCity02; locMarket.stoveClosed = stoveCity02; locMarket.stoveOpen = stoveOpen01;
+            locMarket.background = bgCity02; locMarket.stoveClosed = stoveCity02; locMarket.stoveOpen = null;
             locMarket.bottomPanel = null; // прилавок уже в фоне города
             locPromenade.requiredLevel = 5; locPromenade.cityCost = 300;
             locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
-            locPromenade.background = bgCity03; locPromenade.stoveClosed = stoveCity03; locPromenade.stoveOpen = stoveOpen01;
+            locPromenade.background = bgCity03; locPromenade.stoveClosed = stoveCity03; locPromenade.stoveOpen = null;
             locPromenade.bottomPanel = null; // прилавок уже в фоне города
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 

@@ -57,9 +57,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void SetSprites(Sprite closed, Sprite open)
         {
             if (closed != null) closedSprite = closed;
-            if (open != null) openSprite = open;
+            openSprite = open; // null допустим — тогда «открытая» плита не используется
             if (spriteRenderer != null)
-                spriteRenderer.sprite = _isOpen ? openSprite : closedSprite;
+                spriteRenderer.sprite = (_isOpen && openSprite != null) ? openSprite : closedSprite;
         }
 
         public bool IsOpen => _isOpen;
