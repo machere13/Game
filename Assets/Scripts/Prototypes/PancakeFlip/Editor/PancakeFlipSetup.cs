@@ -600,7 +600,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             upgTitleRt.anchorMin = V2(0.10f, 0.88f); upgTitleRt.anchorMax = V2(0.90f, 0.96f);
             upgTitleRt.offsetMin = upgTitleRt.offsetMax = Vector2.zero;
             upgTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.12f, 0.04f), V2(0.88f, 0.84f), out RectTransform uListContent);
+            MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.12f, 0.04f), V2(0.94f, 0.84f), out RectTransform uListContent);
             var uCloseIcon = MkCloseIcon(upgScr.transform, closeIconSpr);
             var usv = upgScr.AddComponent<PanUpgradeScreenView>();
             SetField(usv, "upgradeListContainer", uListContent);
