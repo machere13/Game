@@ -159,6 +159,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
             var closeIconSpr = LoadSprite("CloseIcon");
             var globalMapSpr = LoadSprite("GlobalMap");
+            var globalMapPlateSpr = LoadSprite("GlobalMapPlate");
             var city01Spr = LoadSprite("City01");
             var city02Spr = LoadSprite("City02");
             var city03Spr = LoadSprite("City03");
@@ -673,33 +674,38 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var mapCloseIcon = MkCloseIcon(mapScr.transform, closeIconSpr);
 
-            var buyModal = MkPanel(mapScr.transform, "BuyModal", V2(0.15f, 0.32f), V2(0.85f, 0.68f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
-            buyModal.GetComponent<Image>().raycastTarget = true;
+            var buyModal = MkPanel(mapScr.transform, "BuyModal", V2(0.18f, 0.30f), V2(0.82f, 0.72f), new Color(1f, 1f, 1f, 0f));
+            var buyModalImg = buyModal.GetComponent<Image>();
+            buyModalImg.raycastTarget = true;
+            if (globalMapPlateSpr != null) { buyModalImg.sprite = globalMapPlateSpr; buyModalImg.type = Image.Type.Simple; buyModalImg.preserveAspect = false; buyModalImg.color = Color.white; }
             AddModalCanvasLayer(buyModal);
-            MkPanel(buyModal.transform, "Header", V2(0f, 0.78f), V2(1f, 1f), new Color(0.28f, 0.42f, 0.55f, 1f));
-            var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
+
+            var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, new Color(0.2f, 0.16f, 0.1f), 0);
             var buyTitleRt = buyTitle.GetComponent<RectTransform>();
-            buyTitleRt.anchorMin = V2(0.04f, 0.79f); buyTitleRt.anchorMax = V2(0.96f, 0.99f);
+            buyTitleRt.anchorMin = V2(0.16f, 0.62f); buyTitleRt.anchorMax = V2(0.84f, 0.78f);
             buyTitleRt.offsetMin = buyTitleRt.offsetMax = Vector2.zero;
             buyTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
+            // Тело: «Купить N» (+иконка денег) или «Получите N уровень».
+            var buyCost = MkLabel(buyModal.transform, "Body", "0", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.2f, 0.16f, 0.1f), 0);
+            var buyCostRt = buyCost.GetComponent<RectTransform>();
+            buyCostRt.anchorMin = V2(0.10f, 0.38f); buyCostRt.anchorMax = V2(0.90f, 0.56f);
+            buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
+            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
             var buyCoin = new GameObject("CostCoin", typeof(RectTransform), typeof(Image));
             buyCoin.transform.SetParent(buyModal.transform, false);
             var buyCoinRt = buyCoin.GetComponent<RectTransform>();
-            buyCoinRt.anchorMin = V2(0.30f, 0.47f); buyCoinRt.anchorMax = V2(0.45f, 0.66f);
+            buyCoinRt.anchorMin = V2(0.66f, 0.40f); buyCoinRt.anchorMax = V2(0.80f, 0.55f);
             buyCoinRt.offsetMin = buyCoinRt.offsetMax = Vector2.zero;
             var buyCoinImg = buyCoin.GetComponent<Image>();
             buyCoinImg.sprite = walletSpr; buyCoinImg.preserveAspect = true; buyCoinImg.raycastTarget = false;
             buyCoinImg.enabled = walletSpr != null;
 
-            var buyCost = MkLabel(buyModal.transform, "Cost", "0", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.2f, 0.16f, 0.1f), 0);
-            var buyCostRt = buyCost.GetComponent<RectTransform>();
-            buyCostRt.anchorMin = V2(0.47f, 0.45f); buyCostRt.anchorMax = V2(0.72f, 0.68f);
-            buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
-            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
             var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
             StyleButtonSprite(buyConfirm, successBtnSpr);
             var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
-            buyConfirmRt.anchorMin = V2(0.2f, 0.08f); buyConfirmRt.anchorMax = V2(0.8f, 0.28f);
+            buyConfirmRt.anchorMin = V2(0.34f, 0.14f); buyConfirmRt.anchorMax = V2(0.66f, 0.30f);
             buyConfirmRt.offsetMin = buyConfirmRt.offsetMax = Vector2.zero;
             var buyCloseIcon = MkCloseIcon(buyModal.transform, closeIconSpr);
             buyModal.SetActive(false);
@@ -715,6 +721,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(mapView, "buyCostText", buyCost.GetComponent<TextMeshProUGUI>());
             SetField(mapView, "buyConfirmButton", buyConfirm.GetComponent<Button>());
             SetField(mapView, "buyCloseButton", buyCloseIcon);
+            SetField(mapView, "buyCoinIcon", buyCoinImg);
 
             var ctrlGo = new GameObject("PancakeFlipController");
             var ctrl = ctrlGo.AddComponent<PancakeFlipController>();

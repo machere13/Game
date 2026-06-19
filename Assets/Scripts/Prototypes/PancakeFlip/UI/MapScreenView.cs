@@ -16,6 +16,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] GameObject buyModal;
         [SerializeField] TextMeshProUGUI buyTitleText;
         [SerializeField] TextMeshProUGUI buyCostText;
+        [SerializeField] Image buyCoinIcon;
         [SerializeField] Button buyConfirmButton;
         [SerializeField] Button buyCloseButton;
 
@@ -146,7 +147,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
             bt.alignment = TextAlignmentOptions.Center; bt.raycastTarget = false;
 
             int captured = index;
-            int reqLevel = loc.requiredLevel;
             switch (state)
             {
                 case CityState.Owned:
@@ -156,13 +156,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
                     });
                     break;
                 case CityState.Buyable:
-                    btn.onClick.AddListener(() => OpenBuy(captured));
+                    btn.onClick.AddListener(() => OpenCity(captured, CityState.Buyable));
                     break;
                 default:
-                    btn.onClick.AddListener(() =>
-                    {
-                        if (statusText != null) statusText.text = $"Требуется уровень {reqLevel}";
-                    });
+                    btn.onClick.AddListener(() => OpenCity(captured, CityState.Locked));
                     break;
             }
         }
@@ -227,7 +224,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             gameObject.SetActive(false);
         }
 
-        void OpenBuy(int index)
+        void OpenCity(int index, CityState state)
         {
             var s = GameSession.Instance;
             if (s == null || s.WorldMap == null || buyModal == null) return;
@@ -237,18 +234,28 @@ namespace IdlePancake.Prototypes.PancakeFlip
             buyModal.SetActive(true);
             buyModal.transform.SetAsLastSibling();
             if (buyTitleText != null) buyTitleText.text = loc.displayName;
-            if (buyCostText != null) buyCostText.text = loc.cityCost.ToString();
 
-            bool affordable = s.Wallet != null && s.Wallet.Coins >= loc.cityCost;
+            bool buyable = state == CityState.Buyable;
+
+            if (buyCostText != null)
+                buyCostText.text = buyable ? $"Купить {loc.cityCost}" : $"Получите {loc.requiredLevel} уровень";
+            if (buyCoinIcon != null)
+                buyCoinIcon.enabled = buyable && buyCoinIcon.sprite != null;
+
             if (buyConfirmButton != null)
             {
-                buyConfirmButton.interactable = affordable;
+                buyConfirmButton.gameObject.SetActive(buyable);
                 buyConfirmButton.onClick.RemoveAllListeners();
-                buyConfirmButton.onClick.AddListener(() =>
+                if (buyable)
                 {
-                    var gs = GameSession.Instance;
-                    if (gs != null && gs.TryBuyCity(index)) { CloseBuy(); Rebuild(); }
-                });
+                    bool affordable = s.Wallet != null && s.Wallet.Coins >= loc.cityCost;
+                    buyConfirmButton.interactable = affordable;
+                    buyConfirmButton.onClick.AddListener(() =>
+                    {
+                        var gs = GameSession.Instance;
+                        if (gs != null && gs.TryBuyCity(index)) { CloseBuy(); Rebuild(); }
+                    });
+                }
             }
         }
 
