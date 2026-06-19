@@ -131,7 +131,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 : state == CityState.Owned ? gs.SuccessButtonSprite
                 : state == CityState.Buyable ? gs.ActionButtonSprite
                 : gs.CancelButtonSprite;
-            if (btnSprite != null) { btnImg.sprite = btnSprite; btnImg.type = Image.Type.Simple; btnImg.color = Color.white; }
+            if (btnSprite != null) { btnImg.sprite = btnSprite; btnImg.type = Image.Type.Sliced; btnImg.color = Color.white; }
             else btnImg.color = btnColor;
             var btn = btnGo.GetComponent<Button>();
             btn.targetGraphic = btnImg;

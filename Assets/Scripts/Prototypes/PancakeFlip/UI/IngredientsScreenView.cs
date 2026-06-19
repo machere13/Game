@@ -362,7 +362,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (img == null || spr == null) return;
             img.sprite = spr;
-            img.type = Image.Type.Simple;
+            img.type = Image.Type.Sliced;
             img.color = Color.white;
         }
 

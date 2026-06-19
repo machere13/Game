@@ -21,7 +21,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
             ApplyButtonLayout(btn);
             var img = btn.GetComponent<Image>();
             if (img != null)
-                img.color = canBuy ? BuyGreen : BuyRed;
+            {
+                var session = GameSession.Instance;
+                var spr = session == null ? null : (canBuy ? session.SuccessButtonSprite : session.CancelButtonSprite);
+                if (spr != null) { img.sprite = spr; img.type = Image.Type.Sliced; img.color = Color.white; }
+                else img.color = canBuy ? BuyGreen : BuyRed;
+            }
             if (label != null)
             {
                 label.fontSize = ButtonFontSize;

@@ -209,7 +209,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (gs != null && gs.CancelButtonSprite != null)
             {
                 skipImg.sprite = gs.CancelButtonSprite;
-                skipImg.type = Image.Type.Simple;
+                skipImg.type = Image.Type.Sliced;
                 skipImg.color = Color.white;
             }
 

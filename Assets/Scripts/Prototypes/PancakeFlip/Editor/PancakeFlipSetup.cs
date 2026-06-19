@@ -99,6 +99,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             bootGo.AddComponent<ResponsiveLayout>();
 
             ForceAllSprites();
+            // 9-slice бордеры для кнопок-спрайтов, чтобы они не растягивались/не искажались.
+            SetSpriteBorder("ActionButton", 40f);
+            SetSpriteBorder("SuccessButton", 40f);
+            SetSpriteBorder("CancelButton", 40f);
             // Пер-городские фоны/плиты (Заправка=01, Средний=02, Бостон=03). Открытая плита пока только City01.
             var bgCity01 = LoadSprite("BackgroundCity01");
             var bgCity02 = LoadSprite("BackgroundCity02");
@@ -955,6 +959,27 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             }
             AssetDatabase.Refresh();
         }
+        static void SetSpriteBorder(string spriteName, float border)
+        {
+            var guids = AssetDatabase.FindAssets($"{spriteName} t:Texture2D", new[] { ArtDir });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(p) != spriteName) continue;
+                var imp = AssetImporter.GetAtPath(p) as TextureImporter;
+                if (imp == null) continue;
+                var settings = new TextureImporterSettings();
+                imp.ReadTextureSettings(settings);
+                var b = new Vector4(border, border, border, border);
+                if (settings.spriteBorder != b)
+                {
+                    settings.spriteBorder = b;
+                    imp.SetTextureSettings(settings);
+                    imp.SaveAndReimport();
+                }
+                return;
+            }
+        }
         static Sprite LoadSprite(string n)
         {
             var guids = AssetDatabase.FindAssets($"{n} t:Sprite", new[] { ArtDir });
@@ -1071,7 +1096,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var img = btnGo.GetComponent<Image>();
             if (img == null) return;
             img.sprite = sprite;
-            img.type = Image.Type.Simple;
+            img.type = Image.Type.Sliced;
             img.color = Color.white;
             img.preserveAspect = false;
         }
