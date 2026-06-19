@@ -40,5 +40,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         [Tooltip("Спрайты местных покупателей")]
         public Sprite[] customerSprites;
+
+        [Tooltip("Иконки покупателей для карточек заказов (если пусто — берутся общие/customerSprites)")]
+        public Sprite[] customerIcons;
     }
 }

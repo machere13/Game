@@ -47,6 +47,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] SpriteRenderer sceneBackground;
         [SerializeField] SpriteRenderer sceneBottomPanel;
         [SerializeField] StoveView stove;
+        [SerializeField] SpriteRenderer panFrontRenderer;
         public PancakeBehaviour Pancake => pancake;
 
         public Wallet Wallet { get; private set; }
@@ -62,6 +63,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public PanStatTrackConfig[] StatTracks => statTracks;
         public PanTierConfig[] PanTiers => panTiers;
         public PanTierConfig EquippedPanTier => Upgrades != null ? Upgrades.EquippedPan : null;
+        public Sprite[] CurrentCustomerIcons { get; private set; }
         public RecipeConfig[] RecipeCatalog =>
             MapActive ? _book.ToArray() : startingRecipes;
 
@@ -145,6 +147,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             PancakeFlipUiFonts.ApplyToAllTextsInLoadedScenes();
             if (pancake != null)
                 pancake.SetActiveCooking(false);
+            ApplyEquippedPanVisual();
             if (MapActive)
                 TravelTo(0);
         }
@@ -185,6 +188,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 OnIngredientsChanged?.Invoke();
             }
 
+            // До SetSource: он сразу перерисует карточки заказов, иконки должны быть уже актуальны.
+            CurrentCustomerIcons = (loc.customerIcons != null && loc.customerIcons.Length > 0)
+                ? loc.customerIcons : loc.customerSprites;
             Orders.SetSource(loc.demandRecipes);
             if (customerAnimator != null)
                 customerAnimator.SetPersonSprites(loc.customerSprites);
@@ -418,7 +424,20 @@ namespace IdlePancake.Prototypes.PancakeFlip
             return ok;
         }
 
-        public void EquipPanTier(PanTierConfig tier) => Upgrades.EquipPan(tier);
+        public void EquipPanTier(PanTierConfig tier)
+        {
+            Upgrades.EquipPan(tier);
+            ApplyEquippedPanVisual();
+        }
+
+        // Меняем переднюю часть сковороды в кухне под надетый тир.
+        public void ApplyEquippedPanVisual()
+        {
+            if (panFrontRenderer == null) return;
+            var tier = EquippedPanTier;
+            if (tier != null && tier.panFront != null)
+                panFrontRenderer.sprite = tier.panFront;
+        }
 
         public void TapDough(IngredientConfig dough)
         {

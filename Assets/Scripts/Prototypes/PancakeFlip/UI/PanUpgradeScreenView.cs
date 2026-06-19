@@ -348,7 +348,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (btnTxt != null)
                     btnTxt.text = isEquipped ? "Надета" : "Надеть";
                 bool canEquipStarter = !isEquipped;
-                ShopBuyButtonStyle.Apply(btn, btnTxt, canEquipStarter);
+                // «Надета» — зелёная кнопка (даже когда неактивна).
+                ShopBuyButtonStyle.Apply(btn, btnTxt, true);
                 ShopBuyButtonStyle.SetCoinIcon(btn, false);
                 btn.interactable = canEquipStarter;
                 btn.onClick.RemoveAllListeners();
@@ -390,7 +391,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (isEquipped)
             {
                 if (btnTxt != null) btnTxt.text = "Надета";
-                ShopBuyButtonStyle.Apply(btn, btnTxt, false);
+                ShopBuyButtonStyle.Apply(btn, btnTxt, true); // «Надета» — зелёная
                 ShopBuyButtonStyle.SetCoinIcon(btn, false);
                 btn.interactable = false;
                 btn.onClick.RemoveAllListeners();

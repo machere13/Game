@@ -8,6 +8,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public string displayName = "Сковорода";
         [TextArea] public string description;
         public Sprite icon;
+        [Tooltip("Спрайт передней части сковороды в кухне (мир).")]
+        public Sprite panFront;
 
         [Tooltip("0 = стартовая, всегда в коллекции при новой игре.")]
         public bool isStarter;

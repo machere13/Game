@@ -61,14 +61,18 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var pan02 = LoadSprite("PanImage02");
             var pan03 = LoadSprite("PanImage03");
             var pan04 = LoadSprite("PanImage04");
+            var panFront01 = LoadSprite("PanFront01");
+            var panFront02 = LoadSprite("PanFront02");
+            var panFront03 = LoadSprite("PanFront03");
+            var panFront04 = LoadSprite("PanFront04");
             CreatePanTier("PanStarter", "Сковорода из ларька", true, 0, 0, pan01 != null ? pan01 : panSpr,
-                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f);
+                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f, panFront01);
             CreatePanTier("PanIron", "Чугунная", false, 120, 3, pan02 != null ? pan02 : panSpr,
-                "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f);
+                "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f, panFront02);
             CreatePanTier("PanPro", "Профи", false, 280, 5, pan03 != null ? pan03 : panSpr,
-                "Рабочая сковорода. База +10%.", 1.1f, 1.1f, 1.1f, 1.1f);
+                "Рабочая сковорода. База +10%.", 1.1f, 1.1f, 1.1f, 1.1f, panFront03);
             CreatePanTier("PanElite", "Элитная", false, 520, 8, pan04 != null ? pan04 : panSpr,
-                "Мастерская. База +15% к каждой характеристике.", 1.15f, 1.15f, 1.15f, 1.15f);
+                "Мастерская. База +15% к каждой характеристике.", 1.15f, 1.15f, 1.15f, 1.15f, panFront04);
         }
 
         [MenuItem("PancakeFlip/Build Everything")]
@@ -287,6 +291,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
             locPromenade.background = bgCity03; locPromenade.stoveClosed = stoveCity03; locPromenade.stoveOpen = null;
             locPromenade.bottomPanel = bottomPanelCity03;
+            // Иконки заказчиков для карточек: у Заправки — общие портреты, у новых городов — свои жители.
+            locStall.customerIcons = new[] { person1Icon, person2Icon, person3Icon };
+            locMarket.customerIcons = new[] { personCity02_1, personCity02_2, personCity02_3 };
+            locPromenade.customerIcons = new[] { personCity03_1, personCity03_2, personCity03_3 };
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
@@ -753,6 +761,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var bottomGoRef = GameObject.Find("BottomPanel");
             SetField(sess, "sceneBottomPanel", bottomGoRef != null ? bottomGoRef.GetComponent<SpriteRenderer>() : null);
             SetField(sess, "stove", Object.FindObjectOfType<StoveView>());
+            SetField(sess, "panFrontRenderer", frontPanSr);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
@@ -969,7 +978,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
 
         static PanTierConfig CreatePanTier(string assetName, string title, bool starter, int cost, int unlockLvl, Sprite icon, string description,
-            float wide, float slowCook, float spin, float flip)
+            float wide, float slowCook, float spin, float flip, Sprite panFront = null)
         {
             var o = GetOrCreate<PanTierConfig>(PansFolder, assetName);
             o.displayName = title;
@@ -978,6 +987,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             o.unlockLevel = unlockLvl;
             o.description = description;
             if (icon != null) o.icon = icon;
+            o.panFront = panFront;
             o.widerPerfectZone = wide;
             o.slowerOvercook = slowCook;
             o.stablerSpin = spin;

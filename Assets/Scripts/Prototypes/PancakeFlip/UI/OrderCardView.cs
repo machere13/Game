@@ -49,10 +49,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (xpText != null)
                 xpText.text = $"+{order.RewardXp}";
 
-            if (personIcon != null && personIconSprites != null && order.PersonIndex < personIconSprites.Length)
+            if (personIcon != null)
             {
-                personIcon.sprite = personIconSprites[order.PersonIndex];
-                personIcon.enabled = true;
+                // Сначала иконки текущего города, иначе — общие.
+                var cityIcons = GameSession.Instance != null ? GameSession.Instance.CurrentCustomerIcons : null;
+                Sprite spr = null;
+                if (cityIcons != null && order.PersonIndex < cityIcons.Length)
+                    spr = cityIcons[order.PersonIndex];
+                if (spr == null && personIconSprites != null && order.PersonIndex < personIconSprites.Length)
+                    spr = personIconSprites[order.PersonIndex];
+                personIcon.sprite = spr;
+                personIcon.enabled = spr != null;
             }
 
             if (selectButton != null)
