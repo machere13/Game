@@ -1169,13 +1169,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             sRt.anchorMin = amin; sRt.anchorMax = amax; sRt.offsetMin = sRt.offsetMax = Vector2.zero;
             scrollGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f); // прозрачно — фон списка не нужен
 
-            var vp = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            var vp = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
             vp.transform.SetParent(scrollGo.transform, false);
             var vpRt = vp.GetComponent<RectTransform>();
             vpRt.anchorMin = Vector2.zero; vpRt.anchorMax = Vector2.one;
             vpRt.offsetMin = new Vector2(8, 6); vpRt.offsetMax = new Vector2(-8, -6);
-            vp.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.02f);
-            vp.GetComponent<Mask>().showMaskGraphic = false;
 
             var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             content.transform.SetParent(vp.transform, false);
