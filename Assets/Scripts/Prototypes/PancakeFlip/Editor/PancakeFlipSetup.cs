@@ -118,7 +118,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var walletSpr = LoadSprite("Wallet");
             var backPanSpr = LoadSprite("BackPan");
             var frontPanSpr = LoadSprite("FrontPan");
-            var bottomPanelSpr = LoadSprite("BottomPanel");
+            // Общий нижний прилавок убран: прилавок/пол теперь часть пер-городского фона (BackgroundCityNN).
+            Sprite bottomPanelSpr = null;
             var person1 = LoadSprite("Person1");
             var person2 = LoadSprite("Person2");
             var person3 = LoadSprite("Person3");
