@@ -187,6 +187,46 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
                 }, chocoStrawberrySpr);
 
+            // --- Новые ингредиенты по городам ---
+            var meat = CreateIngredient("Мясо", 9, 3, false); meat.icon = LoadSprite("Meat"); EditorUtility.SetDirty(meat);
+            var jam = CreateIngredient("Джем", 7, 3, false); jam.icon = LoadSprite("Jam"); EditorUtility.SetDirty(jam);
+            var peanutButter = CreateIngredient("Арахисовая паста", 8, 3, false); peanutButter.icon = LoadSprite("PeanutButter"); EditorUtility.SetDirty(peanutButter);
+            var salmon = CreateIngredient("Лосось", 14, 5, false); salmon.icon = LoadSprite("Salmon"); EditorUtility.SetDirty(salmon);
+            var caviar = CreateIngredient("Чёрная икра", 25, 5, false); caviar.icon = LoadSprite("BlackCaviar"); EditorUtility.SetDirty(caviar);
+            var scallops = CreateIngredient("Гребешки", 18, 5, false); scallops.icon = LoadSprite("Scallops"); EditorUtility.SetDirty(scallops);
+
+            // --- Новые рецепты (иконка — общий блин, пока нет своих) ---
+            var meatRecipe = CreateRecipe("Сытный блин с мясом", 3, 30, 50,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = meat, amount = 2 }
+                }, commonPancakeSpr);
+            var jamRecipe = CreateRecipe("Блин с джемом", 3, 24, 40,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = jam, amount = 1 }
+                }, commonPancakeSpr);
+            var peanutRecipe = CreateRecipe("Блин с арахисовой пастой", 3, 26, 42,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = peanutButter, amount = 1 }
+                }, commonPancakeSpr);
+            var salmonRecipe = CreateRecipe("Блин с лососем", 5, 45, 70,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = salmon, amount = 1 }
+                }, commonPancakeSpr);
+            var caviarRecipe = CreateRecipe("Блин с чёрной икрой", 5, 60, 90,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = caviar, amount = 1 }
+                }, commonPancakeSpr);
+            var scallopRecipe = CreateRecipe("Блин с гребешками", 5, 50, 78,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = scallops, amount = 2 }
+                }, commonPancakeSpr);
+
             // Всё текущее содержимое живёт на Заправке. Другие локации — заглушки под будущий
             // НОВЫЙ контент (свои рецепты/ингредиенты), а не перераспределение заправочного.
             var allRecipes = new[] { baseRecipe, cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe };
@@ -196,14 +236,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 new[] { salami, cheese, banana, chocolate, mushroom, strawberry },
                 new[] { person1, person2, person3, person4 });
             var locPromenade = CreateLocation("LocPromenade", "Бостон Сити", 8,
-                allRecipes,
-                null,
-                null,
+                new[] { baseRecipe, salmonRecipe, caviarRecipe, scallopRecipe },
+                new[] { salmonRecipe, caviarRecipe, scallopRecipe },
+                new[] { salmon, caviar, scallops },
                 new[] { person2, person3 });
             var locMarket = CreateLocation("LocMarket", "Средний Сити", 10,
-                allRecipes,
-                null,
-                null,
+                new[] { baseRecipe, cheeseHamRecipe, meatRecipe, jamRecipe, peanutRecipe },
+                new[] { meatRecipe, jamRecipe, peanutRecipe },
+                new[] { meat, jam, peanutButter },
                 new[] { person3, person4 });
             locStall.requiredLevel = 1; locStall.cityCost = 0;
             locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
