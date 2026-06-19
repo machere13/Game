@@ -135,6 +135,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var city02Spr = LoadSprite("City02");
             var city03Spr = LoadSprite("City03");
             var blockedSpr = LoadSprite("Blocked");
+            var carSpr = LoadSprite("Car");
             var uiFont = LoadPancakeFlipUiFont();
             var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
@@ -199,7 +200,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             locStall.requiredLevel = 1; locStall.cityCost = 0;
             locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
             locPromenade.requiredLevel = 3; locPromenade.cityCost = 150;
-            locPromenade.mapPosition = new Vector2(0.49f, 0.47f); locPromenade.mapIcon = city02Spr;
+            locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
             locMarket.requiredLevel = 5; locMarket.cityCost = 300;
             locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
@@ -587,6 +588,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var mapView = mapScr.AddComponent<MapScreenView>();
             SetField(mapView, "markersContainer", markersRt);
             SetField(mapView, "blockedSprite", blockedSpr);
+            SetField(mapView, "carSprite", carSpr);
             SetField(mapView, "statusText", mapStatus.GetComponent<TextMeshProUGUI>());
             SetField(mapView, "closeButton", mapCloseIcon);
             SetField(mapView, "buyModal", buyModal);

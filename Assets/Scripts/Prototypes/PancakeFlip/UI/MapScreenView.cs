@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
     {
         [SerializeField] RectTransform markersContainer;
         [SerializeField] Sprite blockedSprite;
+        [SerializeField] Sprite carSprite;
         [SerializeField] TextMeshProUGUI statusText;
         [SerializeField] Button closeButton;
         [SerializeField] GameObject buyModal;
@@ -22,6 +24,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         static readonly Color Red = new Color(0.70f, 0.25f, 0.22f);
 
         bool _hooked;
+        bool _driving;
 
         void Start()
         {
@@ -100,12 +103,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var labelGo = new GameObject("Label", typeof(RectTransform));
             labelGo.transform.SetParent(marker.transform, false);
             var lrt = (RectTransform)labelGo.transform;
-            lrt.anchorMin = new Vector2(0f, 0.40f); lrt.anchorMax = new Vector2(1f, 0.56f);
+            lrt.anchorMin = new Vector2(0f, 0.32f); lrt.anchorMax = new Vector2(1f, 0.58f);
             lrt.offsetMin = lrt.offsetMax = Vector2.zero;
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             if (font != null) label.font = font;
             label.text = loc.displayName;
-            label.fontSize = 28f; label.color = Color.white;
+            label.fontSize = 40f; label.color = Color.white;
             label.alignment = TextAlignmentOptions.Center; label.raycastTarget = false;
             label.enableWordWrapping = false;
 
@@ -120,7 +123,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var btnGo = new GameObject("Btn", typeof(RectTransform), typeof(Image), typeof(Button));
             btnGo.transform.SetParent(marker.transform, false);
             var brt = (RectTransform)btnGo.transform;
-            brt.anchorMin = new Vector2(0.08f, 0f); brt.anchorMax = new Vector2(0.92f, 0.32f);
+            brt.anchorMin = new Vector2(0.22f, 0.02f); brt.anchorMax = new Vector2(0.78f, 0.24f);
             brt.offsetMin = brt.offsetMax = Vector2.zero;
             var btnImg = btnGo.GetComponent<Image>();
             btnImg.color = btnColor;
@@ -143,9 +146,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 case CityState.Owned:
                     btn.onClick.AddListener(() =>
                     {
-                        var gs = GameSession.Instance;
-                        if (gs != null) gs.TravelTo(captured);
-                        gameObject.SetActive(false);
+                        if (!_driving) StartCoroutine(DriveAndEnter(captured));
                     });
                     break;
                 case CityState.Buyable:
@@ -158,6 +159,57 @@ namespace IdlePancake.Prototypes.PancakeFlip
                     });
                     break;
             }
+        }
+
+        IEnumerator DriveAndEnter(int target)
+        {
+            _driving = true;
+            var s = GameSession.Instance;
+            if (s == null || s.WorldMap == null || s.Map == null)
+            {
+                _driving = false;
+                yield break;
+            }
+
+            var locs = s.WorldMap.locations;
+            int from = s.Map.CurrentIndex;
+            bool canDrive = carSprite != null && markersContainer != null
+                && from != target
+                && from >= 0 && from < locs.Length && target >= 0 && target < locs.Length
+                && locs[from] != null && locs[target] != null;
+
+            if (canDrive)
+            {
+                Vector2 fromPos = locs[from].mapPosition;
+                Vector2 toPos = locs[target].mapPosition;
+
+                var carGo = new GameObject("Car", typeof(RectTransform), typeof(Image));
+                carGo.transform.SetParent(markersContainer, false);
+                var crt = (RectTransform)carGo.transform;
+                crt.pivot = new Vector2(0.5f, 0.5f);
+                crt.sizeDelta = new Vector2(120f, 120f);
+                crt.anchoredPosition = Vector2.zero;
+                crt.localScale = toPos.x < fromPos.x ? new Vector3(-1f, 1f, 1f) : Vector3.one;
+                var cimg = carGo.GetComponent<Image>();
+                cimg.sprite = carSprite; cimg.preserveAspect = true; cimg.raycastTarget = false;
+                crt.SetAsLastSibling();
+
+                const float dur = 0.8f;
+                float e = 0f;
+                while (e < dur)
+                {
+                    e += Time.deltaTime;
+                    float k = Mathf.Clamp01(e / dur);
+                    float ease = k * k * (3f - 2f * k);
+                    crt.anchorMin = crt.anchorMax = Vector2.Lerp(fromPos, toPos, ease);
+                    yield return null;
+                }
+                Destroy(carGo);
+            }
+
+            s.TravelTo(target);
+            _driving = false;
+            gameObject.SetActive(false);
         }
 
         void OpenBuy(int index)
