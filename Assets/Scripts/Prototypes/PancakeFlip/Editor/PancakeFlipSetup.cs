@@ -547,7 +547,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             mapBgRt.anchorMin = Vector2.zero; mapBgRt.anchorMax = Vector2.one;
             mapBgRt.offsetMin = mapBgRt.offsetMax = Vector2.zero;
             var mapBgImg = mapBg.GetComponent<Image>();
-            if (globalMapSpr != null) { mapBgImg.sprite = globalMapSpr; mapBgImg.preserveAspect = true; }
+            if (globalMapSpr != null) { mapBgImg.sprite = globalMapSpr; mapBgImg.preserveAspect = false; }
             else mapBgImg.color = new Color(0.5f, 0.6f, 0.7f, 1f);
             mapBgImg.raycastTarget = true;
 
