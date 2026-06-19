@@ -147,6 +147,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var personCity03_1 = LoadSprite("Person01City03");
             var personCity03_2 = LoadSprite("Person02City03");
             var personCity03_3 = LoadSprite("Person03City03");
+            // Иконки заказчиков по городам (для карточек).
+            var personIconCity02_1 = LoadSprite("PersonIcon01City02");
+            var personIconCity02_2 = LoadSprite("PersonIcon02City02");
+            var personIconCity02_3 = LoadSprite("PersonIcon03City02");
+            var personIconCity03_1 = LoadSprite("PersonIcon01City03");
+            var personIconCity03_2 = LoadSprite("PersonIcon02City03");
+            var personIconCity03_3 = LoadSprite("PersonIcon03City03");
             var rewardInfoSpr = LoadSprite("RewardInfo");
             var commonPancakeSpr = LoadSprite("CommonPancake");
             var cheeseHamPancakeSpr = LoadSprite("CheeseHamPancake");
@@ -293,8 +300,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             locPromenade.bottomPanel = bottomPanelCity03;
             // Иконки заказчиков для карточек: у Заправки — общие портреты, у новых городов — свои жители.
             locStall.customerIcons = new[] { person1Icon, person2Icon, person3Icon };
-            locMarket.customerIcons = new[] { personCity02_1, personCity02_2, personCity02_3 };
-            locPromenade.customerIcons = new[] { personCity03_1, personCity03_2, personCity03_3 };
+            locMarket.customerIcons = new[] { personIconCity02_1, personIconCity02_2, personIconCity02_3 };
+            locPromenade.customerIcons = new[] { personIconCity03_1, personIconCity03_2, personIconCity03_3 };
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
