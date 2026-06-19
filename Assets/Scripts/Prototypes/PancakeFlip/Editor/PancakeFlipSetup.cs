@@ -197,11 +197,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 null,
                 new[] { person3, person4 });
             locStall.requiredLevel = 1; locStall.cityCost = 0;
-            locStall.mapPosition = new Vector2(0.5f, 0.34f); locStall.mapIcon = city01Spr;
+            locStall.mapPosition = new Vector2(0.56f, 0.26f); locStall.mapIcon = city01Spr;
             locPromenade.requiredLevel = 3; locPromenade.cityCost = 150;
-            locPromenade.mapPosition = new Vector2(0.30f, 0.60f); locPromenade.mapIcon = city02Spr;
+            locPromenade.mapPosition = new Vector2(0.36f, 0.52f); locPromenade.mapIcon = city02Spr;
             locMarket.requiredLevel = 5; locMarket.cityCost = 300;
-            locMarket.mapPosition = new Vector2(0.70f, 0.62f); locMarket.mapIcon = city03Spr;
+            locMarket.mapPosition = new Vector2(0.76f, 0.54f); locMarket.mapIcon = city03Spr;
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
