@@ -57,10 +57,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             CreateStatTrack("StatEasyFlip", "Легче подброс", PanUpgradeConfig.EffectType.EasierFlip, 2, 30,
                 "До 5 уровней: сильнее толчок при том же заряде.", panSpr);
 
-            var pan01 = LoadSprite("Pan01");
-            var pan02 = LoadSprite("Pan02");
-            var pan03 = LoadSprite("Pan03");
-            var pan04 = LoadSprite("Pan04");
+            var pan01 = LoadSprite("PanImage01");
+            var pan02 = LoadSprite("PanImage02");
+            var pan03 = LoadSprite("PanImage03");
+            var pan04 = LoadSprite("PanImage04");
             CreatePanTier("PanStarter", "Сковорода из ларька", true, 0, 0, pan01 != null ? pan01 : panSpr,
                 "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f);
             CreatePanTier("PanIron", "Чугунная", false, 120, 3, pan02 != null ? pan02 : panSpr,
