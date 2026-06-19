@@ -83,21 +83,33 @@ namespace IdlePancake.Prototypes.PancakeFlip
             rowLe.minHeight = PancakeIconSize + 24f;
             rowLe.preferredHeight = PancakeIconSize + 24f;
 
-            var iconGo = new GameObject("PancakeIcon", typeof(RectTransform));
-            iconGo.transform.SetParent(row.transform, false);
-            var iconImg = iconGo.AddComponent<Image>();
-            iconImg.sprite = recipe.icon;
-            iconImg.enabled = recipe.icon != null;
-            iconImg.preserveAspect = true;
-            iconImg.color = Color.white;
-            iconImg.raycastTarget = false;
-            var iconLe = iconGo.AddComponent<LayoutElement>();
+            var frameGo = new GameObject("PancakeFrame", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+            frameGo.transform.SetParent(row.transform, false);
+            var frameImg = frameGo.GetComponent<Image>();
+            var spot = GameSession.Instance != null ? GameSession.Instance.IngredientSpotSprite : null;
+            if (spot != null) { frameImg.sprite = spot; frameImg.type = Image.Type.Simple; frameImg.preserveAspect = true; frameImg.color = Color.white; }
+            else frameImg.enabled = false;
+            frameImg.raycastTarget = false;
+            var iconLe = frameGo.GetComponent<LayoutElement>();
             iconLe.minWidth = PancakeIconSize;
             iconLe.preferredWidth = PancakeIconSize;
             iconLe.flexibleWidth = 0f;
             iconLe.minHeight = PancakeIconSize;
             iconLe.preferredHeight = PancakeIconSize;
             iconLe.flexibleHeight = 0f;
+
+            var iconGo = new GameObject("PancakeIcon", typeof(RectTransform));
+            iconGo.transform.SetParent(frameGo.transform, false);
+            var iconRt = iconGo.GetComponent<RectTransform>();
+            iconRt.anchorMin = new Vector2(0.14f, 0.14f);
+            iconRt.anchorMax = new Vector2(0.86f, 0.86f);
+            iconRt.offsetMin = iconRt.offsetMax = Vector2.zero;
+            var iconImg = iconGo.AddComponent<Image>();
+            iconImg.sprite = recipe.icon;
+            iconImg.enabled = recipe.icon != null;
+            iconImg.preserveAspect = true;
+            iconImg.color = Color.white;
+            iconImg.raycastTarget = false;
 
             var infoGo = new GameObject("Info", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
             infoGo.transform.SetParent(row.transform, false);

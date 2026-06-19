@@ -528,13 +528,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var recipeBookScr = MkPanel(uiRoot, "RecipeBookScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
             StyleButtonSprite(recipeBookScr, recipesHudSpr);
-            AddResponsive(recipeBookScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
+            AddResponsive(recipeBookScr, V2(0.14f, 0.1f), V2(0.86f, 0.92f), V2(0.36f, 0.06f), V2(0.64f, 0.96f));
             recipeBookScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(recipeBookScr);
             var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
             var rbTitle = MkLabel(recipeBookScr.transform, "Title", "Рецепты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var rbTitleRt = rbTitle.GetComponent<RectTransform>();
-            rbTitleRt.anchorMin = V2(0.10f, 0.80f); rbTitleRt.anchorMax = V2(0.90f, 0.90f);
+            rbTitleRt.anchorMin = V2(0.10f, 0.85f); rbTitleRt.anchorMax = V2(0.90f, 0.93f);
             rbTitleRt.offsetMin = rbTitleRt.offsetMax = Vector2.zero;
             rbTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
             MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform rbListContent);
@@ -545,13 +545,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
             StyleButtonSprite(ingScr, recipesHudSpr);
-            AddResponsive(ingScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
+            AddResponsive(ingScr, V2(0.14f, 0.1f), V2(0.86f, 0.92f), V2(0.36f, 0.06f), V2(0.64f, 0.96f));
             ingScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(ingScr);
             var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
             var ingTitle = MkLabel(ingScr.transform, "Title", "Ингредиенты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var ingTitleRt = ingTitle.GetComponent<RectTransform>();
-            ingTitleRt.anchorMin = V2(0.10f, 0.80f); ingTitleRt.anchorMax = V2(0.90f, 0.90f);
+            ingTitleRt.anchorMin = V2(0.10f, 0.85f); ingTitleRt.anchorMax = V2(0.90f, 0.93f);
             ingTitleRt.offsetMin = ingTitleRt.offsetMax = Vector2.zero;
             ingTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
 
@@ -590,13 +590,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.98f, 0.95f, 0.9f, 0.99f));
             StyleButtonSprite(upgScr, panHudSpr);
-            AddResponsive(upgScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
+            AddResponsive(upgScr, V2(0.14f, 0.1f), V2(0.86f, 0.92f), V2(0.36f, 0.06f), V2(0.64f, 0.96f));
             upgScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(upgScr);
             var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
             var upgTitle = MkLabel(upgScr.transform, "Title", "Сковородки", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var upgTitleRt = upgTitle.GetComponent<RectTransform>();
-            upgTitleRt.anchorMin = V2(0.10f, 0.80f); upgTitleRt.anchorMax = V2(0.90f, 0.90f);
+            upgTitleRt.anchorMin = V2(0.10f, 0.85f); upgTitleRt.anchorMax = V2(0.90f, 0.93f);
             upgTitleRt.offsetMin = upgTitleRt.offsetMax = Vector2.zero;
             upgTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
             MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform uListContent);
