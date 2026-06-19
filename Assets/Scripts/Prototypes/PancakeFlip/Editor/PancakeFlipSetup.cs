@@ -799,7 +799,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var sfx = juiceGo.AddComponent<Sfx>();
             SetField(sfx, "source", juiceGo.GetComponent<AudioSource>());
             var musicSource = juiceGo.AddComponent<AudioSource>();
-            musicSource.playOnAwake = false; musicSource.loop = true; musicSource.volume = 0.3f;
+            musicSource.playOnAwake = false; musicSource.loop = true; musicSource.volume = 0.2f;
             SetField(sfx, "musicSource", musicSource);
             // Звуки из папки Sounds (имена файлов = ключи).
             SetField(sfx, "flip", LoadAudio("Throw"));
