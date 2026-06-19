@@ -191,7 +191,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             // До SetSource: он сразу перерисует карточки заказов, иконки должны быть уже актуальны.
             CurrentCustomerIcons = (loc.customerIcons != null && loc.customerIcons.Length > 0)
                 ? loc.customerIcons : loc.customerSprites;
-            Orders.SetSource(loc.demandRecipes);
+            // Заказы накапливаются: спрос = вся открытая книга рецептов (текущий + предыдущие города).
+            Orders.SetSource(RecipeCatalog);
             if (customerAnimator != null)
                 customerAnimator.SetPersonSprites(loc.customerSprites);
             if (sceneBackground != null && loc.background != null)
