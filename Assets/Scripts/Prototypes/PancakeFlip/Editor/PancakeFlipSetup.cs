@@ -534,7 +534,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
             var rbTitle = MkLabel(recipeBookScr.transform, "Title", "Рецепты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var rbTitleRt = rbTitle.GetComponent<RectTransform>();
-            rbTitleRt.anchorMin = V2(0.04f, 0.86f); rbTitleRt.anchorMax = V2(0.96f, 0.98f);
+            rbTitleRt.anchorMin = V2(0.10f, 0.80f); rbTitleRt.anchorMax = V2(0.90f, 0.90f);
             rbTitleRt.offsetMin = rbTitleRt.offsetMax = Vector2.zero;
             rbTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
             MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform rbListContent);
@@ -551,7 +551,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
             var ingTitle = MkLabel(ingScr.transform, "Title", "Ингредиенты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var ingTitleRt = ingTitle.GetComponent<RectTransform>();
-            ingTitleRt.anchorMin = V2(0.04f, 0.86f); ingTitleRt.anchorMax = V2(0.96f, 0.98f);
+            ingTitleRt.anchorMin = V2(0.10f, 0.80f); ingTitleRt.anchorMax = V2(0.90f, 0.90f);
             ingTitleRt.offsetMin = ingTitleRt.offsetMax = Vector2.zero;
             ingTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
 
@@ -596,7 +596,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
             var upgTitle = MkLabel(upgScr.transform, "Title", "Сковородки", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var upgTitleRt = upgTitle.GetComponent<RectTransform>();
-            upgTitleRt.anchorMin = V2(0.04f, 0.86f); upgTitleRt.anchorMax = V2(0.96f, 0.98f);
+            upgTitleRt.anchorMin = V2(0.10f, 0.80f); upgTitleRt.anchorMax = V2(0.90f, 0.90f);
             upgTitleRt.offsetMin = upgTitleRt.offsetMax = Vector2.zero;
             upgTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
             MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform uListContent);
@@ -1124,7 +1124,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             rt.anchorMin = new Vector2(1f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = Vector2.zero;
+            rt.anchoredPosition = new Vector2(-52f, -52f); // чуть левее и ниже от угла
             rt.sizeDelta = new Vector2(CloseIconSize, CloseIconSize);
             var img = g.GetComponent<Image>();
             img.raycastTarget = true;

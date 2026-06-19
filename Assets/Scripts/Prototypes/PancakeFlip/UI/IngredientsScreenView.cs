@@ -135,7 +135,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             bg.color = ingredient != null ? SlotFilledColor : SlotEmptyColor;
             bg.raycastTarget = false;
             var spotSpr = GameSession.Instance != null ? GameSession.Instance.IngredientSpotSprite : null;
-            if (spotSpr != null) { bg.sprite = spotSpr; bg.type = Image.Type.Sliced; bg.color = Color.white; }
+            if (spotSpr != null) { bg.sprite = spotSpr; bg.type = Image.Type.Simple; bg.preserveAspect = true; bg.color = Color.white; }
             var le = slot.GetComponent<LayoutElement>();
             le.minWidth = BuilderSlotSize;
             le.preferredWidth = BuilderSlotSize;
