@@ -204,6 +204,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             Map.SetCurrent(index);
             _activeOrder = null;
+
+            if (Sfx.Instance != null) Sfx.Instance.PlayCityMusic(index);
         }
 
         // Прилавок города может иметь свою нативную ширину — растягиваем на всю ширину камеры и прижимаем к низу.
@@ -230,6 +232,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             int cost = loc != null ? loc.cityCost : 0;
             if (cost > 0 && !Wallet.SpendCoins(cost)) return false;
             Map.MarkOwned(index);
+            if (Sfx.Instance != null) Sfx.Instance.PlayBuy();
             OnNewLocationUnlocked?.Invoke();
             return true;
         }
@@ -366,17 +369,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void BuyIngredient(IngredientConfig ingredient, int amount = 1)
         {
             if (ingredient == null || ingredient.infinite) return;
-            if (Inventory.IsAtCap(ingredient)) return;
+            if (Inventory.IsAtCap(ingredient)) { if (Sfx.Instance != null) Sfx.Instance.PlayDenied(); return; }
             int totalCost = ingredient.coinCost * amount;
-            if (totalCost > 0 && !Wallet.SpendCoins(totalCost)) return;
+            if (totalCost > 0 && !Wallet.SpendCoins(totalCost)) { if (Sfx.Instance != null) Sfx.Instance.PlayDenied(); return; }
             if (totalCost == 0)
             {
                 Inventory.Add(ingredient, amount);
+                if (Sfx.Instance != null) Sfx.Instance.PlayBuy();
                 return;
             }
             int added = Inventory.Add(ingredient, amount);
             int refund = (amount - added) * ingredient.coinCost;
             if (refund > 0) Wallet.AddCoins(refund);
+            if (Sfx.Instance != null) Sfx.Instance.PlayBuy();
         }
 
         public bool TryAddToBuild(IngredientConfig ingredient)
@@ -398,11 +403,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
             return n;
         }
 
-        public bool TryBuyStatStep(PanStatTrackConfig track) =>
-            track != null && Upgrades.TryBuyStatStep(track, Wallet);
+        public bool TryBuyStatStep(PanStatTrackConfig track)
+        {
+            bool ok = track != null && Upgrades.TryBuyStatStep(track, Wallet);
+            if (Sfx.Instance != null) { if (ok) Sfx.Instance.PlayBuy(); else Sfx.Instance.PlayDenied(); }
+            return ok;
+        }
 
-        public bool TryBuyPanTier(PanTierConfig tier) =>
-            tier != null && Upgrades.TryBuyPan(tier, Wallet);
+        public bool TryBuyPanTier(PanTierConfig tier)
+        {
+            bool ok = tier != null && Upgrades.TryBuyPan(tier, Wallet);
+            if (Sfx.Instance != null) { if (ok) Sfx.Instance.PlayBuy(); else Sfx.Instance.PlayDenied(); }
+            return ok;
+        }
 
         public void EquipPanTier(PanTierConfig tier) => Upgrades.EquipPan(tier);
 

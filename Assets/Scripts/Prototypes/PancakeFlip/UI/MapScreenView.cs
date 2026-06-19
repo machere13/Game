@@ -183,6 +183,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (canDrive)
             {
+                if (Sfx.Instance != null) Sfx.Instance.PlayCar();
                 Vector2 fromPos = locs[from].mapPosition;
                 Vector2 toPos = locs[target].mapPosition;
 

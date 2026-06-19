@@ -798,6 +798,22 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             juiceGo.transform.SetParent(uiRoot, false);
             var sfx = juiceGo.AddComponent<Sfx>();
             SetField(sfx, "source", juiceGo.GetComponent<AudioSource>());
+            var musicSource = juiceGo.AddComponent<AudioSource>();
+            musicSource.playOnAwake = false; musicSource.loop = true; musicSource.volume = 0.6f;
+            SetField(sfx, "musicSource", musicSource);
+            // Звуки из папки Sounds (имена файлов = ключи).
+            SetField(sfx, "flip", LoadAudio("Throw"));
+            SetField(sfx, "serve", LoadAudio("OrderDone"));
+            SetField(sfx, "cook", LoadAudio("Frying"));
+            SetField(sfx, "levelUp", LoadAudio("LevelUp"));
+            SetField(sfx, "click", LoadAudio("ButtonClick"));
+            SetField(sfx, "denied", LoadAudio("Denied"));
+            SetField(sfx, "car", LoadAudio("Car"));
+            SetField(sfx, "unlock", LoadAudio("Unlock"));
+            SetField(sfx, "buy", LoadAudio("Buy"));
+            SetField(sfx, "coin", LoadAudio("Coin"));
+            // Порядок = порядок городов в worldMap: Заправка(0), Бостон/ресторан(1), Средний/кофейня(2).
+            SetFieldArr(sfx, "cityMusic", new Object[] { LoadAudio("MusicCity01"), LoadAudio("MusicCity03"), LoadAudio("MusicCity02") });
 
             var floatSpawner = juiceGo.AddComponent<FloatingTextSpawner>();
 
@@ -1035,6 +1051,19 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 return;
             }
         }
+        static AudioClip LoadAudio(string n)
+        {
+            var guids = AssetDatabase.FindAssets($"{n} t:AudioClip", new[] { ArtDir });
+            foreach (var g in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(path) != n) continue;
+                var c = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+                if (c != null) return c;
+            }
+            return null;
+        }
+
         static Sprite LoadSprite(string n)
         {
             var guids = AssetDatabase.FindAssets($"{n} t:Sprite", new[] { ArtDir });
