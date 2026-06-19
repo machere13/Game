@@ -7,6 +7,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
     public sealed class MainScreenController : MonoBehaviour
     {
         [SerializeField] RecipeBookScreenView recipeBookScreen;
+        [SerializeField] MapScreenView mapScreen;
         [SerializeField] PanUpgradeScreenView upgradeScreen;
         [SerializeField] TextMeshProUGUI statusText;
         [SerializeField] CustomerAnimator customerAnimator;
@@ -29,6 +30,12 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             if (recipeBookScreen != null)
                 recipeBookScreen.Open();
+        }
+
+        public void OpenMap()
+        {
+            if (mapScreen != null)
+                mapScreen.Open();
         }
 
         public void OpenUpgrades()

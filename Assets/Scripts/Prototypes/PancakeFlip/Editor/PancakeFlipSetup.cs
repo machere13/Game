@@ -130,6 +130,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var receiptBtnSpr = LoadSprite("ReceiptButton");
             var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
             var closeIconSpr = LoadSprite("CloseIcon");
+            var globalMapSpr = LoadSprite("GlobalMap");
+            var city01Spr = LoadSprite("City01");
+            var city02Spr = LoadSprite("City02");
+            var city03Spr = LoadSprite("City03");
+            var blockedSpr = LoadSprite("Blocked");
+            var carSpr = LoadSprite("Car");
             var uiFont = LoadPancakeFlipUiFont();
             var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
@@ -172,6 +178,38 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = strawberry, amount = 2 },
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
                 }, chocoStrawberrySpr);
+
+            // Всё текущее содержимое живёт на Заправке. Другие локации — заглушки под будущий
+            // НОВЫЙ контент (свои рецепты/ингредиенты), а не перераспределение заправочного.
+            var allRecipes = new[] { baseRecipe, cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe };
+            var locStall = CreateLocation("LocStall", "Заправка", 5,
+                allRecipes,
+                new[] { cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe },
+                new[] { salami, cheese, banana, chocolate, mushroom, strawberry },
+                new[] { person1, person2, person3, person4 });
+            var locPromenade = CreateLocation("LocPromenade", "Бостон Сити", 8,
+                allRecipes,
+                null,
+                null,
+                new[] { person2, person3 });
+            var locMarket = CreateLocation("LocMarket", "Средний Сити", 10,
+                allRecipes,
+                null,
+                null,
+                new[] { person3, person4 });
+            locStall.requiredLevel = 1; locStall.cityCost = 0;
+            locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
+            // Средний Сити (Рынок) открывается вторым; Бостон Сити (Набережная) — третьим.
+            locMarket.requiredLevel = 3; locMarket.cityCost = 150;
+            locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
+            locPromenade.requiredLevel = 5; locPromenade.cityCost = 300;
+            locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
+            EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
+
+            var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
+            worldMap.locations = new[] { locStall, locPromenade, locMarket };
+            EditorUtility.SetDirty(worldMap);
+            AssetDatabase.SaveAssets();
 
             EnsureDefaultPanProgressionAssets(panSpr, frontPanSpr);
             var statWide = FindAssetByName<PanStatTrackConfig>("StatWidePerfect");
@@ -314,7 +352,10 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var profileImg = profileGo.GetComponent<Image>();
             if (profileSpr != null) { profileImg.sprite = profileSpr; profileImg.preserveAspect = true; }
             else profileImg.color = new Color(0.8f, 0.3f, 0.3f);
-            profileImg.raycastTarget = false;
+            profileImg.raycastTarget = true;
+            var profileBtn = profileGo.AddComponent<Button>();
+            profileBtn.targetGraphic = profileImg;
+            profileBtn.transition = Selectable.Transition.None;
 
             var lvlTxt = new GameObject("LevelText", typeof(RectTransform));
             lvlTxt.transform.SetParent(profileGo.transform, false);
@@ -495,6 +536,77 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(usv, "closeButton", uCloseIcon);
             SetField(usv, "defaultPanIcon", panSpr);
 
+            var mapScr = MkPanel(uiRoot, "MapScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.90f, 0.93f, 0.97f, 1f));
+            AddResponsive(mapScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.20f, 0.04f), V2(0.80f, 0.97f));
+            mapScr.GetComponent<Image>().raycastTarget = true;
+            AddModalCanvasLayer(mapScr);
+
+            var mapBg = new GameObject("MapBg", typeof(RectTransform), typeof(Image));
+            mapBg.transform.SetParent(mapScr.transform, false);
+            var mapBgRt = mapBg.GetComponent<RectTransform>();
+            mapBgRt.anchorMin = Vector2.zero; mapBgRt.anchorMax = Vector2.one;
+            mapBgRt.offsetMin = mapBgRt.offsetMax = Vector2.zero;
+            var mapBgImg = mapBg.GetComponent<Image>();
+            if (globalMapSpr != null) { mapBgImg.sprite = globalMapSpr; mapBgImg.preserveAspect = false; }
+            else mapBgImg.color = new Color(0.5f, 0.6f, 0.7f, 1f);
+            mapBgImg.raycastTarget = true;
+
+            var markersGo = new GameObject("Markers", typeof(RectTransform));
+            markersGo.transform.SetParent(mapScr.transform, false);
+            var markersRt = markersGo.GetComponent<RectTransform>();
+            markersRt.anchorMin = Vector2.zero; markersRt.anchorMax = Vector2.one;
+            markersRt.offsetMin = markersRt.offsetMax = Vector2.zero;
+
+            var mapStatus = MkLabel(mapScr.transform, "Status", "", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.95f, 0.4f, 0.3f), 0);
+            var mapStatusRt = mapStatus.GetComponent<RectTransform>();
+            mapStatusRt.anchorMin = V2(0.05f, 0.02f); mapStatusRt.anchorMax = V2(0.95f, 0.09f);
+            mapStatusRt.offsetMin = mapStatusRt.offsetMax = Vector2.zero;
+            mapStatus.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
+            var mapCloseIcon = MkCloseIcon(mapScr.transform, closeIconSpr);
+
+            var buyModal = MkPanel(mapScr.transform, "BuyModal", V2(0.15f, 0.32f), V2(0.85f, 0.68f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            buyModal.GetComponent<Image>().raycastTarget = true;
+            AddModalCanvasLayer(buyModal);
+            MkPanel(buyModal.transform, "Header", V2(0f, 0.78f), V2(1f, 1f), new Color(0.28f, 0.42f, 0.55f, 1f));
+            var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
+            var buyTitleRt = buyTitle.GetComponent<RectTransform>();
+            buyTitleRt.anchorMin = V2(0.04f, 0.79f); buyTitleRt.anchorMax = V2(0.96f, 0.99f);
+            buyTitleRt.offsetMin = buyTitleRt.offsetMax = Vector2.zero;
+            buyTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            var buyCoin = new GameObject("CostCoin", typeof(RectTransform), typeof(Image));
+            buyCoin.transform.SetParent(buyModal.transform, false);
+            var buyCoinRt = buyCoin.GetComponent<RectTransform>();
+            buyCoinRt.anchorMin = V2(0.30f, 0.47f); buyCoinRt.anchorMax = V2(0.45f, 0.66f);
+            buyCoinRt.offsetMin = buyCoinRt.offsetMax = Vector2.zero;
+            var buyCoinImg = buyCoin.GetComponent<Image>();
+            buyCoinImg.sprite = walletSpr; buyCoinImg.preserveAspect = true; buyCoinImg.raycastTarget = false;
+            buyCoinImg.enabled = walletSpr != null;
+
+            var buyCost = MkLabel(buyModal.transform, "Cost", "0", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.2f, 0.16f, 0.1f), 0);
+            var buyCostRt = buyCost.GetComponent<RectTransform>();
+            buyCostRt.anchorMin = V2(0.47f, 0.45f); buyCostRt.anchorMax = V2(0.72f, 0.68f);
+            buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
+            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
+            var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
+            var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
+            buyConfirmRt.anchorMin = V2(0.2f, 0.08f); buyConfirmRt.anchorMax = V2(0.8f, 0.28f);
+            buyConfirmRt.offsetMin = buyConfirmRt.offsetMax = Vector2.zero;
+            var buyCloseIcon = MkCloseIcon(buyModal.transform, closeIconSpr);
+            buyModal.SetActive(false);
+
+            var mapView = mapScr.AddComponent<MapScreenView>();
+            SetField(mapView, "markersContainer", markersRt);
+            SetField(mapView, "blockedSprite", blockedSpr);
+            SetField(mapView, "carSprite", carSpr);
+            SetField(mapView, "statusText", mapStatus.GetComponent<TextMeshProUGUI>());
+            SetField(mapView, "closeButton", mapCloseIcon);
+            SetField(mapView, "buyModal", buyModal);
+            SetField(mapView, "buyTitleText", buyTitle.GetComponent<TextMeshProUGUI>());
+            SetField(mapView, "buyCostText", buyCost.GetComponent<TextMeshProUGUI>());
+            SetField(mapView, "buyConfirmButton", buyConfirm.GetComponent<Button>());
+            SetField(mapView, "buyCloseButton", buyCloseIcon);
+
             var ctrlGo = new GameObject("PancakeFlipController");
             var ctrl = ctrlGo.AddComponent<PancakeFlipController>();
             SetField(ctrl, "pancake", pcBh); SetField(ctrl, "pan", panBh);
@@ -513,12 +625,15 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "uiFont", uiFont);
             SetField(sess, "coinIcon", walletSpr);
             SetField(sess, "closeIcon", closeIconSpr);
+            SetField(sess, "worldMap", worldMap);
+            SetField(sess, "customerAnimator", custAnim);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
             SetField(msc, "recipeBookScreen", rbsv);
             SetField(msc, "upgradeScreen", usv);
             SetField(msc, "customerAnimator", custAnim);
+            SetField(msc, "mapScreen", mapView);
 
             var kitchenBottom = new GameObject("KitchenBottom", typeof(RectTransform), typeof(KitchenUiFrontLayer));
             kitchenBottom.transform.SetParent(uiRoot, false);
@@ -541,7 +656,62 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(kBar, "mainScreen", msc);
             SetField(kBar, "recipesButton", recipesBtnGo.GetComponent<Button>());
             SetField(kBar, "upgradesButton", upgradesBtnGo.GetComponent<Button>());
+            SetField(kBar, "mapButton", profileBtn);
             kitchenBottom.transform.SetAsLastSibling();
+
+            // --- Juice setup ---
+            var fxCenter = new GameObject("FxCenter", typeof(RectTransform));
+            fxCenter.transform.SetParent(canvas.transform, false);
+            var fxCenterRt = fxCenter.GetComponent<RectTransform>();
+            fxCenterRt.anchorMin = fxCenterRt.anchorMax = new Vector2(0.5f, 0.5f);
+            fxCenterRt.pivot = new Vector2(0.5f, 0.5f);
+            fxCenterRt.anchoredPosition = new Vector2(0f, 200f);
+            fxCenterRt.sizeDelta = Vector2.zero;
+
+            var juiceGo = new GameObject("Juice", typeof(AudioSource));
+            juiceGo.transform.SetParent(uiRoot, false);
+            var sfx = juiceGo.AddComponent<Sfx>();
+            SetField(sfx, "source", juiceGo.GetComponent<AudioSource>());
+
+            var floatSpawner = juiceGo.AddComponent<FloatingTextSpawner>();
+
+            var coinSpawner = juiceGo.AddComponent<CoinFlySpawner>();
+            SetField(coinSpawner, "parentCanvas", (RectTransform)canvas.transform);
+            SetField(coinSpawner, "coinSprite", walletSpr);
+
+            var juiceCtrl = juiceGo.AddComponent<JuiceController>();
+            SetField(juiceCtrl, "pan", panGo.transform);
+            SetField(juiceCtrl, "floatText", floatSpawner);
+            SetField(juiceCtrl, "coinFly", coinSpawner);
+            SetField(juiceCtrl, "walletAnchor", walletGo.GetComponent<RectTransform>());
+            SetField(juiceCtrl, "profileAnchor", profileGo.GetComponent<RectTransform>());
+            SetField(juiceCtrl, "centerAnchor", fxCenterRt);
+            SetField(juiceCtrl, "pancake", pcBh);
+            SetField(juiceCtrl, "profileGraphic", profileGo.GetComponent<Image>());
+
+            // Pop every static button built so far.
+            foreach (var b in canvas.GetComponentsInChildren<Button>(true))
+                if (b.GetComponent<ButtonJuice>() == null)
+                    b.gameObject.AddComponent<ButtonJuice>();
+            // --- end Juice setup ---
+
+            // --- Tutorial setup ---
+            var tutCanvasGo = new GameObject("TutorialCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var tutCanvas = tutCanvasGo.GetComponent<Canvas>();
+            tutCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            tutCanvas.sortingOrder = 200;
+            var tutScaler = tutCanvasGo.GetComponent<CanvasScaler>();
+            tutScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            tutScaler.referenceResolution = new Vector2(1080, 1920);
+            tutScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            tutScaler.matchWidthOrHeight = 1f;
+
+            var tut = tutCanvasGo.AddComponent<TutorialController>();
+            SetField(tut, "orderPanelTarget", orderPanel.GetComponent<RectTransform>());
+            SetField(tut, "ingredientListTarget", iListContent);
+            SetField(tut, "cookButtonTarget", iCookBtn.GetComponent<RectTransform>());
+            SetField(tut, "ingredientsScreen", isv);
+            // --- end Tutorial setup ---
 
             var framer = bootGo.AddComponent<WorldSceneFramer>();
             {
@@ -601,6 +771,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (o != null) EditorGUIUtility.PingObject(o);
         }
 
+        [MenuItem("PancakeFlip/Сбросить тутор")]
+        public static void ResetTutorial()
+        {
+            UnityEngine.PlayerPrefs.DeleteKey(TutorialController.DoneKey);
+            UnityEngine.PlayerPrefs.Save();
+            Debug.Log("PancakeFlip: тутор сброшен — покажется при следующем запуске.");
+        }
+
         const string IngredientsFolder = DataDir + "/Ingredients";
         const string RecipesFolder = DataDir + "/Recipes";
         const string StatsFolder = DataDir + "/Stats";
@@ -621,6 +799,19 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             o.displayName = n; o.unlockLevel = lvl; o.rewardCoins = coins; o.rewardXp = xp; o.ingredients = ing;
             o.icon = icon;
             EditorUtility.SetDirty(o); return o;
+        }
+        static LocationConfig CreateLocation(string assetName, string title, int ordersToUnlock,
+            RecipeConfig[] demand, RecipeConfig[] unlockRecipes, IngredientConfig[] unlockIngredients, Sprite[] customers)
+        {
+            var o = GetOrCreate<LocationConfig>(DataDir + "/Locations", assetName);
+            o.displayName = title;
+            o.ordersToUnlockNext = ordersToUnlock;
+            o.demandRecipes = demand;
+            o.unlockRecipes = unlockRecipes;
+            o.unlockIngredients = unlockIngredients;
+            o.customerSprites = customers;
+            EditorUtility.SetDirty(o);
+            return o;
         }
         static PanStatTrackConfig CreateStatTrack(string assetName, string title, PanUpgradeConfig.EffectType effectType, int unlockLvl, int costBase, string description, Sprite icon)
         {
@@ -975,10 +1166,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var riImg = recipeImg.GetComponent<Image>(); riImg.preserveAspect = true;
             riImg.color = Color.white; riImg.enabled = false;
 
-            var hl = new GameObject("Highlight", typeof(RectTransform), typeof(Image));
-            hl.transform.SetParent(card.transform, false); Fill(hl);
-            var hlI = hl.GetComponent<Image>(); hlI.color = new Color(1, 0.85f, 0.3f, 0.35f); hlI.enabled = false;
-
             var sel = new GameObject("SelectBtn", typeof(RectTransform), typeof(Image), typeof(Button));
             sel.transform.SetParent(root.transform, false); Fill(sel); sel.GetComponent<Image>().color = new Color(1, 1, 1, 0.01f);
 
@@ -995,7 +1182,6 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(cv2, "xpText", xpT);
             SetField(cv2, "personIcon", piImg);
             SetField(cv2, "selectButton", sel.GetComponent<Button>());
-            SetField(cv2, "selectionHighlight", hlI);
             if (personIcons != null && personIcons.Length > 0)
             {
                 var arr = new Object[personIcons.Length];

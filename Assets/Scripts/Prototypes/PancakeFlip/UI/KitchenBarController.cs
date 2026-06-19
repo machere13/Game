@@ -9,6 +9,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Button recipesButton;
         [SerializeField] Button ingredientsShopButton;
         [SerializeField] Button upgradesButton;
+        [SerializeField] Button mapButton;
 
         void Awake()
         {
@@ -32,6 +33,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 ingredientsShopButton.onClick.AddListener(() => mainScreen?.OpenIngredientsShop());
             if (upgradesButton != null)
                 upgradesButton.onClick.AddListener(() => mainScreen?.OpenUpgrades());
+            if (mapButton != null)
+                mapButton.onClick.AddListener(() => mainScreen?.OpenMap());
         }
     }
 }

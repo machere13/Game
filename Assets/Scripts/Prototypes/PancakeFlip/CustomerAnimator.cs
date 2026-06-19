@@ -40,6 +40,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
             exitX = exitToX;
         }
 
+        public void SetPersonSprites(Sprite[] sprites)
+        {
+            personSprites = sprites;
+        }
+
         public void PlayServe(int personIndex = -1)
         {
             if (_busy) return;

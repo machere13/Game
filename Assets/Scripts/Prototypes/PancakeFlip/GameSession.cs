@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using IdlePancake.PancakeFlip.MapCore;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -23,6 +24,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] PancakeFlipConfig flipConfig;
         [SerializeField] LevelTableConfig levelTable;
         [SerializeField] RecipeConfig[] startingRecipes;
+        [SerializeField] WorldMapConfig worldMap;
         [SerializeField] RecipeConfig baseRecipe;
         [SerializeField] IngredientConfig[] allIngredients;
         [SerializeField] IngredientConfig doughIngredient;
@@ -36,6 +38,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
+        [SerializeField] CustomerAnimator customerAnimator;
         public PancakeBehaviour Pancake => pancake;
 
         public Wallet Wallet { get; private set; }
@@ -45,12 +48,29 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public PancakeBuild Build { get; private set; }
         public PancakeFlipConfig FlipConfig => flipConfig;
         public RecipeConfig BaseRecipe => baseRecipe;
-        public IngredientConfig[] AllIngredients => allIngredients;
+        public IngredientConfig[] AllIngredients =>
+            MapActive ? _availableIngredients.ToArray() : allIngredients;
         public IngredientConfig DoughIngredient => doughIngredient;
         public PanStatTrackConfig[] StatTracks => statTracks;
         public PanTierConfig[] PanTiers => panTiers;
         public PanTierConfig EquippedPanTier => Upgrades != null ? Upgrades.EquippedPan : null;
-        public RecipeConfig[] RecipeCatalog => startingRecipes;
+        public RecipeConfig[] RecipeCatalog =>
+            MapActive ? _book.ToArray() : startingRecipes;
+
+        public MapState Map { get; private set; }
+        public WorldMapConfig WorldMap => worldMap;
+        public LocationConfig CurrentLocation =>
+            (worldMap != null && Map != null && worldMap.locations != null
+             && Map.CurrentIndex < worldMap.locations.Length)
+                ? worldMap.locations[Map.CurrentIndex] : null;
+
+        public event System.Action OnIngredientsChanged;
+        public event System.Action OnNewLocationUnlocked;
+
+        readonly List<RecipeConfig> _book = new List<RecipeConfig>();
+        readonly List<IngredientConfig> _availableIngredients = new List<IngredientConfig>();
+        readonly HashSet<int> _contentApplied = new HashSet<int>();
+        bool MapActive => worldMap != null && worldMap.locations != null && worldMap.locations.Length > 0;
         public Sprite CoinIcon => coinIcon;
         public Sprite CloseIcon => closeIcon;
         public bool HasCookingPancake { get; private set; }
@@ -82,7 +102,26 @@ namespace IdlePancake.Prototypes.PancakeFlip
             Upgrades.Initialize(defaultPanTier);
             int maxVisible = flipConfig != null ? flipConfig.maxVisibleOrders : DefaultMaxVisibleOrders;
             int persons = flipConfig != null ? flipConfig.personCount : DefaultPersonCount;
-            Orders = new OrderQueue(startingRecipes, maxVisible, persons);
+            if (MapActive)
+            {
+                var reqLevels = new int[worldMap.locations.Length];
+                for (int i = 0; i < worldMap.locations.Length; i++)
+                    reqLevels[i] = worldMap.locations[i] != null ? worldMap.locations[i].requiredLevel : 1;
+                Map = new MapState(reqLevels, 0);
+                // ВРЕМЕННО: все города открыты для теста (убрать, когда вернём гейт уровня/покупку).
+                for (int i = 0; i < Map.LocationCount; i++) Map.MarkOwned(i);
+
+                _book.Clear();
+                if (baseRecipe != null) _book.Add(baseRecipe);
+                _availableIngredients.Clear();
+                if (doughIngredient != null) _availableIngredients.Add(doughIngredient);
+
+                Orders = new OrderQueue(System.Array.Empty<RecipeConfig>(), maxVisible, persons);
+            }
+            else
+            {
+                Orders = new OrderQueue(startingRecipes, maxVisible, persons);
+            }
             Build = new PancakeBuild();
 
             if (pancake != null)
@@ -94,6 +133,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             PancakeFlipUiFonts.ApplyToAllTextsInLoadedScenes();
             if (pancake != null)
                 pancake.SetActiveCooking(false);
+            if (MapActive)
+                TravelTo(0);
         }
 
         void OnDestroy()
@@ -107,6 +148,49 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             _activeOrder = order;
             OnOrderSelected?.Invoke(order);
+        }
+
+        public void TravelTo(int index)
+        {
+            if (!MapActive || Map == null) return;
+            if (!Map.CanEnter(index)) return;
+
+            var loc = worldMap.locations[index];
+            if (loc == null) return;
+
+            if (_contentApplied.Add(index))
+            {
+                if (loc.unlockRecipes != null)
+                {
+                    foreach (var r in loc.unlockRecipes)
+                        if (r != null && !_book.Contains(r)) _book.Add(r);
+                }
+                if (loc.unlockIngredients != null)
+                {
+                    foreach (var ing in loc.unlockIngredients)
+                        if (ing != null && !_availableIngredients.Contains(ing)) _availableIngredients.Add(ing);
+                }
+                OnIngredientsChanged?.Invoke();
+            }
+
+            Orders.SetSource(loc.demandRecipes);
+            if (customerAnimator != null)
+                customerAnimator.SetPersonSprites(loc.customerSprites);
+
+            Map.SetCurrent(index);
+            _activeOrder = null;
+        }
+
+        public bool TryBuyCity(int index)
+        {
+            if (!MapActive || Map == null) return false;
+            if (!Map.CanBuy(index, Wallet.Level)) return false;
+            var loc = worldMap.locations[index];
+            int cost = loc != null ? loc.cityCost : 0;
+            if (cost > 0 && !Wallet.SpendCoins(cost)) return false;
+            Map.MarkOwned(index);
+            OnNewLocationUnlocked?.Invoke();
+            return true;
         }
 
         public bool TryServe()

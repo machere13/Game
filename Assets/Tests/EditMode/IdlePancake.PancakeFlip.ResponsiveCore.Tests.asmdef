@@ -4,7 +4,10 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "IdlePancake.PancakeFlip.ResponsiveCore"
+        "IdlePancake.PancakeFlip.ResponsiveCore",
+        "IdlePancake.PancakeFlip.MapCore",
+        "IdlePancake.PancakeFlip.JuiceCore",
+        "IdlePancake.PancakeFlip.TutorialCore"
     ],
     "includePlatforms": [
         "Editor"

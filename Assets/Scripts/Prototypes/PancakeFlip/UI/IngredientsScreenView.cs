@@ -97,6 +97,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
+            _rowsBuilt = false; // ингредиенты могли открыться после переезда — пересобираем строки
             Rebuild();
         }
 
@@ -360,6 +361,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var btn = btnGo.GetComponent<Button>();
             btn.targetGraphic = img;
             btn.transition = Selectable.Transition.None;
+            btnGo.AddComponent<ButtonJuice>();
             var le = btnGo.GetComponent<LayoutElement>();
             le.minWidth = ActionButtonWidth;
             le.preferredWidth = ActionButtonWidth;

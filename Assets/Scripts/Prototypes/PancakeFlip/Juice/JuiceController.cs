@@ -1,0 +1,113 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace IdlePancake.Prototypes.PancakeFlip
+{
+    public sealed class JuiceController : MonoBehaviour
+    {
+        [SerializeField] FloatingTextSpawner floatText;
+        [SerializeField] CoinFlySpawner coinFly;
+        [SerializeField] RectTransform walletAnchor;
+        [SerializeField] RectTransform profileAnchor;
+        [SerializeField] RectTransform centerAnchor;
+        [SerializeField] PancakeBehaviour pancake;
+        [SerializeField] Transform pan;
+        [SerializeField] Graphic profileGraphic;
+
+        static readonly Color CoinColor = new Color(1f, 0.85f, 0.25f);
+        static readonly Color FlashTint = new Color(1f, 1f, 0.7f);
+
+        Wallet _wallet;
+        int _lastCoins;
+        bool _hooked;
+
+        void Start() => Hook();
+
+        void Hook()
+        {
+            if (_hooked) return;
+            var s = GameSession.Instance;
+            if (s == null) return;
+
+            _wallet = s.Wallet;
+            if (_wallet != null)
+            {
+                _lastCoins = _wallet.Coins;
+                _wallet.OnChanged += OnWalletChanged;
+                _wallet.OnLevelUp += OnLevelUp;
+            }
+            if (pancake == null) pancake = s.Pancake;
+            if (pancake != null) pancake.OnLanded += OnLanded;
+            s.OnPancakeStarted += OnPancakeStarted;
+            s.OnNewLocationUnlocked += OnUnlocked;
+            _hooked = true;
+        }
+
+        void OnDestroy()
+        {
+            if (_wallet != null)
+            {
+                _wallet.OnChanged -= OnWalletChanged;
+                _wallet.OnLevelUp -= OnLevelUp;
+            }
+            if (pancake != null) pancake.OnLanded -= OnLanded;
+            var s = GameSession.Instance;
+            if (s != null)
+            {
+                s.OnPancakeStarted -= OnPancakeStarted;
+                s.OnNewLocationUnlocked -= OnUnlocked;
+            }
+        }
+
+        void OnLanded(PancakeBehaviour.LandingResult r)
+        {
+            if (pancake != null) Juice.PunchScale(this, pancake.transform, 0.22f, 0.2f);
+            // Трясём сковороду, а не камеру — иначе по бокам открывается пустота за фоном.
+            if (pan != null)
+            {
+                float amp = Mathf.Clamp(r.rotations * 0.012f, 0f, 0.07f);
+                if (amp > 0.001f) Juice.Shake(this, pan, amp, 0.18f);
+            }
+            // XP-попап «+N XP (Nx)» рисует PancakeFlipScoreView (анимированный) — здесь не дублируем.
+            if (Sfx.Instance != null) Sfx.Instance.PlayFlip(1f + Mathf.Clamp(r.rotations, 0, 8) * 0.06f);
+        }
+
+        void OnPancakeStarted()
+        {
+            if (Sfx.Instance != null) Sfx.Instance.PlayCook();
+        }
+
+        void OnWalletChanged()
+        {
+            if (_wallet == null) return;
+            int dCoins = _wallet.Coins - _lastCoins;
+            _lastCoins = _wallet.Coins;
+
+            if (dCoins > 0)
+            {
+                if (coinFly != null && centerAnchor != null && walletAnchor != null)
+                    coinFly.Fly(centerAnchor, walletAnchor, Mathf.Clamp(dCoins / 5 + 1, 1, 5));
+                if (floatText != null && walletAnchor != null)
+                    floatText.Spawn($"+{dCoins}", walletAnchor, CoinColor, 48f, -1f);
+                if (Sfx.Instance != null) Sfx.Instance.PlayServe();
+            }
+        }
+
+        void OnLevelUp(int level)
+        {
+            if (profileGraphic != null) Juice.FlashColor(this, profileGraphic, FlashTint, 0.5f);
+            if (floatText != null && profileAnchor != null)
+                floatText.Spawn("LEVEL UP", profileAnchor, FlashTint, 56f, -1f);
+            if (pan != null) Juice.Shake(this, pan, 0.06f, 0.25f);
+            if (Sfx.Instance != null) Sfx.Instance.PlayLevelUp();
+        }
+
+        void OnUnlocked()
+        {
+            if (floatText != null && centerAnchor != null)
+                floatText.Spawn("Новая локация!", centerAnchor, FlashTint, 56f);
+            if (pan != null) Juice.Shake(this, pan, 0.06f, 0.25f);
+            if (Sfx.Instance != null) Sfx.Instance.PlayUnlock();
+        }
+    }
+}
