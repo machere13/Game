@@ -130,6 +130,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var receiptBtnSpr = LoadSprite("ReceiptButton");
             var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
             var closeIconSpr = LoadSprite("CloseIcon");
+            var globalMapSpr = LoadSprite("GlobalMap");
+            var city01Spr = LoadSprite("City01");
+            var city02Spr = LoadSprite("City02");
+            var city03Spr = LoadSprite("City03");
+            var blockedSpr = LoadSprite("Blocked");
             var uiFont = LoadPancakeFlipUiFont();
             var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
@@ -191,6 +196,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 null,
                 null,
                 new[] { person3, person4 });
+            locStall.requiredLevel = 1; locStall.cityCost = 0;
+            locStall.mapPosition = new Vector2(0.5f, 0.34f); locStall.mapIcon = city01Spr;
+            locPromenade.requiredLevel = 3; locPromenade.cityCost = 150;
+            locPromenade.mapPosition = new Vector2(0.30f, 0.60f); locPromenade.mapIcon = city02Spr;
+            locMarket.requiredLevel = 5; locMarket.cityCost = 300;
+            locMarket.mapPosition = new Vector2(0.70f, 0.62f); locMarket.mapIcon = city03Spr;
+            EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
+
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
             worldMap.locations = new[] { locStall, locPromenade, locMarket };
             EditorUtility.SetDirty(worldMap);
@@ -521,32 +534,66 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(usv, "closeButton", uCloseIcon);
             SetField(usv, "defaultPanIcon", panSpr);
 
-            var mapScr = MkPanel(uiRoot, "MapScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.90f, 0.93f, 0.97f, 0.99f));
-            AddResponsive(mapScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
+            var mapScr = MkPanel(uiRoot, "MapScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.90f, 0.93f, 0.97f, 1f));
+            AddResponsive(mapScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.20f, 0.04f), V2(0.80f, 0.97f));
             mapScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(mapScr);
-            var mapSh = mapScr.AddComponent<Shadow>(); mapSh.effectDistance = new Vector2(3, -4); mapSh.effectColor = new Color(0, 0, 0, 0.28f);
-            MkPanel(mapScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.28f, 0.42f, 0.55f, 1f));
-            var mapTitle = MkLabel(mapScr.transform, "Title", "Карта", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
-            var mapTitleRt = mapTitle.GetComponent<RectTransform>();
-            mapTitleRt.anchorMin = V2(0.04f, 0.86f); mapTitleRt.anchorMax = V2(0.96f, 0.98f);
-            mapTitleRt.offsetMin = mapTitleRt.offsetMax = Vector2.zero;
-            mapTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            var nodesRow = new GameObject("Nodes", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-            nodesRow.transform.SetParent(mapScr.transform, false);
-            var nodesRt = nodesRow.GetComponent<RectTransform>();
-            nodesRt.anchorMin = V2(0.04f, 0.16f); nodesRt.anchorMax = V2(0.96f, 0.82f);
-            nodesRt.offsetMin = nodesRt.offsetMax = Vector2.zero;
-            var nodesH = nodesRow.GetComponent<HorizontalLayoutGroup>();
-            nodesH.spacing = 24f;
-            nodesH.childAlignment = TextAnchor.MiddleCenter;
-            nodesH.childControlWidth = false;
-            nodesH.childControlHeight = false;
-            nodesH.childForceExpandWidth = false;
-            nodesH.childForceExpandHeight = false;
+
+            var mapBg = new GameObject("MapBg", typeof(RectTransform), typeof(Image));
+            mapBg.transform.SetParent(mapScr.transform, false);
+            var mapBgRt = mapBg.GetComponent<RectTransform>();
+            mapBgRt.anchorMin = Vector2.zero; mapBgRt.anchorMax = Vector2.one;
+            mapBgRt.offsetMin = mapBgRt.offsetMax = Vector2.zero;
+            var mapBgImg = mapBg.GetComponent<Image>();
+            if (globalMapSpr != null) { mapBgImg.sprite = globalMapSpr; mapBgImg.preserveAspect = true; }
+            else mapBgImg.color = new Color(0.5f, 0.6f, 0.7f, 1f);
+            mapBgImg.raycastTarget = true;
+
+            var markersGo = new GameObject("Markers", typeof(RectTransform));
+            markersGo.transform.SetParent(mapScr.transform, false);
+            var markersRt = markersGo.GetComponent<RectTransform>();
+            markersRt.anchorMin = Vector2.zero; markersRt.anchorMax = Vector2.one;
+            markersRt.offsetMin = markersRt.offsetMax = Vector2.zero;
+
+            var mapStatus = MkLabel(mapScr.transform, "Status", "", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.95f, 0.4f, 0.3f), 0);
+            var mapStatusRt = mapStatus.GetComponent<RectTransform>();
+            mapStatusRt.anchorMin = V2(0.05f, 0.02f); mapStatusRt.anchorMax = V2(0.95f, 0.09f);
+            mapStatusRt.offsetMin = mapStatusRt.offsetMax = Vector2.zero;
+            mapStatus.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
             var mapCloseIcon = MkCloseIcon(mapScr.transform, closeIconSpr);
+
+            var buyModal = MkPanel(mapScr.transform, "BuyModal", V2(0.15f, 0.32f), V2(0.85f, 0.68f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            buyModal.GetComponent<Image>().raycastTarget = true;
+            AddModalCanvasLayer(buyModal);
+            MkPanel(buyModal.transform, "Header", V2(0f, 0.78f), V2(1f, 1f), new Color(0.28f, 0.42f, 0.55f, 1f));
+            var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
+            var buyTitleRt = buyTitle.GetComponent<RectTransform>();
+            buyTitleRt.anchorMin = V2(0.04f, 0.79f); buyTitleRt.anchorMax = V2(0.96f, 0.99f);
+            buyTitleRt.offsetMin = buyTitleRt.offsetMax = Vector2.zero;
+            buyTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            var buyCost = MkLabel(buyModal.transform, "Cost", "0", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.2f, 0.16f, 0.1f), 0);
+            var buyCostRt = buyCost.GetComponent<RectTransform>();
+            buyCostRt.anchorMin = V2(0.1f, 0.45f); buyCostRt.anchorMax = V2(0.9f, 0.68f);
+            buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
+            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
+            var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
+            buyConfirmRt.anchorMin = V2(0.2f, 0.08f); buyConfirmRt.anchorMax = V2(0.8f, 0.28f);
+            buyConfirmRt.offsetMin = buyConfirmRt.offsetMax = Vector2.zero;
+            var buyCloseIcon = MkCloseIcon(buyModal.transform, closeIconSpr);
+            buyModal.SetActive(false);
+
             var mapView = mapScr.AddComponent<MapScreenView>();
-            mapView.SetRefs(nodesRow.transform, mapCloseIcon);
+            SetField(mapView, "markersContainer", markersRt);
+            SetField(mapView, "blockedSprite", blockedSpr);
+            SetField(mapView, "statusText", mapStatus.GetComponent<TextMeshProUGUI>());
+            SetField(mapView, "closeButton", mapCloseIcon);
+            SetField(mapView, "buyModal", buyModal);
+            SetField(mapView, "buyTitleText", buyTitle.GetComponent<TextMeshProUGUI>());
+            SetField(mapView, "buyCostText", buyCost.GetComponent<TextMeshProUGUI>());
+            SetField(mapView, "buyConfirmButton", buyConfirm.GetComponent<Button>());
+            SetField(mapView, "buyCloseButton", buyCloseIcon);
 
             var ctrlGo = new GameObject("PancakeFlipController");
             var ctrl = ctrlGo.AddComponent<PancakeFlipController>();

@@ -1,22 +1,33 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using IdlePancake.PancakeFlip.MapCore;
 
 namespace IdlePancake.Prototypes.PancakeFlip
 {
     public sealed class MapScreenView : MonoBehaviour
     {
-        [SerializeField] Transform nodesContainer;
+        [SerializeField] RectTransform markersContainer;
+        [SerializeField] Sprite blockedSprite;
+        [SerializeField] TextMeshProUGUI statusText;
         [SerializeField] Button closeButton;
+        [SerializeField] GameObject buyModal;
+        [SerializeField] TextMeshProUGUI buyTitleText;
+        [SerializeField] TextMeshProUGUI buyCostText;
+        [SerializeField] Button buyConfirmButton;
+        [SerializeField] Button buyCloseButton;
 
-        static readonly Color CurrentColor = new Color(0.36f, 0.62f, 0.40f, 1f);
-        static readonly Color UnlockedColor = new Color(0.86f, 0.78f, 0.60f, 1f);
-        static readonly Color LockedColor = new Color(0.45f, 0.42f, 0.38f, 1f);
+        static readonly Color Green = new Color(0.30f, 0.65f, 0.30f);
+        static readonly Color Yellow = new Color(0.85f, 0.68f, 0.20f);
+        static readonly Color Red = new Color(0.70f, 0.25f, 0.22f);
+
+        bool _hooked;
 
         void Start()
         {
-            if (closeButton != null)
-                closeButton.onClick.AddListener(() => gameObject.SetActive(false));
+            if (closeButton != null) closeButton.onClick.AddListener(() => gameObject.SetActive(false));
+            if (buyCloseButton != null) buyCloseButton.onClick.AddListener(CloseBuy);
+            if (buyModal != null) buyModal.SetActive(false);
             gameObject.SetActive(false);
         }
 
@@ -24,79 +35,159 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
+            HookMap();
+            CloseBuy();
+            if (statusText != null) statusText.text = "";
             Rebuild();
+        }
+
+        void HookMap()
+        {
+            if (_hooked) return;
+            var s = GameSession.Instance;
+            if (s != null && s.Map != null) { s.Map.OnChanged += Rebuild; _hooked = true; }
+        }
+
+        void OnDisable()
+        {
+            var s = GameSession.Instance;
+            if (s != null && s.Map != null) s.Map.OnChanged -= Rebuild;
+            _hooked = false;
         }
 
         void Rebuild()
         {
-            if (nodesContainer == null) return;
-            foreach (Transform child in nodesContainer)
-                Destroy(child.gameObject);
+            if (markersContainer == null) return;
+            foreach (Transform ch in markersContainer) Destroy(ch.gameObject);
 
             var s = GameSession.Instance;
             if (s == null || s.WorldMap == null || s.WorldMap.locations == null || s.Map == null) return;
 
-            var font = PancakeFlipUiFonts.UiTmpFont;
-            var locations = s.WorldMap.locations;
-            for (int i = 0; i < locations.Length; i++)
+            int level = s.Wallet != null ? s.Wallet.Level : 1;
+            var locs = s.WorldMap.locations;
+            for (int i = 0; i < locs.Length; i++)
             {
-                var loc = locations[i];
+                var loc = locs[i];
                 if (loc == null) continue;
-                BuildNode(nodesContainer, s, i, loc, font);
+                BuildMarker(i, loc, s.Map.StateOf(i, level));
             }
         }
 
-        void BuildNode(Transform parent, GameSession s, int index, LocationConfig loc, TMP_FontAsset font)
+        void BuildMarker(int index, LocationConfig loc, CityState state)
         {
-            bool unlocked = s.Map.CanTravelTo(index);
-            bool current = s.Map.CurrentIndex == index;
+            var font = PancakeFlipUiFonts.UiTmpFont;
 
-            var node = new GameObject($"Node{index}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
-            node.transform.SetParent(parent, false);
-            var img = node.GetComponent<Image>();
-            img.color = current ? CurrentColor : (unlocked ? UnlockedColor : LockedColor);
-            if (loc.mapIcon != null) { img.sprite = loc.mapIcon; img.preserveAspect = true; }
-            var le = node.GetComponent<LayoutElement>();
-            le.minWidth = 220f; le.preferredWidth = 220f;
-            le.minHeight = 260f; le.preferredHeight = 260f;
+            var marker = new GameObject($"Marker{index}", typeof(RectTransform));
+            marker.transform.SetParent(markersContainer, false);
+            var mrt = (RectTransform)marker.transform;
+            mrt.anchorMin = mrt.anchorMax = loc.mapPosition;
+            mrt.pivot = new Vector2(0.5f, 0.5f);
+            mrt.sizeDelta = new Vector2(220f, 250f);
+            mrt.anchoredPosition = Vector2.zero;
 
-            var btn = node.GetComponent<Button>();
-            btn.targetGraphic = img;
-            btn.interactable = unlocked;
-            int captured = index;
-            btn.onClick.AddListener(() =>
-            {
-                var gs = GameSession.Instance;
-                if (gs == null) return;
-                gs.TravelTo(captured);
-                gameObject.SetActive(false);
-            });
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconGo.transform.SetParent(marker.transform, false);
+            var irt = (RectTransform)iconGo.transform;
+            irt.anchorMin = new Vector2(0.5f, 1f); irt.anchorMax = new Vector2(0.5f, 1f);
+            irt.pivot = new Vector2(0.5f, 1f); irt.anchoredPosition = Vector2.zero;
+            irt.sizeDelta = new Vector2(120f, 120f);
+            var iconImg = iconGo.GetComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+            iconImg.sprite = (state == CityState.Locked && blockedSprite != null) ? blockedSprite : loc.mapIcon;
+            iconImg.enabled = iconImg.sprite != null;
 
             var labelGo = new GameObject("Label", typeof(RectTransform));
-            labelGo.transform.SetParent(node.transform, false);
-            var lrt = labelGo.GetComponent<RectTransform>();
-            lrt.anchorMin = new Vector2(0.04f, 0.04f);
-            lrt.anchorMax = new Vector2(0.96f, 0.96f);
+            labelGo.transform.SetParent(marker.transform, false);
+            var lrt = (RectTransform)labelGo.transform;
+            lrt.anchorMin = new Vector2(0f, 0.40f); lrt.anchorMax = new Vector2(1f, 0.56f);
             lrt.offsetMin = lrt.offsetMax = Vector2.zero;
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             if (font != null) label.font = font;
-            label.fontSize = PancakeFlipUiTypography.ModalBody;
-            label.color = Color.white;
-            label.alignment = TextAlignmentOptions.Center;
-            label.raycastTarget = false;
-            label.enableWordWrapping = true;
+            label.text = loc.displayName;
+            label.fontSize = 28f; label.color = Color.white;
+            label.alignment = TextAlignmentOptions.Center; label.raycastTarget = false;
+            label.enableWordWrapping = false;
 
-            string status;
-            if (!unlocked) status = "\nЗакрыто";
-            else if (current) status = $"\n{s.Map.OrdersInCurrent()}/{s.Map.OrdersToUnlockCurrent()}";
-            else status = "";
-            label.text = loc.displayName + status;
+            string btnText; Color btnColor;
+            switch (state)
+            {
+                case CityState.Owned: btnText = "Войти"; btnColor = Green; break;
+                case CityState.Buyable: btnText = "Купить"; btnColor = Yellow; break;
+                default: btnText = "Закрыто"; btnColor = Red; break;
+            }
+
+            var btnGo = new GameObject("Btn", typeof(RectTransform), typeof(Image), typeof(Button));
+            btnGo.transform.SetParent(marker.transform, false);
+            var brt = (RectTransform)btnGo.transform;
+            brt.anchorMin = new Vector2(0.08f, 0f); brt.anchorMax = new Vector2(0.92f, 0.32f);
+            brt.offsetMin = brt.offsetMax = Vector2.zero;
+            var btnImg = btnGo.GetComponent<Image>();
+            btnImg.color = btnColor;
+            var btn = btnGo.GetComponent<Button>();
+            btn.targetGraphic = btnImg;
+
+            var btGo = new GameObject("Text", typeof(RectTransform));
+            btGo.transform.SetParent(btnGo.transform, false);
+            var btrt = (RectTransform)btGo.transform;
+            btrt.anchorMin = Vector2.zero; btrt.anchorMax = Vector2.one; btrt.offsetMin = btrt.offsetMax = Vector2.zero;
+            var bt = btGo.AddComponent<TextMeshProUGUI>();
+            if (font != null) bt.font = font;
+            bt.text = btnText; bt.fontSize = 26f; bt.color = Color.white;
+            bt.alignment = TextAlignmentOptions.Center; bt.raycastTarget = false;
+
+            int captured = index;
+            int reqLevel = loc.requiredLevel;
+            switch (state)
+            {
+                case CityState.Owned:
+                    btn.onClick.AddListener(() =>
+                    {
+                        var gs = GameSession.Instance;
+                        if (gs != null) gs.TravelTo(captured);
+                        gameObject.SetActive(false);
+                    });
+                    break;
+                case CityState.Buyable:
+                    btn.onClick.AddListener(() => OpenBuy(captured));
+                    break;
+                default:
+                    btn.onClick.AddListener(() =>
+                    {
+                        if (statusText != null) statusText.text = $"Требуется уровень {reqLevel}";
+                    });
+                    break;
+            }
         }
 
-        public void SetRefs(Transform nodes, Button close)
+        void OpenBuy(int index)
         {
-            nodesContainer = nodes;
-            closeButton = close;
+            var s = GameSession.Instance;
+            if (s == null || s.WorldMap == null || buyModal == null) return;
+            var loc = s.WorldMap.locations[index];
+            if (loc == null) return;
+
+            buyModal.SetActive(true);
+            buyModal.transform.SetAsLastSibling();
+            if (buyTitleText != null) buyTitleText.text = loc.displayName;
+            if (buyCostText != null) buyCostText.text = loc.cityCost.ToString();
+
+            bool affordable = s.Wallet != null && s.Wallet.Coins >= loc.cityCost;
+            if (buyConfirmButton != null)
+            {
+                buyConfirmButton.interactable = affordable;
+                buyConfirmButton.onClick.RemoveAllListeners();
+                buyConfirmButton.onClick.AddListener(() =>
+                {
+                    var gs = GameSession.Instance;
+                    if (gs != null && gs.TryBuyCity(index)) { CloseBuy(); Rebuild(); }
+                });
+            }
+        }
+
+        void CloseBuy()
+        {
+            if (buyModal != null) buyModal.SetActive(false);
         }
     }
 }
