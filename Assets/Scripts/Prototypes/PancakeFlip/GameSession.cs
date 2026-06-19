@@ -108,6 +108,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 for (int i = 0; i < worldMap.locations.Length; i++)
                     reqLevels[i] = worldMap.locations[i] != null ? worldMap.locations[i].requiredLevel : 1;
                 Map = new MapState(reqLevels, 0);
+                // ВРЕМЕННО: все города открыты для теста (убрать, когда вернём гейт уровня/покупку).
+                for (int i = 0; i < Map.LocationCount; i++) Map.MarkOwned(i);
 
                 _book.Clear();
                 if (baseRecipe != null) _book.Add(baseRecipe);
