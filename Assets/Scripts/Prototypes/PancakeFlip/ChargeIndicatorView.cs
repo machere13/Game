@@ -35,7 +35,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 fillImage.type = Image.Type.Filled;
                 fillImage.fillMethod = Image.FillMethod.Horizontal;
                 fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
-                _baseScaleX = 1f;
             }
 
             SetCharge(0f);
