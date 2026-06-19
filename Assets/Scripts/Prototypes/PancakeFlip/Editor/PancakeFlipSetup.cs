@@ -61,12 +61,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var pan02 = LoadSprite("PanImage02");
             var pan03 = LoadSprite("PanImage03");
             var pan04 = LoadSprite("PanImage04");
-            var panFront01 = LoadSprite("PanFront01");
             var panFront02 = LoadSprite("PanFront02");
             var panFront03 = LoadSprite("PanFront03");
             var panFront04 = LoadSprite("PanFront04");
+            // Стартовая — классический перёд FrontPan (совпадает с BackPan).
             CreatePanTier("PanStarter", "Сковорода из ларька", true, 0, 0, pan01 != null ? pan01 : panSpr,
-                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f, panFront01);
+                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f, frontPanSpr);
             CreatePanTier("PanIron", "Чугунная", false, 120, 3, pan02 != null ? pan02 : panSpr,
                 "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f, panFront02);
             CreatePanTier("PanPro", "Профи", false, 280, 5, pan03 != null ? pan03 : panSpr,

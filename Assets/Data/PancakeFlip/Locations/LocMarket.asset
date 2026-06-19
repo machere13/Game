@@ -38,3 +38,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4c185098479d65744ae15040c3d02bc1, type: 3}
   - {fileID: 21300000, guid: aece442c1a67f6c48abbe59339698eb6, type: 3}
   - {fileID: 21300000, guid: 3768a65f97b8c354fae87d8c5ad8ba6c, type: 3}
+  customerIcons:
+  - {fileID: 21300000, guid: 25944b0c44273cb45880893e6b4b8337, type: 3}
+  - {fileID: 21300000, guid: b6f5203876e601a4f8985ce4e2755c14, type: 3}
+  - {fileID: 21300000, guid: f0d74076d5fc27445875cef322d79dbc, type: 3}
