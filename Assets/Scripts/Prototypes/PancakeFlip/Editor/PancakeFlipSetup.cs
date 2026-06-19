@@ -187,22 +187,23 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 new[] { cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe },
                 new[] { salami, cheese, banana, chocolate, mushroom, strawberry },
                 new[] { person1, person2, person3, person4 });
-            var locPromenade = CreateLocation("LocPromenade", "Набережная", 8,
+            var locPromenade = CreateLocation("LocPromenade", "Бостон Сити", 8,
                 allRecipes,
                 null,
                 null,
                 new[] { person2, person3 });
-            var locMarket = CreateLocation("LocMarket", "Рынок", 10,
+            var locMarket = CreateLocation("LocMarket", "Средний Сити", 10,
                 allRecipes,
                 null,
                 null,
                 new[] { person3, person4 });
             locStall.requiredLevel = 1; locStall.cityCost = 0;
             locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
-            locPromenade.requiredLevel = 3; locPromenade.cityCost = 150;
-            locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
-            locMarket.requiredLevel = 5; locMarket.cityCost = 300;
+            // Средний Сити (Рынок) открывается вторым; Бостон Сити (Набережная) — третьим.
+            locMarket.requiredLevel = 3; locMarket.cityCost = 150;
             locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
+            locPromenade.requiredLevel = 5; locPromenade.cityCost = 300;
+            locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
@@ -573,11 +574,20 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             buyTitleRt.anchorMin = V2(0.04f, 0.79f); buyTitleRt.anchorMax = V2(0.96f, 0.99f);
             buyTitleRt.offsetMin = buyTitleRt.offsetMax = Vector2.zero;
             buyTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            var buyCoin = new GameObject("CostCoin", typeof(RectTransform), typeof(Image));
+            buyCoin.transform.SetParent(buyModal.transform, false);
+            var buyCoinRt = buyCoin.GetComponent<RectTransform>();
+            buyCoinRt.anchorMin = V2(0.30f, 0.47f); buyCoinRt.anchorMax = V2(0.45f, 0.66f);
+            buyCoinRt.offsetMin = buyCoinRt.offsetMax = Vector2.zero;
+            var buyCoinImg = buyCoin.GetComponent<Image>();
+            buyCoinImg.sprite = walletSpr; buyCoinImg.preserveAspect = true; buyCoinImg.raycastTarget = false;
+            buyCoinImg.enabled = walletSpr != null;
+
             var buyCost = MkLabel(buyModal.transform, "Cost", "0", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.2f, 0.16f, 0.1f), 0);
             var buyCostRt = buyCost.GetComponent<RectTransform>();
-            buyCostRt.anchorMin = V2(0.1f, 0.45f); buyCostRt.anchorMax = V2(0.9f, 0.68f);
+            buyCostRt.anchorMin = V2(0.47f, 0.45f); buyCostRt.anchorMax = V2(0.72f, 0.68f);
             buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
-            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
             var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
             var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
             buyConfirmRt.anchorMin = V2(0.2f, 0.08f); buyConfirmRt.anchorMax = V2(0.8f, 0.28f);
