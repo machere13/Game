@@ -22,6 +22,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         // Базовая (запечённая в портрете) геометрия — захватывается один раз до первого ресейла.
         bool _captured;
+        PancakeBehaviour _pancakeBh;
         float _baseBurnerY;
         float _basePanY;
         float _basePancakeY;
@@ -97,7 +98,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (pancake != null)
                 {
                     Vector3 cp = pancake.position;
-                    pancake.position = new Vector3(cp.x, _basePancakeY + delta, cp.z);
+                    var np = new Vector3(cp.x, _basePancakeY + delta, cp.z);
+                    pancake.position = np;
+                    // Физика держит свою позицию покоя — обновляем и её, иначе блин снапнется обратно.
+                    if (_pancakeBh == null) _pancakeBh = pancake.GetComponent<PancakeBehaviour>();
+                    if (_pancakeBh != null) _pancakeBh.SetRestPosition(new Vector2(np.x, np.y));
                 }
             }
 

@@ -127,6 +127,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
             panCenter = center;
         }
 
+        // Обновить позицию покоя (когда сцену переобрамляют под другой экран).
+        public void SetRestPosition(Vector2 pos)
+        {
+            _restPosition = pos;
+            if (_state == State.OnPan && _rb != null)
+            {
+                _rb.position = pos;
+                transform.position = new Vector3(pos.x, pos.y, transform.position.z);
+            }
+        }
+
         // Лицо блина под текущий рецепт. Обратная сторона — то же изображение (отзеркаливается автоматически).
         // null — вернуть обычный блин (запасной спрайт).
         public void SetFaceArt(Sprite art)
