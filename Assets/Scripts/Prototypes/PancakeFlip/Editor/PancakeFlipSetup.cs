@@ -134,6 +134,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var person1Icon = LoadSprite("Person1Icon");
             var person2Icon = LoadSprite("Person2Icon");
             var person3Icon = LoadSprite("Person3Icon");
+            // Посетители по городам: City02 — Средний Сити, City03 — Бостон Сити.
+            var personCity02_1 = LoadSprite("Person01City02");
+            var personCity02_2 = LoadSprite("Person02City02");
+            var personCity02_3 = LoadSprite("Person03City02");
+            var personCity03_1 = LoadSprite("Person01City03");
+            var personCity03_2 = LoadSprite("Person02City03");
+            var personCity03_3 = LoadSprite("Person03City03");
             var rewardInfoSpr = LoadSprite("RewardInfo");
             var commonPancakeSpr = LoadSprite("CommonPancake");
             var cheeseHamPancakeSpr = LoadSprite("CheeseHamPancake");
@@ -254,12 +261,12 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 new[] { baseRecipe, salmonRecipe, caviarRecipe, scallopRecipe },
                 new[] { salmonRecipe, caviarRecipe, scallopRecipe },
                 new[] { salmon, caviar, scallops },
-                new[] { person2, person3 });
+                new[] { personCity03_1, personCity03_2, personCity03_3 });
             var locMarket = CreateLocation("LocMarket", "Средний Сити", 10,
                 new[] { baseRecipe, cheeseHamRecipe, meatRecipe, jamRecipe, peanutRecipe },
                 new[] { meatRecipe, jamRecipe, peanutRecipe },
                 new[] { meat, jam, peanutButter },
-                new[] { person3, person4 });
+                new[] { personCity02_1, personCity02_2, personCity02_3 });
             locStall.requiredLevel = 1; locStall.cityCost = 0;
             locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
             locStall.background = bgCity01; locStall.stoveClosed = stoveCity01; locStall.stoveOpen = stoveOpen01;
