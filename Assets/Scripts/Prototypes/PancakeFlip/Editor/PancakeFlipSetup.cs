@@ -528,7 +528,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var recipeBookScr = MkPanel(uiRoot, "RecipeBookScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
             StyleButtonSprite(recipeBookScr, recipesHudSpr);
-            AddResponsive(recipeBookScr, V2(0.14f, 0.1f), V2(0.86f, 0.92f), V2(0.36f, 0.06f), V2(0.64f, 0.96f));
+            AddResponsive(recipeBookScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             recipeBookScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(recipeBookScr);
             var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
@@ -537,7 +537,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             rbTitleRt.anchorMin = V2(0.10f, 0.85f); rbTitleRt.anchorMax = V2(0.90f, 0.93f);
             rbTitleRt.offsetMin = rbTitleRt.offsetMax = Vector2.zero;
             rbTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform rbListContent);
+            MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.12f, 0.04f), V2(0.88f, 0.84f), out RectTransform rbListContent);
             var rbCloseIcon = MkCloseIcon(recipeBookScr.transform, closeIconSpr);
             var rbsv = recipeBookScr.AddComponent<RecipeBookScreenView>();
             SetField(rbsv, "recipeListContainer", rbListContent);
@@ -545,7 +545,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
             StyleButtonSprite(ingScr, recipesHudSpr);
-            AddResponsive(ingScr, V2(0.14f, 0.1f), V2(0.86f, 0.92f), V2(0.36f, 0.06f), V2(0.64f, 0.96f));
+            AddResponsive(ingScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             ingScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(ingScr);
             var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
@@ -568,7 +568,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             iBuilderH.childForceExpandWidth = false;
             iBuilderH.childForceExpandHeight = false;
 
-            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.73f), out RectTransform iListContent);
+            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.12f, 0.13f), V2(0.88f, 0.73f), out RectTransform iListContent);
 
             var iCookBtn = MkButton(ingScr.transform, "CookBtn", "Готовить", tmpFont, new Color(0.86f, 0.55f, 0.18f, 1f));
             StyleButtonSprite(iCookBtn, successBtnSpr);
@@ -590,7 +590,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.98f, 0.95f, 0.9f, 0.99f));
             StyleButtonSprite(upgScr, panHudSpr);
-            AddResponsive(upgScr, V2(0.14f, 0.1f), V2(0.86f, 0.92f), V2(0.36f, 0.06f), V2(0.64f, 0.96f));
+            AddResponsive(upgScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             upgScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(upgScr);
             var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
