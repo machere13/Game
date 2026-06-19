@@ -127,6 +127,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var backPanSpr = LoadSprite("BackPan");
             var frontPanSpr = LoadSprite("FrontPan");
             var bottomPanelSpr = LoadSprite("BottomPanel");
+            var bottomPanelCity02 = LoadSprite("BottomPanelCity02");
+            var bottomPanelCity03 = LoadSprite("BottomPanelCity03");
             var person1 = LoadSprite("Person1");
             var person2 = LoadSprite("Person2");
             var person3 = LoadSprite("Person3");
@@ -276,11 +278,11 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             locMarket.requiredLevel = 3; locMarket.cityCost = 150;
             locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
             locMarket.background = bgCity02; locMarket.stoveClosed = stoveCity02; locMarket.stoveOpen = null;
-            locMarket.bottomPanel = null; // прилавок уже в фоне города
+            locMarket.bottomPanel = bottomPanelCity02;
             locPromenade.requiredLevel = 5; locPromenade.cityCost = 300;
             locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
             locPromenade.background = bgCity03; locPromenade.stoveClosed = stoveCity03; locPromenade.stoveOpen = null;
-            locPromenade.bottomPanel = null; // прилавок уже в фоне города
+            locPromenade.bottomPanel = bottomPanelCity03;
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
