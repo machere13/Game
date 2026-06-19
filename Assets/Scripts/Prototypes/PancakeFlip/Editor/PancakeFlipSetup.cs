@@ -510,12 +510,36 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetFloatField(olv, "slotHeight", 0.285f);
             SetFloatField(olv, "gap", 0.004f);
 
-            var chargeGo = MkPanel(uiRoot, "ChargeIndicator", V2(0.25f, 0.84f), V2(0.75f, 0.9f), new Color(0.15f, 0.15f, 0.15f, 0.7f));
+            var backProgressSpr = LoadSprite("BackProgress");
+            var centerProgressSpr = LoadSprite("CenterProgress");
+            var frontProgressSpr = LoadSprite("FrontProgress");
+
+            var chargeGo = MkPanel(uiRoot, "ChargeIndicator", V2(0.25f, 0.84f), V2(0.75f, 0.9f), new Color(0f, 0f, 0f, 0f));
             AddResponsive(chargeGo, V2(0.25f, 0.84f), V2(0.75f, 0.9f), V2(0.38f, 0.88f), V2(0.62f, 0.94f));
-            var fillGo2 = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            chargeGo.GetComponent<Image>().raycastTarget = false;
+
+            // Back — пустой трек (нижний слой).
+            var backGo = new GameObject("Back", typeof(RectTransform), typeof(Image));
+            backGo.transform.SetParent(chargeGo.transform, false); Fill(backGo);
+            var backImg = backGo.GetComponent<Image>();
+            backImg.sprite = backProgressSpr; backImg.type = Image.Type.Simple; backImg.preserveAspect = false;
+            backImg.color = Color.white; backImg.raycastTarget = false; backImg.enabled = backProgressSpr != null;
+
+            // Center — заливка, открывается слева направо (средний слой).
+            var fillGo2 = new GameObject("Center", typeof(RectTransform), typeof(Image));
             fillGo2.transform.SetParent(chargeGo.transform, false); Fill(fillGo2);
-            var fillI = fillGo2.GetComponent<Image>(); fillI.color = Color.yellow;
-            fillI.type = Image.Type.Filled; fillI.fillMethod = Image.FillMethod.Horizontal; fillI.fillAmount = 0;
+            var fillI = fillGo2.GetComponent<Image>();
+            fillI.sprite = centerProgressSpr; fillI.color = Color.white; fillI.raycastTarget = false;
+            fillI.type = Image.Type.Filled; fillI.fillMethod = Image.FillMethod.Horizontal;
+            fillI.fillOrigin = (int)Image.OriginHorizontal.Left; fillI.fillAmount = 0f;
+
+            // Front — рамка поверх (верхний слой).
+            var frontGo = new GameObject("Front", typeof(RectTransform), typeof(Image));
+            frontGo.transform.SetParent(chargeGo.transform, false); Fill(frontGo);
+            var frontImg = frontGo.GetComponent<Image>();
+            frontImg.sprite = frontProgressSpr; frontImg.type = Image.Type.Simple; frontImg.preserveAspect = false;
+            frontImg.color = Color.white; frontImg.raycastTarget = false; frontImg.enabled = frontProgressSpr != null;
+
             var cv = chargeGo.AddComponent<ChargeIndicatorView>(); SetField(cv, "fillImage", fillI);
 
             var popup = MkLabel(uiRoot, "RotationsPopup", "", tmpFont, PancakeFlipUiTypography.RotationsPopup, new Color(1, 0.95f, 0.7f), 0);

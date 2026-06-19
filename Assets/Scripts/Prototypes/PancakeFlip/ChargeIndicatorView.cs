@@ -10,7 +10,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Color baseColor = new Color(1f, 0.9f, 0.3f);
 
         float _charge = -1f;
-        float _baseScaleX = 1f;
         CanvasGroup _canvasGroup;
 
         void Start()
@@ -32,11 +31,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (fillImage != null)
             {
                 fillImage.raycastTarget = false;
-                var rt = fillImage.rectTransform;
-                _baseScaleX = Mathf.Abs(rt.localScale.x);
-                if (_baseScaleX <= 0f) _baseScaleX = 1f;
-
-                fillImage.color = baseColor;
+                // Заливка слева направо: открываем спрайт по горизонтали от левого края.
+                fillImage.type = Image.Type.Filled;
+                fillImage.fillMethod = Image.FillMethod.Horizontal;
+                fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+                _baseScaleX = 1f;
             }
 
             SetCharge(0f);
@@ -49,14 +48,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             if (fillImage == null) return;
 
+            // На полном заряде — лёгкое мерцание прозрачностью (не перекрашиваем спрайт).
             if (_charge >= 0.999f)
             {
                 float blink = (Mathf.Sin(Time.time * (2f * Mathf.PI / blinkPeriod)) + 1f) * 0.5f;
-                fillImage.color = Color.Lerp(baseColor, Color.white, 0.3f + 0.4f * blink);
+                var c = fillImage.color;
+                c.a = 0.7f + 0.3f * blink;
+                fillImage.color = c;
             }
             else
             {
-                fillImage.color = baseColor;
+                var c = fillImage.color;
+                c.a = 1f;
+                fillImage.color = c;
             }
         }
 
@@ -71,11 +75,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             _canvasGroup.alpha = _charge > 0.001f ? 1f : 0f;
 
             if (fillImage == null) return;
-
-            var rt = fillImage.rectTransform;
-            var s = rt.localScale;
-            float x = Mathf.Lerp(0.0001f, _baseScaleX, _charge);
-            rt.localScale = new Vector3(x, s.y, s.z);
+            fillImage.fillAmount = _charge;
         }
 
         public void SetVisible(bool visible)
