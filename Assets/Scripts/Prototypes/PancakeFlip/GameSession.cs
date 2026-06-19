@@ -39,6 +39,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
         [SerializeField] CustomerAnimator customerAnimator;
+        [SerializeField] SpriteRenderer sceneBackground;
+        [SerializeField] StoveView stove;
         public PancakeBehaviour Pancake => pancake;
 
         public Wallet Wallet { get; private set; }
@@ -176,6 +178,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
             Orders.SetSource(loc.demandRecipes);
             if (customerAnimator != null)
                 customerAnimator.SetPersonSprites(loc.customerSprites);
+            if (sceneBackground != null && loc.background != null)
+                sceneBackground.sprite = loc.background;
+            if (stove != null)
+                stove.SetSprites(loc.stoveClosed, loc.stoveOpen);
 
             Map.SetCurrent(index);
             _activeOrder = null;

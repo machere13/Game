@@ -99,11 +99,19 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             bootGo.AddComponent<ResponsiveLayout>();
 
             ForceAllSprites();
-            var bgSpr = LoadSprite("Background");
+            // Пер-городские фоны/плиты (Заправка=01, Средний=02, Бостон=03). Открытая плита пока только City01.
+            var bgCity01 = LoadSprite("BackgroundCity01");
+            var bgCity02 = LoadSprite("BackgroundCity02");
+            var bgCity03 = LoadSprite("BackgroundCity03");
+            var stoveCity01 = LoadSprite("StoveCity01");
+            var stoveCity02 = LoadSprite("StoveCity02");
+            var stoveCity03 = LoadSprite("StoveCity03");
+            var stoveOpen01 = LoadSprite("StoveOpenCity01");
+            var bgSpr = bgCity01;
             var panSpr = LoadSprite("Pan");
             var pancakeSpr = LoadSprite("Pancake");
-            var stoveClosedS = LoadSprite("image 5");
-            var stoveOpenS = LoadSprite("image 4");
+            var stoveClosedS = stoveCity01;
+            var stoveOpenS = stoveOpen01;
             var orderListSpr = LoadSprite("OrderList");
             var orderItemSpr = LoadSprite("OrderItem");
             var profileSpr = LoadSprite("Profile");
@@ -199,11 +207,14 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 new[] { person3, person4 });
             locStall.requiredLevel = 1; locStall.cityCost = 0;
             locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
+            locStall.background = bgCity01; locStall.stoveClosed = stoveCity01; locStall.stoveOpen = stoveOpen01;
             // Средний Сити (Рынок) открывается вторым; Бостон Сити (Набережная) — третьим.
             locMarket.requiredLevel = 3; locMarket.cityCost = 150;
             locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
+            locMarket.background = bgCity02; locMarket.stoveClosed = stoveCity02; locMarket.stoveOpen = stoveOpen01;
             locPromenade.requiredLevel = 5; locPromenade.cityCost = 300;
             locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
+            locPromenade.background = bgCity03; locPromenade.stoveClosed = stoveCity03; locPromenade.stoveOpen = stoveOpen01;
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
@@ -627,6 +638,9 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "closeIcon", closeIconSpr);
             SetField(sess, "worldMap", worldMap);
             SetField(sess, "customerAnimator", custAnim);
+            var bgGoRef = GameObject.Find("Background");
+            SetField(sess, "sceneBackground", bgGoRef != null ? bgGoRef.GetComponent<SpriteRenderer>() : null);
+            SetField(sess, "stove", Object.FindObjectOfType<StoveView>());
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();

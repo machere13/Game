@@ -53,6 +53,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 spriteRenderer.sprite = closedSprite;
         }
 
+        // Подмена спрайтов плиты при смене локации; обновляет текущий показанный спрайт.
+        public void SetSprites(Sprite closed, Sprite open)
+        {
+            if (closed != null) closedSprite = closed;
+            if (open != null) openSprite = open;
+            if (spriteRenderer != null)
+                spriteRenderer.sprite = _isOpen ? openSprite : closedSprite;
+        }
+
         public bool IsOpen => _isOpen;
     }
 }
