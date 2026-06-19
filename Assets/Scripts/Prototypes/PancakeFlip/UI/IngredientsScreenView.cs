@@ -299,8 +299,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             rowH.childControlHeight = true;
             rowH.childForceExpandWidth = false;
             rowH.childForceExpandHeight = false;
-            rowH.spacing = 12f;
-            rowH.padding = new RectOffset(8, 8, 4, 4);
+            rowH.spacing = 24f;
+            rowH.padding = new RectOffset(36, 16, 10, 10);
             rowH.childAlignment = TextAnchor.MiddleLeft;
             var rowLe = row.GetComponent<LayoutElement>();
             rowLe.minHeight = 220f;
@@ -313,12 +313,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
             iconImg.preserveAspect = true;
             iconImg.enabled = ing.icon != null;
             iconImg.raycastTarget = false;
+            const float RowIconSize = 140f;
             var iconLe = iconGo.GetComponent<LayoutElement>();
-            iconLe.minWidth = IngredientIconSize;
-            iconLe.preferredWidth = IngredientIconSize;
+            iconLe.minWidth = RowIconSize;
+            iconLe.preferredWidth = RowIconSize;
             iconLe.flexibleWidth = 0f;
-            iconLe.minHeight = IngredientIconSize;
-            iconLe.preferredHeight = IngredientIconSize;
+            iconLe.minHeight = RowIconSize;
+            iconLe.preferredHeight = RowIconSize;
             iconLe.flexibleHeight = 0f;
 
             var labelGo = new GameObject("Label", typeof(RectTransform), typeof(LayoutElement));
