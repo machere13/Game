@@ -288,7 +288,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 // Одинаковая картинка с двух сторон: обратную сторону показываем повёрнутой на 180°
                 // (flipX+flipY), иначе у симметричного блина переворот незаметен.
                 bool sameArt = resA == resB;
-                bool back = sameArt && _currentSide == Side.B;
+                // Стартовая сторона (B на сковороде) показывается натурально; повёрнута — другая.
+                bool back = sameArt && _currentSide == Side.A;
                 _sr.flipX = back;
                 _sr.flipY = back;
             }
