@@ -80,8 +80,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             rowH.childForceExpandWidth = false;
             rowH.childForceExpandHeight = false;
             var rowLe = row.GetComponent<LayoutElement>();
-            rowLe.minHeight = PancakeIconSize + 24f;
-            rowLe.preferredHeight = PancakeIconSize + 24f;
+            rowLe.minHeight = PancakeIconSize + 80f;
+            rowLe.preferredHeight = PancakeIconSize + 80f;
 
             var iconGo = new GameObject("PancakeIcon", typeof(RectTransform), typeof(LayoutElement));
             iconGo.transform.SetParent(row.transform, false);
