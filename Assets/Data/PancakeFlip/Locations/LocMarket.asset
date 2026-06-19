@@ -17,7 +17,7 @@ MonoBehaviour:
   background: {fileID: 21300000, guid: 5890c9439a71f474bbaf53532b24c64c, type: 3}
   stoveClosed: {fileID: 21300000, guid: 6281c57eed687914ebfccc1f7eb40dd2, type: 3}
   stoveOpen: {fileID: 0}
-  bottomPanel: {fileID: 0}
+  bottomPanel: {fileID: 21300000, guid: 30b02b69fb29cab44a4e56d60b15b85b, type: 3}
   ordersToUnlockNext: 10
   requiredLevel: 3
   cityCost: 150
