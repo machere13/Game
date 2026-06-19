@@ -189,7 +189,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var baseRecipe = CreateRecipe("Обычный блин", 0, 5, 10,
                 new[] { new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 } },
-                commonPancakeSpr);
+                pancakeSpr != null ? pancakeSpr : commonPancakeSpr);
             var cheeseHamRecipe = CreateRecipe("Блин с салями и сыром", 1, 20, 35,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },

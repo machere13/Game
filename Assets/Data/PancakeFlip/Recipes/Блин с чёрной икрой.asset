@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\u0411\u043B\u0438\u043D \u0441 \u0447\u0451\u0440\u043D\u043E\u0439
     \u0438\u043A\u0440\u043E\u0439"
-  icon: {fileID: 21300000, guid: 535e758f2fffbba4f9f8467465a3785e, type: 3}
+  icon: {fileID: 21300000, guid: 32879ef20c1c8ab4b8c6da97ea3a3638, type: 3}
   unlockLevel: 5
   ingredients:
   - ingredient: {fileID: 11400000, guid: b8bf2c6c33990dc4d9a23281c7aab2a6, type: 2}
