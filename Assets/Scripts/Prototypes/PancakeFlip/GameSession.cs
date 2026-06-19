@@ -197,7 +197,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 {
                     sceneBottomPanel.sprite = loc.bottomPanel;
                     // Прилавки городов чуть приподнимаем; у стартовой Заправки — свой спрайт, не трогаем.
-                    FitBottomPanelWidth(index == 0 ? 0f : 0.30f);
+                    FitBottomPanelWidth(index == 0 ? 0f : 0.12f);
                 }
                 sceneBottomPanel.enabled = loc.bottomPanel != null;
             }
