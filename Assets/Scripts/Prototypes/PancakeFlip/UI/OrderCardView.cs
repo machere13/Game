@@ -37,6 +37,9 @@ namespace IdlePancake.Prototypes.PancakeFlip
             {
                 recipeImage.sprite = order.Recipe.icon;
                 recipeImage.enabled = true;
+                // В заказах блин показываем под наклоном ~45° и чуть меньше.
+                recipeImage.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -45f);
+                recipeImage.rectTransform.localScale = Vector3.one * 0.92f;
             }
             else if (recipeImage != null)
                 recipeImage.enabled = false;
@@ -46,10 +49,17 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (xpText != null)
                 xpText.text = $"+{order.RewardXp}";
 
-            if (personIcon != null && personIconSprites != null && order.PersonIndex < personIconSprites.Length)
+            if (personIcon != null)
             {
-                personIcon.sprite = personIconSprites[order.PersonIndex];
-                personIcon.enabled = true;
+                // Сначала иконки текущего города, иначе — общие.
+                var cityIcons = GameSession.Instance != null ? GameSession.Instance.CurrentCustomerIcons : null;
+                Sprite spr = null;
+                if (cityIcons != null && order.PersonIndex < cityIcons.Length)
+                    spr = cityIcons[order.PersonIndex];
+                if (spr == null && personIconSprites != null && order.PersonIndex < personIconSprites.Length)
+                    spr = personIconSprites[order.PersonIndex];
+                personIcon.sprite = spr;
+                personIcon.enabled = spr != null;
             }
 
             if (selectButton != null)

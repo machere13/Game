@@ -15,7 +15,9 @@ MonoBehaviour:
   displayName: "\u041F\u0440\u043E\u0444\u0438"
   description: "\u0420\u0430\u0431\u043E\u0447\u0430\u044F \u0441\u043A\u043E\u0432\u043E\u0440\u043E\u0434\u0430.
     \u0411\u0430\u0437\u0430 +10%."
-  icon: {fileID: 21300000, guid: aa01030000000000000000000000ba03, type: 3}
+  icon: {fileID: 21300000, guid: 5c929fa9260752442a1b5949fab416c6, type: 3}
+  panFront: {fileID: 21300000, guid: aa11030000000000000000000000bf03, type: 3}
+  panBack: {fileID: 21300000, guid: aa01030000000000000000000000ba03, type: 3}
   isStarter: 0
   coinCost: 280
   unlockLevel: 5

@@ -127,6 +127,28 @@ namespace IdlePancake.Prototypes.PancakeFlip
             panCenter = center;
         }
 
+        // Обновить позицию покоя (когда сцену переобрамляют под другой экран).
+        public void SetRestPosition(Vector2 pos)
+        {
+            _restPosition = pos;
+            if (_state == State.OnPan && _rb != null)
+            {
+                _rb.position = pos;
+                transform.position = new Vector3(pos.x, pos.y, transform.position.z);
+            }
+        }
+
+        // Лицо блина под текущий рецепт. Обратная сторона — то же изображение (отзеркаливается автоматически).
+        // null — вернуть обычный блин (запасной спрайт).
+        public void SetFaceArt(Sprite art)
+        {
+            var a = art != null ? art : _fallbackSprite;
+            spriteFaceA = a;
+            spriteFaceB = a;
+            if (_state == State.OnPan)
+                ApplyRestOnPanPose();
+        }
+
         public void Throw(float verticalForce, float spinDegPerSec)
         {
             if (!_activeCooking) return;
@@ -147,7 +169,10 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 Physics2D.IgnoreCollision(_col, _panCol, false);
 
             if (_sr != null)
+            {
                 _sr.flipX = false;
+                _sr.flipY = false;
+            }
 
             _rb.bodyType = RigidbodyType2D.Dynamic;
             _rb.constraints = RigidbodyConstraints2D.None;
@@ -271,8 +296,13 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 bool sideAOnPan = _currentSide == Side.A;
                 _sr.sprite = sideAOnPan ? resB : resA;
 
+                // Одинаковая картинка с двух сторон: обратную сторону показываем повёрнутой на 180°
+                // (flipX+flipY), иначе у симметричного блина переворот незаметен.
                 bool sameArt = resA == resB;
-                _sr.flipX = sameArt && _currentSide == Side.B;
+                // Стартовая сторона (B на сковороде) показывается натурально; повёрнута — другая.
+                bool back = sameArt && _currentSide == Side.A;
+                _sr.flipX = back;
+                _sr.flipY = back;
             }
 
             _rb.MoveRotation(0f);

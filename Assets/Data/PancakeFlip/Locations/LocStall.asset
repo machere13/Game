@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\u0417\u0430\u043F\u0440\u0430\u0432\u043A\u0430"
   mapIcon: {fileID: 21300000, guid: 3fec76e814cf1f540afe635cf65abaa9, type: 3}
-  background: {fileID: 0}
+  background: {fileID: 21300000, guid: fa9b9676b80dc5a45ad1e9b436b0b5b6, type: 3}
+  stoveClosed: {fileID: 21300000, guid: 8a5b9fe6958774a40b61b33f876c8795, type: 3}
+  stoveOpen: {fileID: 21300000, guid: e93c9b97277cd6a44b5766a774ab33ca, type: 3}
+  bottomPanel: {fileID: 21300000, guid: 585265a2b2947f04c89292fb9e2d2844, type: 3}
   ordersToUnlockNext: 5
   requiredLevel: 1
   cityCost: 0
@@ -41,4 +44,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: a942e9fa3fdf24e4a8b1d5df2826b817, type: 3}
   - {fileID: 21300000, guid: fbd9edbabcca58e47bf4091dc58753d4, type: 3}
   - {fileID: 21300000, guid: fb6ea292e8299bd46828338a9e690bbc, type: 3}
-  - {fileID: 21300000, guid: 28a1114912804d2408d7d709f560e176, type: 3}
+  - {fileID: 0}
+  customerIcons:
+  - {fileID: 21300000, guid: be04cb2426918be48b4a8804647097b4, type: 3}
+  - {fileID: 21300000, guid: 83e1a7e609298b6488d3c1d24137b477, type: 3}
+  - {fileID: 21300000, guid: aa4947b01a41d2541acc5a1de425e57a, type: 3}

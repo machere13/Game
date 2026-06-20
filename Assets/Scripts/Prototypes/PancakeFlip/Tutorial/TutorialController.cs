@@ -203,7 +203,15 @@ namespace IdlePancake.Prototypes.PancakeFlip
             srt.anchorMin = new Vector2(0.80f, 0.965f);
             srt.anchorMax = new Vector2(0.99f, 0.998f);
             srt.offsetMin = srt.offsetMax = Vector2.zero;
-            skipGo.GetComponent<Image>().color = new Color(0.5f, 0.2f, 0.2f, 0.92f);
+            var skipImg = skipGo.GetComponent<Image>();
+            skipImg.color = new Color(0.5f, 0.2f, 0.2f, 0.92f);
+            var gs = GameSession.Instance;
+            if (gs != null && gs.CancelButtonSprite != null)
+            {
+                skipImg.sprite = gs.CancelButtonSprite;
+                skipImg.type = Image.Type.Sliced;
+                skipImg.color = Color.white;
+            }
 
             var skipTxtGo = new GameObject("Text", typeof(RectTransform));
             skipTxtGo.transform.SetParent(skipGo.transform, false);

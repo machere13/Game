@@ -14,19 +14,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\u0421\u0440\u0435\u0434\u043D\u0438\u0439 \u0421\u0438\u0442\u0438"
   mapIcon: {fileID: 21300000, guid: b1768dec0efa4684a9c335a3e691b566, type: 3}
-  background: {fileID: 0}
+  background: {fileID: 21300000, guid: 5890c9439a71f474bbaf53532b24c64c, type: 3}
+  stoveClosed: {fileID: 21300000, guid: 6281c57eed687914ebfccc1f7eb40dd2, type: 3}
+  stoveOpen: {fileID: 0}
+  bottomPanel: {fileID: 21300000, guid: 30b02b69fb29cab44a4e56d60b15b85b, type: 3}
   ordersToUnlockNext: 10
   requiredLevel: 3
   cityCost: 150
   mapPosition: {x: 0.87, y: 0.44}
   demandRecipes:
-  - {fileID: 11400000, guid: cbff5a8638706214ebbd28154cc093e0, type: 2}
-  - {fileID: 11400000, guid: 254e33dd6b32e8747b70ca4d811587e5, type: 2}
-  - {fileID: 11400000, guid: 74ecb0dfe9f158d4d8f1e2bd58d20dfe, type: 2}
-  - {fileID: 11400000, guid: 606440204657d824a83f987e139d847a, type: 2}
-  - {fileID: 11400000, guid: 09d671ef3e83385488825d1824643723, type: 2}
-  unlockRecipes: []
-  unlockIngredients: []
+  - {fileID: 11400000, guid: b2a0af63ca51f4349acef8a9124d22d7, type: 2}
+  - {fileID: 11400000, guid: 5042907645fad7146b82a0d23c521e0c, type: 2}
+  - {fileID: 11400000, guid: f49e80c743d3aa542a53e88281ad4194, type: 2}
+  unlockRecipes:
+  - {fileID: 11400000, guid: b2a0af63ca51f4349acef8a9124d22d7, type: 2}
+  - {fileID: 11400000, guid: 5042907645fad7146b82a0d23c521e0c, type: 2}
+  - {fileID: 11400000, guid: f49e80c743d3aa542a53e88281ad4194, type: 2}
+  unlockIngredients:
+  - {fileID: 11400000, guid: 4163a2245b0f1f04295655ea1c0d8135, type: 2}
+  - {fileID: 11400000, guid: 8ecce4c978150da4ea6ba8da8ae0d209, type: 2}
+  - {fileID: 11400000, guid: 9502ddc9852d18542953020221fe5ff9, type: 2}
   customerSprites:
-  - {fileID: 21300000, guid: fb6ea292e8299bd46828338a9e690bbc, type: 3}
-  - {fileID: 21300000, guid: 28a1114912804d2408d7d709f560e176, type: 3}
+  - {fileID: 21300000, guid: 4c185098479d65744ae15040c3d02bc1, type: 3}
+  - {fileID: 21300000, guid: aece442c1a67f6c48abbe59339698eb6, type: 3}
+  - {fileID: 21300000, guid: 3768a65f97b8c354fae87d8c5ad8ba6c, type: 3}
+  customerIcons:
+  - {fileID: 21300000, guid: 25944b0c44273cb45880893e6b4b8337, type: 3}
+  - {fileID: 21300000, guid: b6f5203876e601a4f8985ce4e2755c14, type: 3}
+  - {fileID: 21300000, guid: f0d74076d5fc27445875cef322d79dbc, type: 3}

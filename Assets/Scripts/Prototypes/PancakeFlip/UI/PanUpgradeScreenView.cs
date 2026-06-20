@@ -103,20 +103,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             rowLe.preferredHeight = PancakeFlipUiTypography.StatRowMinHeight;
             rowLe.flexibleWidth = 1f;
 
-            var iconGo = new GameObject("Icon", typeof(RectTransform));
-            iconGo.transform.SetParent(row.transform, false);
-            var iconImg = iconGo.AddComponent<Image>();
-            iconImg.sprite = track.icon != null ? track.icon : defaultPanIcon;
-            iconImg.preserveAspect = true;
-            iconImg.raycastTarget = false;
-            var iconLe = iconGo.AddComponent<LayoutElement>();
-            iconLe.minWidth = 110f;
-            iconLe.preferredWidth = 110f;
-            iconLe.flexibleWidth = 0f;
-            iconLe.minHeight = 110f;
-            iconLe.preferredHeight = 110f;
-            iconLe.flexibleHeight = 0f;
-
+            // Иконка у характеристик не нужна — сразу текст.
             var textsGo = new GameObject("Texts", typeof(RectTransform), typeof(VerticalLayoutGroup));
             textsGo.transform.SetParent(row.transform, false);
             var v = textsGo.GetComponent<VerticalLayoutGroup>();
@@ -153,8 +140,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (font != null) desc.font = font;
             descGo.AddComponent<LayoutElement>().preferredHeight = PancakeFlipUiTypography.DescPreferredHeight;
 
+            // Правая колонка: шкала уровней сверху, кнопка под ней.
+            var rightGo = new GameObject("Right", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
+            rightGo.transform.SetParent(row.transform, false);
+            var rightV = rightGo.GetComponent<VerticalLayoutGroup>();
+            rightV.spacing = 10f;
+            rightV.childAlignment = TextAnchor.MiddleCenter;
+            rightV.childControlWidth = true;
+            rightV.childControlHeight = true;
+            rightV.childForceExpandWidth = false;
+            rightV.childForceExpandHeight = false;
+            var rightLe = rightGo.GetComponent<LayoutElement>();
+            rightLe.minWidth = ShopBuyButtonStyle.PreferredButtonWidth;
+            rightLe.preferredWidth = ShopBuyButtonStyle.PreferredButtonWidth;
+            rightLe.flexibleWidth = 0f;
+
             var cellsGo = new GameObject("Cells", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-            cellsGo.transform.SetParent(row.transform, false);
+            cellsGo.transform.SetParent(rightGo.transform, false);
             var ch = cellsGo.GetComponent<HorizontalLayoutGroup>();
             ch.spacing = 6f;
             ch.childAlignment = TextAnchor.MiddleCenter;
@@ -178,7 +180,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             }
 
             var btnGo = new GameObject("BuyBtn", typeof(RectTransform), typeof(Image), typeof(Button));
-            btnGo.transform.SetParent(row.transform, false);
+            btnGo.transform.SetParent(rightGo.transform, false);
             var btnImg = btnGo.GetComponent<Image>();
             btnImg.color = ShopBuyButtonStyle.BuyGreen;
             var btn = btnGo.GetComponent<Button>();
@@ -251,7 +253,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var h = row.GetComponent<HorizontalLayoutGroup>();
             h.childAlignment = TextAnchor.MiddleLeft;
             h.spacing = 14f;
-            h.padding = new RectOffset(12, 28, 10, 10);
+            h.padding = new RectOffset(14, 28, 10, 10);
             h.childControlWidth = true;
             h.childControlHeight = true;
             h.childForceExpandWidth = false;
@@ -268,11 +270,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
             iconImg.preserveAspect = true;
             iconImg.raycastTarget = false;
             var iconLe = iconGo.AddComponent<LayoutElement>();
-            iconLe.minWidth = 260f;
-            iconLe.preferredWidth = 260f;
+            iconLe.minWidth = 150f;
+            iconLe.preferredWidth = 150f;
             iconLe.flexibleWidth = 0f;
-            iconLe.minHeight = 160f;
-            iconLe.preferredHeight = 160f;
+            iconLe.minHeight = 150f;
+            iconLe.preferredHeight = 150f;
             iconLe.flexibleHeight = 0f;
 
             var textsGo = new GameObject("Texts", typeof(RectTransform), typeof(VerticalLayoutGroup));
@@ -346,7 +348,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 if (btnTxt != null)
                     btnTxt.text = isEquipped ? "Надета" : "Надеть";
                 bool canEquipStarter = !isEquipped;
-                ShopBuyButtonStyle.Apply(btn, btnTxt, canEquipStarter);
+                // «Надета» — зелёная кнопка (даже когда неактивна).
+                ShopBuyButtonStyle.Apply(btn, btnTxt, true);
                 ShopBuyButtonStyle.SetCoinIcon(btn, false);
                 btn.interactable = canEquipStarter;
                 btn.onClick.RemoveAllListeners();
@@ -388,7 +391,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (isEquipped)
             {
                 if (btnTxt != null) btnTxt.text = "Надета";
-                ShopBuyButtonStyle.Apply(btn, btnTxt, false);
+                ShopBuyButtonStyle.Apply(btn, btnTxt, true); // «Надета» — зелёная
                 ShopBuyButtonStyle.SetCoinIcon(btn, false);
                 btn.interactable = false;
                 btn.onClick.RemoveAllListeners();

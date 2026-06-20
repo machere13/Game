@@ -67,29 +67,31 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var row = new GameObject("RecipeRow", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
             row.transform.SetParent(parent, false);
             var rowBg = row.GetComponent<Image>();
-            rowBg.color = new Color(1f, 0.96f, 0.86f, 0.6f);
             rowBg.raycastTarget = false;
+            var rowSpot = GameSession.Instance != null ? GameSession.Instance.RecipeHudSpotSprite : null;
+            if (rowSpot != null) { rowBg.sprite = rowSpot; rowBg.type = Image.Type.Sliced; rowBg.color = Color.white; }
+            else rowBg.color = new Color(1f, 0.96f, 0.86f, 0.6f);
             var rowH = row.GetComponent<HorizontalLayoutGroup>();
-            rowH.spacing = 14f;
-            rowH.padding = new RectOffset(12, 12, 10, 10);
+            rowH.spacing = 28f;
+            rowH.padding = new RectOffset(36, 16, 10, 10);
             rowH.childAlignment = TextAnchor.MiddleLeft;
             rowH.childControlWidth = true;
             rowH.childControlHeight = true;
             rowH.childForceExpandWidth = false;
             rowH.childForceExpandHeight = false;
             var rowLe = row.GetComponent<LayoutElement>();
-            rowLe.minHeight = PancakeIconSize + 24f;
-            rowLe.preferredHeight = PancakeIconSize + 24f;
+            rowLe.minHeight = PancakeIconSize + 80f;
+            rowLe.preferredHeight = PancakeIconSize + 80f;
 
-            var iconGo = new GameObject("PancakeIcon", typeof(RectTransform));
+            var iconGo = new GameObject("PancakeIcon", typeof(RectTransform), typeof(LayoutElement));
             iconGo.transform.SetParent(row.transform, false);
             var iconImg = iconGo.AddComponent<Image>();
             iconImg.sprite = recipe.icon;
             iconImg.enabled = recipe.icon != null;
-            iconImg.preserveAspect = true;
+            iconImg.preserveAspect = true; // блин по центру квадратной ячейки
             iconImg.color = Color.white;
             iconImg.raycastTarget = false;
-            var iconLe = iconGo.AddComponent<LayoutElement>();
+            var iconLe = iconGo.GetComponent<LayoutElement>();
             iconLe.minWidth = PancakeIconSize;
             iconLe.preferredWidth = PancakeIconSize;
             iconLe.flexibleWidth = 0f;

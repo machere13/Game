@@ -57,18 +57,27 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             CreateStatTrack("StatEasyFlip", "Легче подброс", PanUpgradeConfig.EffectType.EasierFlip, 2, 30,
                 "До 5 уровней: сильнее толчок при том же заряде.", panSpr);
 
-            var pan01 = LoadSprite("Pan01");
-            var pan02 = LoadSprite("Pan02");
-            var pan03 = LoadSprite("Pan03");
-            var pan04 = LoadSprite("Pan04");
+            var pan01 = LoadSprite("PanImage01");
+            var pan02 = LoadSprite("PanImage02");
+            var pan03 = LoadSprite("PanImage03");
+            var pan04 = LoadSprite("PanImage04");
+            // Парные задник+передник по тирам.
+            var panBack01 = LoadSprite("Pan01");
+            var panBack02 = LoadSprite("Pan02");
+            var panBack03 = LoadSprite("Pan03");
+            var panBack04 = LoadSprite("Pan04");
+            var panFront01 = LoadSprite("PanFront01");
+            var panFront02 = LoadSprite("PanFront02");
+            var panFront03 = LoadSprite("PanFront03");
+            var panFront04 = LoadSprite("PanFront04");
             CreatePanTier("PanStarter", "Сковорода из ларька", true, 0, 0, pan01 != null ? pan01 : panSpr,
-                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f);
+                "Стартовая. Прокачка ячеек сохраняется при смене сковороды.", 1f, 1f, 1f, 1f, panFront01, panBack01);
             CreatePanTier("PanIron", "Чугунная", false, 120, 3, pan02 != null ? pan02 : panSpr,
-                "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f);
+                "Тяжёлая, ровнее жар. База +5% к каждой характеристике.", 1.05f, 1.05f, 1.05f, 1.05f, panFront02, panBack02);
             CreatePanTier("PanPro", "Профи", false, 280, 5, pan03 != null ? pan03 : panSpr,
-                "Рабочая сковорода. База +10%.", 1.1f, 1.1f, 1.1f, 1.1f);
+                "Рабочая сковорода. База +10%.", 1.1f, 1.1f, 1.1f, 1.1f, panFront03, panBack03);
             CreatePanTier("PanElite", "Элитная", false, 520, 8, pan04 != null ? pan04 : panSpr,
-                "Мастерская. База +15% к каждой характеристике.", 1.15f, 1.15f, 1.15f, 1.15f);
+                "Мастерская. База +15% к каждой характеристике.", 1.15f, 1.15f, 1.15f, 1.15f, panFront04, panBack04);
         }
 
         [MenuItem("PancakeFlip/Build Everything")]
@@ -99,11 +108,27 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             bootGo.AddComponent<ResponsiveLayout>();
 
             ForceAllSprites();
-            var bgSpr = LoadSprite("Background");
+            // 9-slice бордеры для кнопок-спрайтов, чтобы они не растягивались/не искажались.
+            SetSpriteBorder("ActionButton", 40f);
+            SetSpriteBorder("SuccessButton", 40f);
+            SetSpriteBorder("CancelButton", 40f);
+            SetSpriteBorder("RecipesHud", 90f);
+            SetSpriteBorder("PanHud", 90f);
+            SetSpriteBorder("RecipeHudSpot", 40f);
+            SetSpriteBorder("IngredientSpot", 40f);
+            // Пер-городские фоны/плиты (Заправка=01, Средний=02, Бостон=03). Открытая плита пока только City01.
+            var bgCity01 = LoadSprite("BackgroundCity01");
+            var bgCity02 = LoadSprite("BackgroundCity02");
+            var bgCity03 = LoadSprite("BackgroundCity03");
+            var stoveCity01 = LoadSprite("StoveCity01");
+            var stoveCity02 = LoadSprite("StoveCity02");
+            var stoveCity03 = LoadSprite("StoveCity03");
+            var stoveOpen01 = LoadSprite("StoveOpenCity01");
+            var bgSpr = bgCity01;
             var panSpr = LoadSprite("Pan");
             var pancakeSpr = LoadSprite("Pancake");
-            var stoveClosedS = LoadSprite("image 5");
-            var stoveOpenS = LoadSprite("image 4");
+            var stoveClosedS = stoveCity01;
+            var stoveOpenS = stoveOpen01;
             var orderListSpr = LoadSprite("OrderList");
             var orderItemSpr = LoadSprite("OrderItem");
             var profileSpr = LoadSprite("Profile");
@@ -111,6 +136,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var backPanSpr = LoadSprite("BackPan");
             var frontPanSpr = LoadSprite("FrontPan");
             var bottomPanelSpr = LoadSprite("BottomPanel");
+            var bottomPanelCity02 = LoadSprite("BottomPanelCity02");
+            var bottomPanelCity03 = LoadSprite("BottomPanelCity03");
             var person1 = LoadSprite("Person1");
             var person2 = LoadSprite("Person2");
             var person3 = LoadSprite("Person3");
@@ -118,24 +145,49 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             var person1Icon = LoadSprite("Person1Icon");
             var person2Icon = LoadSprite("Person2Icon");
             var person3Icon = LoadSprite("Person3Icon");
+            // Посетители по городам: City02 — Средний Сити, City03 — Бостон Сити.
+            var personCity02_1 = LoadSprite("Person01City02");
+            var personCity02_2 = LoadSprite("Person02City02");
+            var personCity02_3 = LoadSprite("Person03City02");
+            var personCity03_1 = LoadSprite("Person01City03");
+            var personCity03_2 = LoadSprite("Person02City03");
+            var personCity03_3 = LoadSprite("Person03City03");
+            // Иконки заказчиков по городам (для карточек).
+            var personIconCity02_1 = LoadSprite("PersonIcon01City02");
+            var personIconCity02_2 = LoadSprite("PersonIcon02City02");
+            var personIconCity02_3 = LoadSprite("PersonIcon03City02");
+            var personIconCity03_1 = LoadSprite("PersonIcon01City03");
+            var personIconCity03_2 = LoadSprite("PersonIcon02City03");
+            var personIconCity03_3 = LoadSprite("PersonIcon03City03");
             var rewardInfoSpr = LoadSprite("RewardInfo");
             var commonPancakeSpr = LoadSprite("CommonPancake");
             var cheeseHamPancakeSpr = LoadSprite("CheeseHamPancake");
             var chocoStrawberrySpr = LoadSprite("ChocolateStrawberryPancake");
             var bananaChocoPancakeSpr = LoadSprite("BananaChocolatePancake");
             var mushroomPancakeSpr = LoadSprite("MushroomPancake");
+            var meatPancakeSpr = LoadSprite("MeatPancake");
+            var jamPeanutPancakeSpr = LoadSprite("JamPeanutPancake");
+            var salmonScallopsPancakeSpr = LoadSprite("SalmonScallopsPancake");
+            var blackCaviarPancakeSpr = LoadSprite("BlackCaviarPancake");
             var xpIconSpr = LoadSprite("XPIcon");
             var pancakeSideUiSpr = LoadSprite("PancakeSide");
-            var pancakeBackSpr = LoadSprite("PancakeBack");
             var receiptBtnSpr = LoadSprite("ReceiptButton");
             var panUpgradeBtnSpr = LoadSprite("PanUpgradeButton");
             var closeIconSpr = LoadSprite("CloseIcon");
             var globalMapSpr = LoadSprite("GlobalMap");
+            var globalMapPlateSpr = LoadSprite("GlobalMapPlate");
             var city01Spr = LoadSprite("City01");
             var city02Spr = LoadSprite("City02");
             var city03Spr = LoadSprite("City03");
             var blockedSpr = LoadSprite("Blocked");
             var carSpr = LoadSprite("Car");
+            var actionBtnSpr = LoadSprite("ActionButton");
+            var successBtnSpr = LoadSprite("SuccessButton");
+            var cancelBtnSpr = LoadSprite("CancelButton");
+            var recipesHudSpr = LoadSprite("RecipesHud");
+            var panHudSpr = LoadSprite("PanHud");
+            var ingredientSpotSpr = LoadSprite("IngredientSpot");
+            var recipeHudSpotSpr = LoadSprite("RecipeHudSpot");
             var uiFont = LoadPancakeFlipUiFont();
             var tmpFont = GetOrCreateEditorTmpFont(uiFont);
 
@@ -154,7 +206,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var baseRecipe = CreateRecipe("Обычный блин", 0, 5, 10,
                 new[] { new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 } },
-                commonPancakeSpr);
+                pancakeSpr != null ? pancakeSpr : commonPancakeSpr);
             var cheeseHamRecipe = CreateRecipe("Блин с салями и сыром", 1, 20, 35,
                 new[] {
                     new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
@@ -179,6 +231,46 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                     new RecipeConfig.IngredientSlot { ingredient = chocolate, amount = 1 }
                 }, chocoStrawberrySpr);
 
+            // --- Новые ингредиенты по городам ---
+            var meat = CreateIngredient("Мясо", 9, 3, false); meat.icon = LoadSprite("Meat"); EditorUtility.SetDirty(meat);
+            var jam = CreateIngredient("Джем", 7, 3, false); jam.icon = LoadSprite("Jam"); EditorUtility.SetDirty(jam);
+            var peanutButter = CreateIngredient("Арахисовая паста", 8, 3, false); peanutButter.icon = LoadSprite("PeanutButter"); EditorUtility.SetDirty(peanutButter);
+            var salmon = CreateIngredient("Лосось", 14, 5, false); salmon.icon = LoadSprite("Salmon"); EditorUtility.SetDirty(salmon);
+            var caviar = CreateIngredient("Чёрная икра", 25, 5, false); caviar.icon = LoadSprite("BlackCaviar"); EditorUtility.SetDirty(caviar);
+            var scallops = CreateIngredient("Гребешки", 18, 5, false); scallops.icon = LoadSprite("Scallops"); EditorUtility.SetDirty(scallops);
+
+            // --- Новые рецепты со своими картинками блинов ---
+            var meatRecipe = CreateRecipe("Сытный блин с мясом", 3, 30, 50,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = meat, amount = 2 }
+                }, meatPancakeSpr != null ? meatPancakeSpr : commonPancakeSpr);
+            var jamRecipe = CreateRecipe("Блин с джемом", 3, 24, 40,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = jam, amount = 1 }
+                }, jamPeanutPancakeSpr != null ? jamPeanutPancakeSpr : commonPancakeSpr);
+            var peanutRecipe = CreateRecipe("Блин с арахисовой пастой", 3, 26, 42,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = peanutButter, amount = 1 }
+                }, jamPeanutPancakeSpr != null ? jamPeanutPancakeSpr : commonPancakeSpr);
+            var salmonRecipe = CreateRecipe("Блин с лососем", 5, 45, 70,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = salmon, amount = 1 }
+                }, salmonScallopsPancakeSpr != null ? salmonScallopsPancakeSpr : commonPancakeSpr);
+            var caviarRecipe = CreateRecipe("Блин с чёрной икрой", 5, 60, 90,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = caviar, amount = 1 }
+                }, blackCaviarPancakeSpr != null ? blackCaviarPancakeSpr : commonPancakeSpr);
+            var scallopRecipe = CreateRecipe("Блин с гребешками", 5, 50, 78,
+                new[] {
+                    new RecipeConfig.IngredientSlot { ingredient = dough, amount = 1 },
+                    new RecipeConfig.IngredientSlot { ingredient = scallops, amount = 2 }
+                }, salmonScallopsPancakeSpr != null ? salmonScallopsPancakeSpr : commonPancakeSpr);
+
             // Всё текущее содержимое живёт на Заправке. Другие локации — заглушки под будущий
             // НОВЫЙ контент (свои рецепты/ингредиенты), а не перераспределение заправочного.
             var allRecipes = new[] { baseRecipe, cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe };
@@ -187,23 +279,34 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
                 new[] { cheeseHamRecipe, bananaChocoRecipe, mushroomRecipe, strawberryChocoRecipe },
                 new[] { salami, cheese, banana, chocolate, mushroom, strawberry },
                 new[] { person1, person2, person3, person4 });
+            // Спрос локальный: каждый город заказывает только свои рецепты (без заказов прошлого города).
             var locPromenade = CreateLocation("LocPromenade", "Бостон Сити", 8,
-                allRecipes,
-                null,
-                null,
-                new[] { person2, person3 });
+                new[] { salmonRecipe, caviarRecipe, scallopRecipe },
+                new[] { salmonRecipe, caviarRecipe, scallopRecipe },
+                new[] { salmon, caviar, scallops },
+                new[] { personCity03_1, personCity03_2, personCity03_3 });
             var locMarket = CreateLocation("LocMarket", "Средний Сити", 10,
-                allRecipes,
-                null,
-                null,
-                new[] { person3, person4 });
+                new[] { meatRecipe, jamRecipe, peanutRecipe },
+                new[] { meatRecipe, jamRecipe, peanutRecipe },
+                new[] { meat, jam, peanutButter },
+                new[] { personCity02_1, personCity02_2, personCity02_3 });
             locStall.requiredLevel = 1; locStall.cityCost = 0;
             locStall.mapPosition = new Vector2(0.64f, 0.16f); locStall.mapIcon = city01Spr;
+            locStall.background = bgCity01; locStall.stoveClosed = stoveCity01; locStall.stoveOpen = stoveOpen01;
+            locStall.bottomPanel = bottomPanelSpr; // у Заправки прилавок отдельным спрайтом
             // Средний Сити (Рынок) открывается вторым; Бостон Сити (Набережная) — третьим.
             locMarket.requiredLevel = 3; locMarket.cityCost = 150;
             locMarket.mapPosition = new Vector2(0.87f, 0.44f); locMarket.mapIcon = city03Spr;
+            locMarket.background = bgCity02; locMarket.stoveClosed = stoveCity02; locMarket.stoveOpen = null;
+            locMarket.bottomPanel = bottomPanelCity02;
             locPromenade.requiredLevel = 5; locPromenade.cityCost = 300;
             locPromenade.mapPosition = new Vector2(0.55f, 0.47f); locPromenade.mapIcon = city02Spr;
+            locPromenade.background = bgCity03; locPromenade.stoveClosed = stoveCity03; locPromenade.stoveOpen = null;
+            locPromenade.bottomPanel = bottomPanelCity03;
+            // Иконки заказчиков для карточек: у Заправки — общие портреты, у новых городов — свои жители.
+            locStall.customerIcons = new[] { person1Icon, person2Icon, person3Icon };
+            locMarket.customerIcons = new[] { personIconCity02_1, personIconCity02_2, personIconCity02_3 };
+            locPromenade.customerIcons = new[] { personIconCity03_1, personIconCity03_2, personIconCity03_3 };
             EditorUtility.SetDirty(locStall); EditorUtility.SetDirty(locPromenade); EditorUtility.SetDirty(locMarket);
 
             var worldMap = GetOrCreate<WorldMapConfig>(DataDir, "WorldMap");
@@ -328,8 +431,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             pcBh.SetPanCenter(panBh.PanCenter);
             SetField(pcBh, "config", flipConfig);
             SetField(pcBh, "spriteFaceA", pancakeSpr);
-            Sprite faceB = pancakeBackSpr != null ? pancakeBackSpr : pancakeSideUiSpr;
-            SetField(pcBh, "spriteFaceB", faceB != null ? faceB : pancakeSpr);
+            // Обратная сторона — то же изображение (отзеркаливается в рантайме).
+            SetField(pcBh, "spriteFaceB", pancakeSpr);
 
             var canvasGo = new GameObject("Canvas");
             var canvas = canvasGo.AddComponent<Canvas>();
@@ -428,12 +531,36 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetFloatField(olv, "slotHeight", 0.285f);
             SetFloatField(olv, "gap", 0.004f);
 
-            var chargeGo = MkPanel(uiRoot, "ChargeIndicator", V2(0.25f, 0.84f), V2(0.75f, 0.9f), new Color(0.15f, 0.15f, 0.15f, 0.7f));
+            var backProgressSpr = LoadSprite("BackProgress");
+            var centerProgressSpr = LoadSprite("CenterProgress");
+            var frontProgressSpr = LoadSprite("FrontProgress");
+
+            var chargeGo = MkPanel(uiRoot, "ChargeIndicator", V2(0.25f, 0.84f), V2(0.75f, 0.9f), new Color(0f, 0f, 0f, 0f));
             AddResponsive(chargeGo, V2(0.25f, 0.84f), V2(0.75f, 0.9f), V2(0.38f, 0.88f), V2(0.62f, 0.94f));
-            var fillGo2 = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            chargeGo.GetComponent<Image>().raycastTarget = false;
+
+            // Back — пустой трек (нижний слой).
+            var backGo = new GameObject("Back", typeof(RectTransform), typeof(Image));
+            backGo.transform.SetParent(chargeGo.transform, false); Fill(backGo);
+            var backImg = backGo.GetComponent<Image>();
+            backImg.sprite = backProgressSpr; backImg.type = Image.Type.Simple; backImg.preserveAspect = false;
+            backImg.color = Color.white; backImg.raycastTarget = false; backImg.enabled = backProgressSpr != null;
+
+            // Center — заливка, открывается слева направо (средний слой).
+            var fillGo2 = new GameObject("Center", typeof(RectTransform), typeof(Image));
             fillGo2.transform.SetParent(chargeGo.transform, false); Fill(fillGo2);
-            var fillI = fillGo2.GetComponent<Image>(); fillI.color = Color.yellow;
-            fillI.type = Image.Type.Filled; fillI.fillMethod = Image.FillMethod.Horizontal; fillI.fillAmount = 0;
+            var fillI = fillGo2.GetComponent<Image>();
+            fillI.sprite = centerProgressSpr; fillI.color = Color.white; fillI.raycastTarget = false;
+            fillI.type = Image.Type.Filled; fillI.fillMethod = Image.FillMethod.Horizontal;
+            fillI.fillOrigin = (int)Image.OriginHorizontal.Left; fillI.fillAmount = 0f;
+
+            // Front — рамка поверх (верхний слой).
+            var frontGo = new GameObject("Front", typeof(RectTransform), typeof(Image));
+            frontGo.transform.SetParent(chargeGo.transform, false); Fill(frontGo);
+            var frontImg = frontGo.GetComponent<Image>();
+            frontImg.sprite = frontProgressSpr; frontImg.type = Image.Type.Simple; frontImg.preserveAspect = false;
+            frontImg.color = Color.white; frontImg.raycastTarget = false; frontImg.enabled = frontProgressSpr != null;
+
             var cv = chargeGo.AddComponent<ChargeIndicatorView>(); SetField(cv, "fillImage", fillI);
 
             var popup = MkLabel(uiRoot, "RotationsPopup", "", tmpFont, PancakeFlipUiTypography.RotationsPopup, new Color(1, 0.95f, 0.7f), 0);
@@ -458,31 +585,31 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(civ, "pancakeA", imgA); SetField(civ, "pancakeB", imgB);
 
             var recipeBookScr = MkPanel(uiRoot, "RecipeBookScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            StyleButtonSprite(recipeBookScr, recipesHudSpr);
             AddResponsive(recipeBookScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             recipeBookScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(recipeBookScr);
             var rbSh = recipeBookScr.AddComponent<Shadow>(); rbSh.effectDistance = new Vector2(3, -4); rbSh.effectColor = new Color(0, 0, 0, 0.28f);
-            MkPanel(recipeBookScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
             var rbTitle = MkLabel(recipeBookScr.transform, "Title", "Рецепты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var rbTitleRt = rbTitle.GetComponent<RectTransform>();
-            rbTitleRt.anchorMin = V2(0.04f, 0.86f); rbTitleRt.anchorMax = V2(0.96f, 0.98f);
+            rbTitleRt.anchorMin = V2(0.10f, 0.86f); rbTitleRt.anchorMax = V2(0.90f, 0.94f);
             rbTitleRt.offsetMin = rbTitleRt.offsetMax = Vector2.zero;
             rbTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform rbListContent);
+            MkVerticalScrollArea(recipeBookScr.transform, "Scroll", V2(0.12f, 0.04f), V2(0.88f, 0.84f), out RectTransform rbListContent);
             var rbCloseIcon = MkCloseIcon(recipeBookScr.transform, closeIconSpr);
             var rbsv = recipeBookScr.AddComponent<RecipeBookScreenView>();
             SetField(rbsv, "recipeListContainer", rbListContent);
             SetField(rbsv, "closeButton", rbCloseIcon);
 
             var ingScr = MkPanel(uiRoot, "IngredientsScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
+            StyleButtonSprite(ingScr, recipesHudSpr);
             AddResponsive(ingScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             ingScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(ingScr);
             var ingSh = ingScr.AddComponent<Shadow>(); ingSh.effectDistance = new Vector2(3, -4); ingSh.effectColor = new Color(0, 0, 0, 0.28f);
-            MkPanel(ingScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.32f, 0.46f, 0.4f, 1f));
             var ingTitle = MkLabel(ingScr.transform, "Title", "Ингредиенты", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var ingTitleRt = ingTitle.GetComponent<RectTransform>();
-            ingTitleRt.anchorMin = V2(0.04f, 0.86f); ingTitleRt.anchorMax = V2(0.96f, 0.98f);
+            ingTitleRt.anchorMin = V2(0.10f, 0.86f); ingTitleRt.anchorMax = V2(0.90f, 0.94f);
             ingTitleRt.offsetMin = ingTitleRt.offsetMax = Vector2.zero;
             ingTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
 
@@ -499,11 +626,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             iBuilderH.childForceExpandWidth = false;
             iBuilderH.childForceExpandHeight = false;
 
-            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.03f, 0.13f), V2(0.97f, 0.73f), out RectTransform iListContent);
+            MkVerticalScrollArea(ingScr.transform, "Scroll", V2(0.12f, 0.22f), V2(0.88f, 0.74f), out RectTransform iListContent);
 
             var iCookBtn = MkButton(ingScr.transform, "CookBtn", "Готовить", tmpFont, new Color(0.86f, 0.55f, 0.18f, 1f));
+            StyleButtonSprite(iCookBtn, successBtnSpr);
             var iCookRt = iCookBtn.GetComponent<RectTransform>();
-            iCookRt.anchorMin = V2(0.18f, 0.02f); iCookRt.anchorMax = V2(0.82f, 0.11f);
+            iCookRt.anchorMin = V2(0.18f, 0.06f); iCookRt.anchorMax = V2(0.82f, 0.16f);
+            iCookBtn.transform.SetAsLastSibling();
             iCookRt.offsetMin = iCookRt.offsetMax = Vector2.zero;
             var iCookLabel = iCookBtn.GetComponentInChildren<TextMeshProUGUI>();
 
@@ -519,17 +648,17 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (stoveV != null) { SetField(stoveV, "ingredientsScreen", isv); SetField(isv, "stove", stoveV); }
 
             var upgScr = MkPanel(uiRoot, "UpgradeScreen", V2(0.055f, 0.1f), V2(0.945f, 0.92f), new Color(0.98f, 0.95f, 0.9f, 0.99f));
+            StyleButtonSprite(upgScr, panHudSpr);
             AddResponsive(upgScr, V2(0.055f, 0.1f), V2(0.945f, 0.92f), V2(0.34f, 0.06f), V2(0.66f, 0.96f));
             upgScr.GetComponent<Image>().raycastTarget = true;
             AddModalCanvasLayer(upgScr);
             var upgSh = upgScr.AddComponent<Shadow>(); upgSh.effectDistance = new Vector2(3, -4); upgSh.effectColor = new Color(0, 0, 0, 0.28f);
-            MkPanel(upgScr.transform, "Header", V2(0f, 0.86f), V2(1f, 1f), new Color(0.45f, 0.32f, 0.22f, 1f));
             var upgTitle = MkLabel(upgScr.transform, "Title", "Сковородки", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
             var upgTitleRt = upgTitle.GetComponent<RectTransform>();
-            upgTitleRt.anchorMin = V2(0.04f, 0.86f); upgTitleRt.anchorMax = V2(0.96f, 0.98f);
+            upgTitleRt.anchorMin = V2(0.10f, 0.86f); upgTitleRt.anchorMax = V2(0.90f, 0.94f);
             upgTitleRt.offsetMin = upgTitleRt.offsetMax = Vector2.zero;
             upgTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-            MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.03f, 0.04f), V2(0.97f, 0.84f), out RectTransform uListContent);
+            MkVerticalScrollArea(upgScr.transform, "Scroll", V2(0.12f, 0.04f), V2(0.94f, 0.84f), out RectTransform uListContent);
             var uCloseIcon = MkCloseIcon(upgScr.transform, closeIconSpr);
             var usv = upgScr.AddComponent<PanUpgradeScreenView>();
             SetField(usv, "upgradeListContainer", uListContent);
@@ -565,32 +694,50 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
 
             var mapCloseIcon = MkCloseIcon(mapScr.transform, closeIconSpr);
 
-            var buyModal = MkPanel(mapScr.transform, "BuyModal", V2(0.15f, 0.32f), V2(0.85f, 0.68f), new Color(0.96f, 0.94f, 0.89f, 0.99f));
-            buyModal.GetComponent<Image>().raycastTarget = true;
+            // Полупрозрачный блокер на весь экран — ловит клики, чтобы они не проходили на маркеры под модалкой.
+            var buyBlocker = new GameObject("BuyBlocker", typeof(RectTransform), typeof(Image));
+            buyBlocker.transform.SetParent(mapScr.transform, false);
+            var buyBlockerRt = buyBlocker.GetComponent<RectTransform>();
+            buyBlockerRt.anchorMin = Vector2.zero; buyBlockerRt.anchorMax = Vector2.one;
+            buyBlockerRt.offsetMin = buyBlockerRt.offsetMax = Vector2.zero;
+            var buyBlockerImg = buyBlocker.GetComponent<Image>();
+            buyBlockerImg.color = new Color(0f, 0f, 0f, 0.35f);
+            buyBlockerImg.raycastTarget = true;
+            buyBlocker.SetActive(false);
+
+            var buyModal = MkPanel(mapScr.transform, "BuyModal", V2(0.18f, 0.30f), V2(0.82f, 0.72f), new Color(1f, 1f, 1f, 0f));
+            var buyModalImg = buyModal.GetComponent<Image>();
+            buyModalImg.raycastTarget = true;
+            if (globalMapPlateSpr != null) { buyModalImg.sprite = globalMapPlateSpr; buyModalImg.type = Image.Type.Simple; buyModalImg.preserveAspect = false; buyModalImg.color = Color.white; }
             AddModalCanvasLayer(buyModal);
-            MkPanel(buyModal.transform, "Header", V2(0f, 0.78f), V2(1f, 1f), new Color(0.28f, 0.42f, 0.55f, 1f));
-            var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, Color.white, 0);
+            buyModal.GetComponent<Canvas>().sortingOrder = 101; // выше блокера, чтобы кнопки модалки ловили клик
+
+            var buyTitle = MkLabel(buyModal.transform, "Title", "Город", tmpFont, PancakeFlipUiTypography.ModalHeaderTitle, new Color(0.2f, 0.16f, 0.1f), 0);
             var buyTitleRt = buyTitle.GetComponent<RectTransform>();
-            buyTitleRt.anchorMin = V2(0.04f, 0.79f); buyTitleRt.anchorMax = V2(0.96f, 0.99f);
+            buyTitleRt.anchorMin = V2(0.16f, 0.64f); buyTitleRt.anchorMax = V2(0.84f, 0.80f);
             buyTitleRt.offsetMin = buyTitleRt.offsetMax = Vector2.zero;
             buyTitle.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
+            // Тело: «Купить N» (+иконка денег) или «Получите N уровень».
+            var buyCost = MkLabel(buyModal.transform, "Body", "0", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.2f, 0.16f, 0.1f), 0);
+            var buyCostRt = buyCost.GetComponent<RectTransform>();
+            buyCostRt.anchorMin = V2(0.10f, 0.38f); buyCostRt.anchorMax = V2(0.90f, 0.56f);
+            buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
+            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
             var buyCoin = new GameObject("CostCoin", typeof(RectTransform), typeof(Image));
             buyCoin.transform.SetParent(buyModal.transform, false);
             var buyCoinRt = buyCoin.GetComponent<RectTransform>();
-            buyCoinRt.anchorMin = V2(0.30f, 0.47f); buyCoinRt.anchorMax = V2(0.45f, 0.66f);
+            buyCoinRt.anchorMin = V2(0.66f, 0.40f); buyCoinRt.anchorMax = V2(0.80f, 0.55f);
             buyCoinRt.offsetMin = buyCoinRt.offsetMax = Vector2.zero;
             var buyCoinImg = buyCoin.GetComponent<Image>();
             buyCoinImg.sprite = walletSpr; buyCoinImg.preserveAspect = true; buyCoinImg.raycastTarget = false;
             buyCoinImg.enabled = walletSpr != null;
 
-            var buyCost = MkLabel(buyModal.transform, "Cost", "0", tmpFont, PancakeFlipUiTypography.ModalBody, new Color(0.2f, 0.16f, 0.1f), 0);
-            var buyCostRt = buyCost.GetComponent<RectTransform>();
-            buyCostRt.anchorMin = V2(0.47f, 0.45f); buyCostRt.anchorMax = V2(0.72f, 0.68f);
-            buyCostRt.offsetMin = buyCostRt.offsetMax = Vector2.zero;
-            buyCost.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
             var buyConfirm = MkButton(buyModal.transform, "BuyConfirm", "Купить", tmpFont, new Color(0.30f, 0.62f, 0.30f, 1f));
+            StyleButtonSprite(buyConfirm, successBtnSpr);
             var buyConfirmRt = buyConfirm.GetComponent<RectTransform>();
-            buyConfirmRt.anchorMin = V2(0.2f, 0.08f); buyConfirmRt.anchorMax = V2(0.8f, 0.28f);
+            buyConfirmRt.anchorMin = V2(0.34f, 0.20f); buyConfirmRt.anchorMax = V2(0.66f, 0.36f);
             buyConfirmRt.offsetMin = buyConfirmRt.offsetMax = Vector2.zero;
             var buyCloseIcon = MkCloseIcon(buyModal.transform, closeIconSpr);
             buyModal.SetActive(false);
@@ -606,6 +753,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(mapView, "buyCostText", buyCost.GetComponent<TextMeshProUGUI>());
             SetField(mapView, "buyConfirmButton", buyConfirm.GetComponent<Button>());
             SetField(mapView, "buyCloseButton", buyCloseIcon);
+            SetField(mapView, "buyCoinIcon", buyCoinImg);
+            SetField(mapView, "buyBlocker", buyBlocker);
 
             var ctrlGo = new GameObject("PancakeFlipController");
             var ctrl = ctrlGo.AddComponent<PancakeFlipController>();
@@ -625,8 +774,20 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             SetField(sess, "uiFont", uiFont);
             SetField(sess, "coinIcon", walletSpr);
             SetField(sess, "closeIcon", closeIconSpr);
+            SetField(sess, "actionButtonSprite", actionBtnSpr);
+            SetField(sess, "successButtonSprite", successBtnSpr);
+            SetField(sess, "cancelButtonSprite", cancelBtnSpr);
+            SetField(sess, "ingredientSpotSprite", ingredientSpotSpr);
+            SetField(sess, "recipeHudSpotSprite", recipeHudSpotSpr);
             SetField(sess, "worldMap", worldMap);
             SetField(sess, "customerAnimator", custAnim);
+            var bgGoRef = GameObject.Find("Background");
+            SetField(sess, "sceneBackground", bgGoRef != null ? bgGoRef.GetComponent<SpriteRenderer>() : null);
+            var bottomGoRef = GameObject.Find("BottomPanel");
+            SetField(sess, "sceneBottomPanel", bottomGoRef != null ? bottomGoRef.GetComponent<SpriteRenderer>() : null);
+            SetField(sess, "stove", Object.FindObjectOfType<StoveView>());
+            SetField(sess, "panFrontRenderer", frontPanSr);
+            SetField(sess, "panBackRenderer", backPanSr);
 
             var mscGo = new GameObject("MainScreenController");
             var msc = mscGo.AddComponent<MainScreenController>();
@@ -672,6 +833,22 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             juiceGo.transform.SetParent(uiRoot, false);
             var sfx = juiceGo.AddComponent<Sfx>();
             SetField(sfx, "source", juiceGo.GetComponent<AudioSource>());
+            var musicSource = juiceGo.AddComponent<AudioSource>();
+            musicSource.playOnAwake = false; musicSource.loop = true; musicSource.volume = 0.2f;
+            SetField(sfx, "musicSource", musicSource);
+            // Звуки из папки Sounds (имена файлов = ключи).
+            SetField(sfx, "flip", LoadAudio("Throw"));
+            SetField(sfx, "serve", LoadAudio("OrderDone"));
+            SetField(sfx, "cook", LoadAudio("Frying"));
+            SetField(sfx, "levelUp", LoadAudio("LevelUp"));
+            SetField(sfx, "click", LoadAudio("ButtonClick"));
+            SetField(sfx, "denied", LoadAudio("Denied"));
+            SetField(sfx, "car", LoadAudio("Car"));
+            SetField(sfx, "unlock", LoadAudio("Unlock"));
+            SetField(sfx, "buy", LoadAudio("Buy"));
+            SetField(sfx, "coin", LoadAudio("Coin"));
+            // Порядок = порядок городов в worldMap: Заправка(0), Бостон/ресторан(1), Средний/кофейня(2).
+            SetFieldArr(sfx, "cityMusic", new Object[] { LoadAudio("MusicCity01"), LoadAudio("MusicCity03"), LoadAudio("MusicCity02") });
 
             var floatSpawner = juiceGo.AddComponent<FloatingTextSpawner>();
 
@@ -827,7 +1004,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
         }
 
         static PanTierConfig CreatePanTier(string assetName, string title, bool starter, int cost, int unlockLvl, Sprite icon, string description,
-            float wide, float slowCook, float spin, float flip)
+            float wide, float slowCook, float spin, float flip, Sprite panFront = null, Sprite panBack = null)
         {
             var o = GetOrCreate<PanTierConfig>(PansFolder, assetName);
             o.displayName = title;
@@ -836,6 +1013,8 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             o.unlockLevel = unlockLvl;
             o.description = description;
             if (icon != null) o.icon = icon;
+            o.panFront = panFront;
+            o.panBack = panBack;
             o.widerPerfectZone = wide;
             o.slowerOvercook = slowCook;
             o.stablerSpin = spin;
@@ -888,6 +1067,40 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             }
             AssetDatabase.Refresh();
         }
+        static void SetSpriteBorder(string spriteName, float border)
+        {
+            var guids = AssetDatabase.FindAssets($"{spriteName} t:Texture2D", new[] { ArtDir });
+            foreach (var g in guids)
+            {
+                var p = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(p) != spriteName) continue;
+                var imp = AssetImporter.GetAtPath(p) as TextureImporter;
+                if (imp == null) continue;
+                var settings = new TextureImporterSettings();
+                imp.ReadTextureSettings(settings);
+                var b = new Vector4(border, border, border, border);
+                if (settings.spriteBorder != b)
+                {
+                    settings.spriteBorder = b;
+                    imp.SetTextureSettings(settings);
+                    imp.SaveAndReimport();
+                }
+                return;
+            }
+        }
+        static AudioClip LoadAudio(string n)
+        {
+            var guids = AssetDatabase.FindAssets($"{n} t:AudioClip", new[] { ArtDir });
+            foreach (var g in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(g);
+                if (System.IO.Path.GetFileNameWithoutExtension(path) != n) continue;
+                var c = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+                if (c != null) return c;
+            }
+            return null;
+        }
+
         static Sprite LoadSprite(string n)
         {
             var guids = AssetDatabase.FindAssets($"{n} t:Sprite", new[] { ArtDir });
@@ -998,6 +1211,16 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             if (font != null) tx.font = font;
             return g;
         }
+        static void StyleButtonSprite(GameObject btnGo, Sprite sprite)
+        {
+            if (btnGo == null || sprite == null) return;
+            var img = btnGo.GetComponent<Image>();
+            if (img == null) return;
+            img.sprite = sprite;
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
+            img.preserveAspect = false;
+        }
         static void Fill(GameObject g)
         {
             var r = g.GetComponent<RectTransform>(); r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one;
@@ -1012,7 +1235,7 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             rt.anchorMin = new Vector2(1f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = Vector2.zero;
+            rt.anchoredPosition = new Vector2(-52f, -52f); // чуть левее и ниже от угла
             rt.sizeDelta = new Vector2(CloseIconSize, CloseIconSize);
             var img = g.GetComponent<Image>();
             img.raycastTarget = true;
@@ -1055,15 +1278,13 @@ namespace IdlePancake.Prototypes.PancakeFlip.Editor
             scrollGo.transform.SetParent(parent, false);
             var sRt = scrollGo.GetComponent<RectTransform>();
             sRt.anchorMin = amin; sRt.anchorMax = amax; sRt.offsetMin = sRt.offsetMax = Vector2.zero;
-            scrollGo.GetComponent<Image>().color = new Color(0.78f, 0.74f, 0.68f, 0.45f);
+            scrollGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f); // прозрачно — фон списка не нужен
 
-            var vp = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            var vp = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
             vp.transform.SetParent(scrollGo.transform, false);
             var vpRt = vp.GetComponent<RectTransform>();
             vpRt.anchorMin = Vector2.zero; vpRt.anchorMax = Vector2.one;
             vpRt.offsetMin = new Vector2(8, 6); vpRt.offsetMax = new Vector2(-8, -6);
-            vp.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.02f);
-            vp.GetComponent<Mask>().showMaskGraphic = false;
 
             var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             content.transform.SetParent(vp.transform, false);

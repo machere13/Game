@@ -134,6 +134,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
             var bg = slot.GetComponent<Image>();
             bg.color = ingredient != null ? SlotFilledColor : SlotEmptyColor;
             bg.raycastTarget = false;
+            var spotSpr = GameSession.Instance != null ? GameSession.Instance.IngredientSpotSprite : null;
+            if (spotSpr != null) { bg.sprite = spotSpr; bg.type = Image.Type.Simple; bg.preserveAspect = true; bg.color = Color.white; }
             var le = slot.GetComponent<LayoutElement>();
             le.minWidth = BuilderSlotSize;
             le.preferredWidth = BuilderSlotSize;
@@ -261,7 +263,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 row.buy.button.interactable = canBuy;
                 if (row.buy.label != null) row.buy.label.text = buyText;
                 if (!row.isFree && row.buy.background != null)
-                    row.buy.background.color = canBuy ? ShopBuyButtonStyle.BuyGreen : ShopBuyButtonStyle.BuyRed;
+                {
+                    var spr = canBuy ? s.SuccessButtonSprite : s.CancelButtonSprite;
+                    if (spr != null) { row.buy.background.sprite = spr; row.buy.background.color = Color.white; }
+                    else row.buy.background.color = canBuy ? ShopBuyButtonStyle.BuyGreen : ShopBuyButtonStyle.BuyRed;
+                }
             }
         }
 
@@ -282,19 +288,23 @@ namespace IdlePancake.Prototypes.PancakeFlip
         {
             var font = PancakeFlipUiFonts.UiTmpFont;
 
-            var row = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            var row = new GameObject("Row", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
             row.transform.SetParent(parent, false);
+            var rowBg = row.GetComponent<Image>();
+            rowBg.raycastTarget = false;
+            if (s.RecipeHudSpotSprite != null) { rowBg.sprite = s.RecipeHudSpotSprite; rowBg.type = Image.Type.Sliced; rowBg.color = Color.white; }
+            else rowBg.color = new Color(1f, 1f, 1f, 0f);
             var rowH = row.GetComponent<HorizontalLayoutGroup>();
             rowH.childControlWidth = true;
             rowH.childControlHeight = true;
             rowH.childForceExpandWidth = false;
             rowH.childForceExpandHeight = false;
-            rowH.spacing = 12f;
-            rowH.padding = new RectOffset(8, 8, 4, 4);
+            rowH.spacing = 24f;
+            rowH.padding = new RectOffset(36, 16, 10, 10);
             rowH.childAlignment = TextAnchor.MiddleLeft;
             var rowLe = row.GetComponent<LayoutElement>();
-            rowLe.minHeight = 118f;
-            rowLe.preferredHeight = 118f;
+            rowLe.minHeight = 220f;
+            rowLe.preferredHeight = 220f;
 
             var iconGo = new GameObject(IconChildName, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
             iconGo.transform.SetParent(row.transform, false);
@@ -303,16 +313,30 @@ namespace IdlePancake.Prototypes.PancakeFlip
             iconImg.preserveAspect = true;
             iconImg.enabled = ing.icon != null;
             iconImg.raycastTarget = false;
+            const float RowIconSize = 140f;
             var iconLe = iconGo.GetComponent<LayoutElement>();
-            iconLe.minWidth = IngredientIconSize;
-            iconLe.preferredWidth = IngredientIconSize;
+            iconLe.minWidth = RowIconSize;
+            iconLe.preferredWidth = RowIconSize;
             iconLe.flexibleWidth = 0f;
-            iconLe.minHeight = IngredientIconSize;
-            iconLe.preferredHeight = IngredientIconSize;
+            iconLe.minHeight = RowIconSize;
+            iconLe.preferredHeight = RowIconSize;
             iconLe.flexibleHeight = 0f;
 
+            // Справа от иконки — колонка: название (строка 1), кнопки (строка 2).
+            var infoGo = new GameObject("Info", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
+            infoGo.transform.SetParent(row.transform, false);
+            var infoV = infoGo.GetComponent<VerticalLayoutGroup>();
+            infoV.childControlWidth = true;
+            infoV.childControlHeight = true;
+            infoV.childForceExpandWidth = false;
+            infoV.childForceExpandHeight = false;
+            infoV.spacing = 8f;
+            infoV.childAlignment = TextAnchor.MiddleLeft;
+            var infoLe = infoGo.GetComponent<LayoutElement>();
+            infoLe.flexibleWidth = 1f;
+
             var labelGo = new GameObject("Label", typeof(RectTransform), typeof(LayoutElement));
-            labelGo.transform.SetParent(row.transform, false);
+            labelGo.transform.SetParent(infoGo.transform, false);
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             label.fontSize = PancakeFlipUiTypography.ShopIngredientRowLabel;
             label.color = new Color(0.18f, 0.15f, 0.12f);
@@ -322,19 +346,35 @@ namespace IdlePancake.Prototypes.PancakeFlip
             if (font != null) label.font = font;
             label.text = $"{ing.displayName}  x{s.Inventory.GetAmount(ing)}";
             var labelLe = labelGo.GetComponent<LayoutElement>();
-            labelLe.flexibleWidth = 1f;
+            labelLe.minHeight = 56f;
+            labelLe.preferredHeight = 56f;
+
+            var btnRowGo = new GameObject("Buttons", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            btnRowGo.transform.SetParent(infoGo.transform, false);
+            var btnRowH = btnRowGo.GetComponent<HorizontalLayoutGroup>();
+            btnRowH.childControlWidth = true;
+            btnRowH.childControlHeight = true;
+            btnRowH.childForceExpandWidth = false;
+            btnRowH.childForceExpandHeight = false;
+            btnRowH.spacing = 16f;
+            btnRowH.childAlignment = TextAnchor.MiddleLeft;
+            var btnRowLe = btnRowGo.GetComponent<LayoutElement>();
+            btnRowLe.minHeight = ShopBuyButtonStyle.PreferredButtonHeight;
+            btnRowLe.preferredHeight = ShopBuyButtonStyle.PreferredButtonHeight;
 
             bool isFree = ing.coinCost <= 0;
 
-            var add = CreateActionButton(row.transform, "Добавить", AddButtonColor, font, withCoinIcon: false);
+            var add = CreateActionButton(btnRowGo.transform, "Добавить", AddButtonColor, font, withCoinIcon: false);
+            SetBtnSprite(add.background, s.ActionButtonSprite);
             add.button.onClick.AddListener(() =>
             {
                 var gs = GameSession.Instance;
                 if (gs != null) gs.TryAddToBuild(ing);
             });
 
-            var buy = CreateActionButton(row.transform, isFree ? "Заготовить" : ing.coinCost.ToString(),
+            var buy = CreateActionButton(btnRowGo.transform, isFree ? "Заготовить" : ing.coinCost.ToString(),
                 isFree ? AddButtonColor : ShopBuyButtonStyle.BuyGreen, font, withCoinIcon: !isFree);
+            SetBtnSprite(buy.background, isFree ? s.ActionButtonSprite : s.SuccessButtonSprite);
             buy.button.onClick.AddListener(() =>
             {
                 var gs = GameSession.Instance;
@@ -350,6 +390,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 buy = buy,
                 isFree = isFree,
             };
+        }
+
+        static void SetBtnSprite(Image img, Sprite spr)
+        {
+            if (img == null || spr == null) return;
+            img.sprite = spr;
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
         }
 
         static ActionButtonUi CreateActionButton(Transform parent, string text, Color bgColor, TMP_FontAsset font, bool withCoinIcon)

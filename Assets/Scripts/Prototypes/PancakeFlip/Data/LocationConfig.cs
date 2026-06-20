@@ -8,8 +8,14 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public string displayName = "Локация";
         [Tooltip("Иконка узла на карте (опц.)")]
         public Sprite mapIcon;
-        [Tooltip("Фон локации — зарезервировано под арт (пока null)")]
+        [Tooltip("Фон кухни в этом городе")]
         public Sprite background;
+        [Tooltip("Спрайт плиты (закрытой) в этом городе")]
+        public Sprite stoveClosed;
+        [Tooltip("Спрайт плиты (открытой) в этом городе")]
+        public Sprite stoveOpen;
+        [Tooltip("Нижний прилавок этого города (null = прилавок уже в фоне, не показывать отдельный)")]
+        public Sprite bottomPanel;
 
         [Tooltip("Сколько заказов сдать здесь, чтобы открыть следующую локацию")]
         public int ordersToUnlockNext = 5;
@@ -34,5 +40,8 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
         [Tooltip("Спрайты местных покупателей")]
         public Sprite[] customerSprites;
+
+        [Tooltip("Иконки покупателей для карточек заказов (если пусто — берутся общие/customerSprites)")]
+        public Sprite[] customerIcons;
     }
 }

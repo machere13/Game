@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "\u041E\u0431\u044B\u0447\u043D\u044B\u0439 \u0431\u043B\u0438\u043D"
   m_EditorClassIdentifier: 
   displayName: "\u041E\u0431\u044B\u0447\u043D\u044B\u0439 \u0431\u043B\u0438\u043D"
-  icon: {fileID: 21300000, guid: 535e758f2fffbba4f9f8467465a3785e, type: 3}
+  icon: {fileID: 21300000, guid: 0534ba38780a54e4db8729cf9af9e4af, type: 3}
   unlockLevel: 0
   ingredients:
   - ingredient: {fileID: 11400000, guid: b8bf2c6c33990dc4d9a23281c7aab2a6, type: 2}

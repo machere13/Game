@@ -35,10 +35,20 @@ namespace IdlePancake.Prototypes.PancakeFlip
         [SerializeField] Font uiFont;
         [SerializeField] Sprite coinIcon;
         [SerializeField] Sprite closeIcon;
+        [SerializeField] Sprite actionButtonSprite;
+        [SerializeField] Sprite successButtonSprite;
+        [SerializeField] Sprite cancelButtonSprite;
+        [SerializeField] Sprite ingredientSpotSprite;
+        [SerializeField] Sprite recipeHudSpotSprite;
 
         [Header("Scene refs")]
         [SerializeField] PancakeBehaviour pancake;
         [SerializeField] CustomerAnimator customerAnimator;
+        [SerializeField] SpriteRenderer sceneBackground;
+        [SerializeField] SpriteRenderer sceneBottomPanel;
+        [SerializeField] StoveView stove;
+        [SerializeField] SpriteRenderer panFrontRenderer;
+        [SerializeField] SpriteRenderer panBackRenderer;
         public PancakeBehaviour Pancake => pancake;
 
         public Wallet Wallet { get; private set; }
@@ -54,6 +64,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public PanStatTrackConfig[] StatTracks => statTracks;
         public PanTierConfig[] PanTiers => panTiers;
         public PanTierConfig EquippedPanTier => Upgrades != null ? Upgrades.EquippedPan : null;
+        public Sprite[] CurrentCustomerIcons { get; private set; }
         public RecipeConfig[] RecipeCatalog =>
             MapActive ? _book.ToArray() : startingRecipes;
 
@@ -73,6 +84,11 @@ namespace IdlePancake.Prototypes.PancakeFlip
         bool MapActive => worldMap != null && worldMap.locations != null && worldMap.locations.Length > 0;
         public Sprite CoinIcon => coinIcon;
         public Sprite CloseIcon => closeIcon;
+        public Sprite ActionButtonSprite => actionButtonSprite;
+        public Sprite SuccessButtonSprite => successButtonSprite;
+        public Sprite CancelButtonSprite => cancelButtonSprite;
+        public Sprite IngredientSpotSprite => ingredientSpotSprite;
+        public Sprite RecipeHudSpotSprite => recipeHudSpotSprite;
         public bool HasCookingPancake { get; private set; }
 
         public static GameSession Instance { get; private set; }
@@ -97,6 +113,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             AutowirePanAssetsIfEmpty();
             Instance = this;
             Wallet = new Wallet(levelTable);
+            Wallet.AddCoins(500); // стартовый баланс для теста
             Inventory = new Inventory();
             Upgrades = new PanUpgradeState();
             Upgrades.Initialize(defaultPanTier);
@@ -108,8 +125,6 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 for (int i = 0; i < worldMap.locations.Length; i++)
                     reqLevels[i] = worldMap.locations[i] != null ? worldMap.locations[i].requiredLevel : 1;
                 Map = new MapState(reqLevels, 0);
-                // ВРЕМЕННО: все города открыты для теста (убрать, когда вернём гейт уровня/покупку).
-                for (int i = 0; i < Map.LocationCount; i++) Map.MarkOwned(i);
 
                 _book.Clear();
                 if (baseRecipe != null) _book.Add(baseRecipe);
@@ -133,6 +148,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             PancakeFlipUiFonts.ApplyToAllTextsInLoadedScenes();
             if (pancake != null)
                 pancake.SetActiveCooking(false);
+            ApplyEquippedPanVisual();
             if (MapActive)
                 TravelTo(0);
         }
@@ -173,12 +189,48 @@ namespace IdlePancake.Prototypes.PancakeFlip
                 OnIngredientsChanged?.Invoke();
             }
 
-            Orders.SetSource(loc.demandRecipes);
+            // До SetSource: он сразу перерисует карточки заказов, иконки должны быть уже актуальны.
+            CurrentCustomerIcons = (loc.customerIcons != null && loc.customerIcons.Length > 0)
+                ? loc.customerIcons : loc.customerSprites;
+            // Заказы накапливаются: спрос = вся открытая книга рецептов (текущий + предыдущие города).
+            Orders.SetSource(RecipeCatalog);
             if (customerAnimator != null)
                 customerAnimator.SetPersonSprites(loc.customerSprites);
+            if (sceneBackground != null && loc.background != null)
+                sceneBackground.sprite = loc.background;
+            if (sceneBottomPanel != null)
+            {
+                if (loc.bottomPanel != null)
+                {
+                    sceneBottomPanel.sprite = loc.bottomPanel;
+                    // Прилавки городов чуть приподнимаем; у стартовой Заправки — свой спрайт, не трогаем.
+                    FitBottomPanelWidth(index == 0 ? 0f : 0.12f);
+                }
+                sceneBottomPanel.enabled = loc.bottomPanel != null;
+            }
+            if (stove != null)
+                stove.SetSprites(loc.stoveClosed, loc.stoveOpen);
 
             Map.SetCurrent(index);
             _activeOrder = null;
+
+            if (Sfx.Instance != null) Sfx.Instance.PlayCityMusic(index);
+        }
+
+        // Прилавок города может иметь свою нативную ширину — растягиваем на всю ширину камеры и прижимаем к низу.
+        void FitBottomPanelWidth(float liftFactor = 0f)
+        {
+            var cam = Camera.main;
+            if (cam == null || sceneBottomPanel == null || sceneBottomPanel.sprite == null) return;
+            float ortho = cam.orthographicSize;
+            float camW = ortho * 2f * cam.aspect;
+            var spr = sceneBottomPanel.sprite;
+            if (spr.bounds.size.x <= 0f) return;
+            float sc = camW / spr.bounds.size.x;
+            var t = sceneBottomPanel.transform;
+            t.localScale = Vector3.one * sc;
+            float h = spr.bounds.size.y * sc;
+            t.position = new Vector3(0f, -ortho + h * 0.5f + ortho * liftFactor, t.position.z);
         }
 
         public bool TryBuyCity(int index)
@@ -189,6 +241,7 @@ namespace IdlePancake.Prototypes.PancakeFlip
             int cost = loc != null ? loc.cityCost : 0;
             if (cost > 0 && !Wallet.SpendCoins(cost)) return false;
             Map.MarkOwned(index);
+            if (Sfx.Instance != null) Sfx.Instance.PlayBuy();
             OnNewLocationUnlocked?.Invoke();
             return true;
         }
@@ -283,10 +336,27 @@ namespace IdlePancake.Prototypes.PancakeFlip
 
             Build.Clear();
             HasCookingPancake = true;
+
+            // Подбираем лицо блина под рецепт, который собрал игрок (null — обычный блин).
+            pancake.SetFaceArt(ResolveCookingArt());
+
             pancake.SetActiveCooking(true);
             pancake.ResetCooking();
             OnPancakeStarted?.Invoke();
             return true;
+        }
+
+        // Ищем рецепт из каталога, чьи ингредиенты совпали с тем, что сейчас на сковороде, и берём его картинку.
+        Sprite ResolveCookingArt()
+        {
+            var catalog = RecipeCatalog;
+            if (catalog == null) return null;
+            foreach (var recipe in catalog)
+            {
+                if (recipe == null || recipe.icon == null) continue;
+                if (MatchesOrderRecipe(recipe)) return recipe.icon;
+            }
+            return null;
         }
 
         void ClearCookingPancake()
@@ -308,17 +378,19 @@ namespace IdlePancake.Prototypes.PancakeFlip
         public void BuyIngredient(IngredientConfig ingredient, int amount = 1)
         {
             if (ingredient == null || ingredient.infinite) return;
-            if (Inventory.IsAtCap(ingredient)) return;
+            if (Inventory.IsAtCap(ingredient)) { if (Sfx.Instance != null) Sfx.Instance.PlayDenied(); return; }
             int totalCost = ingredient.coinCost * amount;
-            if (totalCost > 0 && !Wallet.SpendCoins(totalCost)) return;
+            if (totalCost > 0 && !Wallet.SpendCoins(totalCost)) { if (Sfx.Instance != null) Sfx.Instance.PlayDenied(); return; }
             if (totalCost == 0)
             {
                 Inventory.Add(ingredient, amount);
+                if (Sfx.Instance != null) Sfx.Instance.PlayBuy();
                 return;
             }
             int added = Inventory.Add(ingredient, amount);
             int refund = (amount - added) * ingredient.coinCost;
             if (refund > 0) Wallet.AddCoins(refund);
+            if (Sfx.Instance != null) Sfx.Instance.PlayBuy();
         }
 
         public bool TryAddToBuild(IngredientConfig ingredient)
@@ -340,13 +412,36 @@ namespace IdlePancake.Prototypes.PancakeFlip
             return n;
         }
 
-        public bool TryBuyStatStep(PanStatTrackConfig track) =>
-            track != null && Upgrades.TryBuyStatStep(track, Wallet);
+        public bool TryBuyStatStep(PanStatTrackConfig track)
+        {
+            bool ok = track != null && Upgrades.TryBuyStatStep(track, Wallet);
+            if (Sfx.Instance != null) { if (ok) Sfx.Instance.PlayBuy(); else Sfx.Instance.PlayDenied(); }
+            return ok;
+        }
 
-        public bool TryBuyPanTier(PanTierConfig tier) =>
-            tier != null && Upgrades.TryBuyPan(tier, Wallet);
+        public bool TryBuyPanTier(PanTierConfig tier)
+        {
+            bool ok = tier != null && Upgrades.TryBuyPan(tier, Wallet);
+            if (Sfx.Instance != null) { if (ok) Sfx.Instance.PlayBuy(); else Sfx.Instance.PlayDenied(); }
+            return ok;
+        }
 
-        public void EquipPanTier(PanTierConfig tier) => Upgrades.EquipPan(tier);
+        public void EquipPanTier(PanTierConfig tier)
+        {
+            Upgrades.EquipPan(tier);
+            ApplyEquippedPanVisual();
+        }
+
+        // Меняем переднюю и заднюю части сковороды в кухне под надетый тир.
+        public void ApplyEquippedPanVisual()
+        {
+            var tier = EquippedPanTier;
+            if (tier == null) return;
+            if (panFrontRenderer != null && tier.panFront != null)
+                panFrontRenderer.sprite = tier.panFront;
+            if (panBackRenderer != null && tier.panBack != null)
+                panBackRenderer.sprite = tier.panBack;
+        }
 
         public void TapDough(IngredientConfig dough)
         {
